@@ -42,6 +42,7 @@
 #define TCP_PORT_MUTEX_TIMEOUT pdMS_TO_TICKS(1000)
 #define SPI_MUTEX_TIMEOUT pdMS_TO_TICKS(1000)
 #define DATA_READY_TIMEOUT pdMS_TO_TICKS(1000)
+#define MSP_BOOT_DELAY_MS 100
 
 static const char *TAG = "main";
 
@@ -64,6 +65,11 @@ uint8_t spi_rx_buffer[CONFIG_WP_DATA_RX_LENGTH + HEADER_LEN];
 static void tcp_server_task(void *pvParameters);
 static void data_handler_task(void *pvParameters);
 
+static esp_err_t msp_reset_set(bool reset_active)
+{
+    return gpio_set_level(CONFIG_WP_GPIO_MSP_RST_N, reset_active ? 0 : 1);
+}
+
 static void IRAM_ATTR data_ready_handler(void *arg)
 {
     uint32_t gpio_num = (uint32_t)arg;
@@ -72,6 +78,7 @@ static void IRAM_ATTR data_ready_handler(void *arg)
 
 void app_main(void)
 {
+    ESP_LOGI(TAG, "Entering app_main");
     ESP_ERROR_CHECK(bsp_init());
 
 #if CONFIG_WP_DOUBLE_RESET
@@ -114,6 +121,16 @@ void app_main(void)
     ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
     ESP_ERROR_CHECK(gpio_set_level(CONFIG_WP_GPIO_LINK_READY, 0));
     ESP_ERROR_CHECK(gpio_sleep_sel_dis(CONFIG_WP_GPIO_LINK_READY));
+
+    gpio_cfg.intr_type = GPIO_INTR_DISABLE;
+    gpio_cfg.mode = GPIO_MODE_OUTPUT_OD;
+    gpio_cfg.pin_bit_mask = (1ULL << CONFIG_WP_GPIO_MSP_RST_N);
+    gpio_cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
+    gpio_cfg.pull_up_en = GPIO_PULLUP_DISABLE;
+    ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
+    ESP_ERROR_CHECK(msp_reset_set(true));
+    ESP_ERROR_CHECK(gpio_sleep_sel_dis(CONFIG_WP_GPIO_MSP_RST_N));
+    ESP_LOGI(TAG, "Reset MSP430 on GPIO %d", CONFIG_WP_GPIO_MSP_RST_N);
 
     gpio_cfg.intr_type = GPIO_INTR_POSEDGE;
     gpio_cfg.mode = GPIO_MODE_INPUT;
@@ -261,6 +278,9 @@ static void tcp_server_task(void *pvParameters)
         }
 
         provisioner_twt_suspend(1);
+        ESP_ERROR_CHECK(msp_reset_set(false));
+        ESP_LOGI(TAG, "Boot MSP430 after TCP connection");
+        vTaskDelay(pdMS_TO_TICKS(MSP_BOOT_DELAY_MS));
 
         // Clear data ready signal
         xSemaphoreTake(data_ready_semaphore, 0);
@@ -276,7 +296,8 @@ static void tcp_server_task(void *pvParameters)
             if (err != ESP_OK)
             {
                 ESP_LOGE(TAG, "Failed to receive header");
-                continue;
+                run = false;
+                break;
             }
 
             switch (recv_header.command)
@@ -380,6 +401,10 @@ static void tcp_server_task(void *pvParameters)
             ESP_LOGI(TAG, "Command %s processed", command_name(recv_header.command));
         }
 
+        transmits_enabled = false;
+        ESP_ERROR_CHECK(msp_reset_set(true));
+        ESP_LOGI(TAG, "Reset MSP430 after TCP disconnect");
+
         // Close socket
         err = sock_close(&response_socket);
         if (err != ESP_OK)
@@ -471,6 +496,8 @@ static void data_handler_task(void *pvParameters)
                 if (ret != ESP_OK)
                 {
                     ESP_LOGE(TAG, "Failed to send data: %s", esp_err_to_name(ret));
+                    transmits_enabled = false;
+                    ESP_ERROR_CHECK(msp_reset_set(true));
                     continue;
                 }
 

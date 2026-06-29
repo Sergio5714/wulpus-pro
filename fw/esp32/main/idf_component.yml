@@ -1,3 +1,4 @@
 dependencies:
   mdns: 1.2.3
   mdvorak/double_reset: ^2.0.1
+  espressif/network_provisioning: ^1.0.5

@@ -3,6 +3,7 @@
 #include <nvs_flash.h>
 
 #include "led_strip.h"
+#include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <esp_timer.h>
 
