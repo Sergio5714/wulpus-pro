@@ -12,7 +12,7 @@ The firmware includes the following features:
 
 This firmware is written with [ESP-IDF](https://github.com/espressif/esp-idf). We recommend using at the official [VS Code extension](https://github.com/espressif/vscode-esp-idf-extension/tree/master).
 
-The firmware is tested on the [ESP32-C6-DEVKITM-1](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32c6/esp32-c6-devkitm-1/user_guide.html) board, but should work on any ESP32-C6 board. The firmware is designed to be easily portable to other ESP32 boards as well.
+The firmware has been tested on both the [ESP32-C6-DEVKITM-1](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32c6/esp32-c6-devkitm-1/user_guide.html) and the [Seeed Studio XIAO ESP32-C6](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/) boards. The XIAO ESP32-C6 target is expected to receive longer-term support, while the DevKit remains useful for development and bring-up. The firmware should work on other ESP32-C6 boards with suitable board defaults, and is designed to be portable to other ESP32 boards as well.
 
 ### Board Variants
 
@@ -37,9 +37,13 @@ idf.py build
 idf.py -p COM7 flash monitor
 ```
 
+Adapt `COM7` to the serial port assigned to your ESP32 board.
+
 ### Connection to WULPUS PRO
 
-Use the following default pin mapping to connect the WULPUS PRO acquisition board to the ESP32-C6 board. The XIAO labels follow the Seeed Studio XIAO ESP32-C6 front pin map.
+Use the following default pin mappings to connect the WULPUS PRO acquisition board to the ESP32-C6 board.
+
+Seeed Studio XIAO ESP32-C6:
 
 | **Signal**         | **ESP32-C6 GPIO** | **XIAO ESP32-C6 Pin** | **WULPUS PRO Connector Pin** |
 |--------------------|-------------------|-----------------------|------------------------------|
@@ -49,35 +53,30 @@ Use the following default pin mapping to connect the WULPUS PRO acquisition boar
 | `SPI_MOSI`         | 18                | D10 / MOSI            | X3.2                         |
 | `Data_ready`       | 1                 | D1                    | X4.2                         |
 | `BLE_conn_ready`   | 0                 | D0                    | X4.3                         |
-| `MSP_RST_N`        | 2                 | D2                    | MSP430 reset                 |
+| `MSP_RST_N`        | 2                 | D2                    | X1.5                         |
+
+ESP32-C6-DEVKITM-1:
+
+| **Signal**         | **ESP32-C6 GPIO** | **DevKit Header Name** | **WULPUS PRO Connector Pin** |
+|--------------------|-------------------|------------------------|------------------------------|
+| `SPI_SS`           | 18                | 18                     | X3.4                         |
+| `SPI_CLK`          | 6                 | 6                      | X3.3                         |
+| `SPI_MISO`         | 7                 | 7                      | X3.1                         |
+| `SPI_MOSI`         | 2                 | 2                      | X3.2                         |
+| `Data_ready`       | 1                 | 1/N                    | X4.2                         |
+| `BLE_conn_ready`   | 0                 | 0/N                    | X4.3                         |
+| `MSP_RST_N`        | 3                 | 3                      | X1.5                         |
+
+For the ESP32-C6-DEVKITM-1 defaults, GPIO2 is used for `SPI_MOSI`; `MSP_RST_N` is therefore mapped to GPIO3.
 
 On the XIAO ESP32-C6 side headers shown in the board pinout, the exposed SPI-labeled pins are `D10`/GPIO18 (`MOSI`), `D9`/GPIO20 (`MISO`), and `D8`/GPIO19 (`SCK`). Chip select uses `D3`/GPIO21.
 `MSP_RST_N` is configured as an open-drain active-low output without an internal pull-up. It is asserted low while no TCP client is connected, released high after a TCP client connects, and held for 100 ms before command handling continues. It is asserted low again when the TCP connection closes or is lost.
 
 For a new board revision, copy one of the files in `boards/`, change only the `CONFIG_WP_*` and board hardware values, then pass that file in `SDKCONFIG_DEFAULTS`.
 
-### Usage in the Python API
+### Python Wi-Fi Example
 
-The Python API remains largely unchanged, the only thing you need to do in order to use the Wi-Fi connection is to pass the `WulpusWiFi` communication link to the `WulpusGuiSingleCh` class instead of the `WulpusDongle` class. This will look like this:
-
-```python
-from wulpus.wifi import WulpusWiFi
-
-# Create a wifi object
-wifi = WulpusWiFi()
-
-# Setup the GUI (uss_conf is already setup and configured)
-gui = WulpusGuiSingleCh(wifi, uss_conf)
-
-display(gui)
-```
-
-## TODO
-
-This firmware is still a work in progress. The following features are planned for future releases (among others):
-
-- [ ] Add LED status codes
-- [ ] Return error codes on the socket on failures
+For Python-side usage, see the Wi-Fi example notebook at `../../sw/wulpus_pro_wifi_example.ipynb`. It shows device discovery, connection setup with `WulpusWiFi`, configuration transfer, and data acquisition over the TCP link.
 
 ## Licensing
 
