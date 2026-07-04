@@ -1,4 +1,4 @@
-# WULPUS PRO ESP32 Firmware
+# WULPUS PRO source files for ESP32 firmware project
 
 This firmware enables WULPUS PRO to connect to Wi-Fi via a ESP32-C6, which enables higher throughputs and thus framerates.
 
@@ -8,7 +8,7 @@ The firmware includes the following features:
 - **Power Management**: The firmware includes power management, which allows the ESP32 to enter light sleep when not in use. This results in ~1.5mA current draw
 - **Easy expandability**: The firmware is designed to be easily extensible, allowing you to add new features and functionality as needed
 
-## Getting Started
+# How to get started?
 
 This firmware is written with [ESP-IDF](https://github.com/espressif/esp-idf). We recommend using at the official [VS Code extension](https://github.com/espressif/vscode-esp-idf-extension/tree/master).
 
@@ -38,6 +38,12 @@ idf.py -p COM7 flash monitor
 ```
 
 Adapt `COM7` to the serial port assigned to your ESP32 board.
+
+### IMPORTANT: Provision Wi-Fi after flashing
+
+After flashing the firmware for the first time, provision the ESP32-C6 with the Wi-Fi network credentials. Provisioning lets the ESP32 store the SSID and password in non-volatile memory, so the firmware can reconnect to the same network after reset or power cycling.
+
+Follow Espressif's provisioning documentation for the first-time setup flow: [ESP-IDF Provisioning API](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/provisioning/index.html).
 
 ### Connection to WULPUS PRO
 
@@ -78,7 +84,7 @@ For a new board revision, copy one of the files in `boards/`, change only the `C
 
 For Python-side usage, see the Wi-Fi example notebook at `../../sw/wulpus_pro_wifi_example.ipynb`. It shows device discovery, connection setup with `WulpusWiFi`, configuration transfer, and data acquisition over the TCP link.
 
-## Licensing
+# License
 
 ESP-IDF is licensed under the Apache License 2.0. See the [LICENSE](https://github.com/espressif/esp-idf/blob/master/LICENSE) in the ESP-IDF repository for more information.
 
