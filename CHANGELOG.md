@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added ESP32-C6 Wi-Fi firmware support for the Seeed Studio XIAO ESP32-C6 board, including board-specific defaults and README pin mapping.
 - Added MSP430 board reset control logic to the ESP32 Wi-Fi firmware.
 - Added a Python Wi-Fi example notebook for discovery, connection setup, configuration transfer, and data acquisition over the ESP32 TCP link.
+- Added Apache-2.0 license headers to ESP32 firmware source files and Python support scripts.
 - Added `uv` project metadata and lockfile for Python dependency management.
 - Added README comparison table between WULPUS PRO and the original WULPUS platform.
 
@@ -26,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored the ESP32 firmware configuration around reusable ESP-IDF defaults, target-specific defaults, and board-specific pinout files.
 - Updated the ESP32 project from ESP-IDF 5.4.1 to ESP-IDF 6.0.1.
 - Updated ESP32 documentation for tested DevKit and XIAO boards, board selection, flashing, serial port selection, and WULPUS PRO connector pin mappings.
+- Updated ESP32 firmware attribution with author information and ESP-IDF example note.
 - Updated project READMEs for repository structure, build instructions, usage flows, firmware links, and WULPUS PRO-specific documentation pointers.
 - Migrated Python package management from conda to uv.
 - Updated README full specifications with grouped system, receive-chain, data-link, imaging, power, and mechanics values.

@@ -1,3 +1,22 @@
+/*
+Copyright (C) 2025 ETH Zurich. All rights reserved.
+
+Author: Cedric Hirschi, ETH Zurich
+        Sergei Vostrikov, GitHub: @Sergio5714
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 /* Wi-Fi Provisioning Manager Example
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
@@ -13,19 +32,12 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-// #include <esp_wifi.h>
 #include <esp_event.h>
 #include <esp_pm.h>
 #include <esp_system.h>
-#include <esp_timer.h>
 
 #include <driver/gpio.h>
 #include <driver/spi_master.h>
-
-// #include "lwip/err.h"
-// #include "lwip/sockets.h"
-// #include "lwip/sys.h"
-// #include <lwip/netdb.h>
 
 #include "bsp.h"
 #include "provisioner.h"
@@ -134,7 +146,6 @@ void app_main(void)
 
     gpio_cfg.intr_type = GPIO_INTR_POSEDGE;
     gpio_cfg.mode = GPIO_MODE_INPUT;
-    // gpio_cfg.pull_down_en = GPIO_PULLDOWN_ENABLE;
     gpio_cfg.pin_bit_mask = (1ULL << CONFIG_WP_GPIO_DATA_READY);
     ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
     ESP_ERROR_CHECK(gpio_sleep_set_direction(CONFIG_WP_GPIO_DATA_READY, GPIO_MODE_INPUT));
@@ -219,9 +230,6 @@ void app_main(void)
     ESP_ERROR_CHECK(provisioner_start(false));
 #endif
     ESP_ERROR_CHECK(provisioner_wait());
-
-    // // Print wifi stats
-    // print_wifi_stats();
 
     // Start but suspend TWT
     provisioner_twt_setup();
@@ -456,9 +464,6 @@ static void data_handler_task(void *pvParameters)
             // Data: <data>
             if (transmits_enabled & (response_socket.fd >= 0))
             {
-                // // Get current time
-                // uint32_t current_time = esp_timer_get_time();
-
                 // Read data from the device
                 if (xSemaphoreTake(spi_mutex, SPI_MUTEX_TIMEOUT) != pdTRUE)
                 {
@@ -473,24 +478,6 @@ static void data_handler_task(void *pvParameters)
                     continue;
                 }
 
-                // uint32_t elapsed_time = esp_timer_get_time() - current_time;
-                // ESP_LOGD(TAG, "SPI reception took %lu us", elapsed_time);
-
-                // ESP_LOGD(TAG, "TRX ID: %u", *(uint8_t *)(spi_rx_buffer + HEADER_LEN + 1));
-                // ESP_LOGD(TAG, "ACQ NR: %u", *(uint16_t *)(spi_rx_buffer + HEADER_LEN + 2));
-
-                // uint32_t data_sum = 0;
-                // for (int i = 0; i < CONFIG_WP_DATA_RX_LENGTH; i++)
-                // {
-                //     data_sum += *(uint8_t *)(spi_rx_buffer + HEADER_LEN + 3 + i);
-                // }
-                // ESP_LOGD(TAG, "Data sum: %lu", data_sum);
-
-                // current_time = esp_timer_get_time();
-
-                // int flag = 1;
-                // setsockopt(response_socket.fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
-
                 // Send header and data
                 ret = sock_send(&response_socket, spi_rx_buffer, CONFIG_WP_DATA_RX_LENGTH + HEADER_LEN);
                 if (ret != ESP_OK)
@@ -500,11 +487,6 @@ static void data_handler_task(void *pvParameters)
                     ESP_ERROR_CHECK(msp_reset_set(true));
                     continue;
                 }
-
-                // ESP_LOGI(TAG, "Sent successfully");
-
-                // elapsed_time = esp_timer_get_time() - current_time;
-                // ESP_LOGD(TAG, "Data sending took  %lu us", elapsed_time);
             }
         }
     }

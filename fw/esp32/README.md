@@ -84,6 +84,11 @@ For a new board revision, copy one of the files in `boards/`, change only the `C
 
 For Python-side usage, see the Wi-Fi example notebook at `../../sw/wulpus_pro_wifi_example.ipynb`. It shows device discovery, connection setup with `WulpusWiFi`, configuration transfer, and data acquisition over the TCP link.
 
+# Authors
+
+- Cedric Hirschi, ETH Zurich
+- Sergei Vistrikov (Sergio5714, [ESP32 scripts migration branch](https://github.com/Sergio5714/wulpus-pro/tree/feature/migration_to_xiao_wifi/fw/esp32/scripts))
+
 # License
 
 ESP-IDF is licensed under the Apache License 2.0. See the [LICENSE](https://github.com/espressif/esp-idf/blob/master/LICENSE) in the ESP-IDF repository for more information.
