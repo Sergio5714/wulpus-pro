@@ -2,15 +2,37 @@
 ## A base platform for wearable ultra-low-power ultrasound
 > Independent fork by @Sergio5714 (Sergei Vostrikov)
 
+<p align="center">
+  <img src="docs/images/v1_0/wulpus_pro_main.png" alt="WULPUS PRO main" width="80%"/>
+</p>
+
 # Introduction
 
-This repository contains the work in progress on the WULPUS PRO ultrasound platform, a successor of the [WULPUS Project](https://github.com/Sergio5714/wulpus).
+This repository contains the work in progress on the WULPUS PRO ultrasound platform, a successor of the [WULPUS Project](https://github.com/Sergio5714/wulpus). It features +30V unipolar programmable pulser, time-multiplexed multichannel acquisition frontend with TGC, optonal envelope extractor and support of PZTs and CMUTs. The module is compact (40 x 20 mm footprint) and lightweight (5g), allowing integration with external host PCB.
 
-WULPUS PRO is a compact base platform for ultra-low-power ultrasound sensing.
+## System diagram
 
-## Comparison with original WULPUS
+<p align="center">
+  <img src="docs/images/wulpus_pro_system_diagram.png" alt="WULPUS PRO system diagram" width="80%"/>
+  <br/>
+  WULPUS PRO system diagram
+</p>
 
-WULPUS PRO builds on the original [WULPUS](https://github.com/Sergio5714/wulpus) platform and keeps the same low-power wearable ultrasound philosophy, while extending the hardware and communication options.
+## Hardware photos
+
+<table>
+  <tr>
+    <td width="90%" align="center">
+      <img src="docs/images/v1_0/eval_board_main.jpg" alt="WULPUS PRO evaluation board" width="80%"/>
+      <br/>
+      WULPUS PRO evaluation board
+    </td>
+  </tr>
+</table>
+
+## Specifications
+
+WULPUS PRO builds on the original [WULPUS](https://github.com/Sergio5714/wulpus) platform and keeps the same low-power wearable ultrasound philosophy while extending the hardware and communication options. The table below compares the main features of WULPUS PRO with those of the original WULPUS platform.
 
 | Feature | WULPUS | WULPUS PRO |
 | --- | --- | --- |
@@ -26,52 +48,7 @@ WULPUS PRO builds on the original [WULPUS](https://github.com/Sergio5714/wulpus)
 | Wireless link | BLE | BLE or **Wi-Fi** (via host) |
 | Form factor | 46 x 25 mm footprint | **40 x 20 mm** footprint |
 
-## System diagram
-
-Work in progress.
-
-## Hardware photos
-
-Work in progress.
-
-## Full specifications
-
-| Feature | Specification |
-| --- | --- |
-| **Transducer and transmit path** | |
-| Channels | 16, time-multiplexed |
-| Transducer support | PZT transducers and CMUTs |
-| Transducer bias | Indirect or direct bias, -30 V or 30 V |
-| Excitation amplitude | 30 V unipolar |
-| Excitation frequency | 100 kHz to 10 MHz |
-| **Receive path** | |
-| Analog front-end | 6 dB LNA + 70 dB VGA |
-| Time gain compensation | TGC up to 70 dB depth-dependent attenuation compensation |
-| Envelope extraction | Optional LTC5507-based envelope detector, runtime configurable |
-| Envelope detector bandwidth | Up to 1.5 MHz envelope bandwidth |
-| Amplification-path bandwidth | 9.9 MHz |
-| End-to-end -3 dB bandwidth | 1.4 MHz (bounded by MSP430)|
-| Usable measured bandwidth | SNR >=10 dB up to 2.5 MHz |
-| Passband SNR | Approximately 32 dB at 40 dB total gain |
-| Peak SINAD | 41.42 dB (1 MHz), 36.25 dB (2.25 MHz), both at 4.9 mV input amplitude |
-| ENOB | ~7.8 bits |
-| **Acquisition and data link** | |
-| ADC | 8 Msps analog-to-digital converter, 12-bit resolution |
-| Host interface | SPI, 8 MHz |
-| Maximum PRF | 300 Hz |
-| Raw streaming over BLE | 50 Hz PRF |
-| Raw streaming over Wi-Fi | Up to 300 Hz PRF |
-| **Imaging performance** | |
-| B-mode frame rate | 18 FPS using 16-channel synthetic-aperture acquisition at 300 Hz PRF |
-| B-mode axial resolution | ~ 0.7 mm with a 2.25 MHz transducer (LA-2.25-32, Vermon) |
-| B-mode lateral resolution | ~ 2.3 mm at the center with a 2.25 MHz transducer (LA-2.25-32, Vermon) |
-| **Power** | |
-| Power budget | <=40 mW at 50 Hz PRF |
-| Core electronics power | 35 mW (50 Hz PRF), 58 mW (300 Hz PRF) |
-| Battery-life reference | More than 24 hours of continuous raw data streaming at 50 Hz PRF from a 300 mAh Li-Po battery with BLE |
-| **Mechanics** | |
-| Module size | 39 x 21 x 6 mm |
-| Weight | 5 g |
+Full WULPUS PRO specifications are available in [docs/full_specifications.md](docs/full_specifications.md).
 
 # Structure of the repository
 
@@ -87,6 +64,7 @@ This repository has the following folders:
     - nRF52832 DK board firmware, located at `fw/nrf52/ble_peripheral/US_probe_nRF52_firmware`
     - nRF52840 USB dongle firmware, located at `fw/nrf52/peripheral/US_probe_dongle_firmware`
 - `sw`, containing the Python code for the WULPUS PRO API and graphical user interface
+- `docs`, containing project-level documentation such as the full WULPUS PRO specifications
 
 # Documentation
 
@@ -94,6 +72,8 @@ WULPUS PRO builds on top of the original WULPUS platform. Please refer to the or
 
 For WULPUS PRO-specific documentation, see:
 
+- [Full specifications](docs/full_specifications.md)
+- [Documentation changelog](docs/CHANGELOG.md)
 - [Hardware README](hw/README.md)
 - [MSP430 firmware README](fw/msp430/README.md)
 - [ESP32 Wi-Fi firmware README](fw/esp32/README.md)
@@ -123,6 +103,13 @@ To build your own instance of the WULPUS PRO platform, complete the following st
    uv sync
    uv run jupyter notebook
    ```
+
+## PCBWay shared projects for WULPUS PCBs
+
+For convenient one-click PCB production and assembly, you can use the PCBWay shared projects (optional; DIY via the `hw` folder is also supported):
+- [WULPUS PRO Evaluation Board v1.0.0](https://www.pcbway.com/project/shareproject/WULPUS_PRO_Evaluation_board_v1_0_0_992d7510.html)
+
+This option is convenient for outsourced PCB production and assembly, with an estimated **~1 month lead time** and a price of about **USD 220** per probe (evaluation board), based on mid-2026 pricing.
 
 # Usage
 
