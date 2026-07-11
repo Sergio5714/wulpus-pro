@@ -14,8 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added MSP430 board reset control logic to the ESP32 Wi-Fi firmware.
 - Added a Python Wi-Fi example notebook for discovery, connection setup, configuration transfer, and data acquisition over the ESP32 TCP link.
 - Added Apache-2.0 license headers to ESP32 firmware source files and Python support scripts.
+- Added a documentation changelog under `docs/`.
+- Added image documentation README with CC BY-ND 4.0 license information.
+- Added WULPUS PRO images to the root README hero and hardware photos sections.
+- Added the WULPUS PRO system diagram to the root README.
 - Added `uv` project metadata and lockfile for Python dependency management.
-- Added README comparison table between WULPUS PRO and the original WULPUS platform.
+- Added a root README specifications section comparing WULPUS PRO with the original WULPUS platform.
 
 ### Fixed
 
@@ -28,9 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated the ESP32 project from ESP-IDF 5.4.1 to ESP-IDF 6.0.1.
 - Updated ESP32 documentation for tested DevKit and XIAO boards, board selection, flashing, serial port selection, and WULPUS PRO connector pin mappings.
 - Updated ESP32 firmware attribution with author information and ESP-IDF example note.
+- Reworked the root README introduction with a concise overview of the pulser, acquisition front end, supported transducers, and module form factor.
 - Updated project READMEs for repository structure, build instructions, usage flows, firmware links, and WULPUS PRO-specific documentation pointers.
 - Migrated Python package management from conda to uv.
-- Updated README full specifications with grouped system, receive-chain, data-link, imaging, power, and mechanics values.
+- Moved WULPUS PRO full specifications from the root README into `docs/full_specifications.md`.
 - Updated gitignore rules.
 
 ### Removed
@@ -41,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-05-1
 
 ### Added
-- Initial release (without GitHub release)
+- Initial release (without official GitHub release)
 
 ### Fixed
 
