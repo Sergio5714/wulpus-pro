@@ -87,7 +87,6 @@ WULPUS PRO builds on top of the original WULPUS platform. Please refer to the or
 For WULPUS PRO-specific documentation, see:
 
 - [Full specifications](docs/full_specifications.md)
-- [Documentation changelog](docs/CHANGELOG.md)
 - [Hardware README](hw/README.md)
 - [MSP430 firmware README](fw/msp430/README.md)
 - [ESP32 Wi-Fi firmware README](fw/esp32/README.md)

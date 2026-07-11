@@ -87,7 +87,7 @@ For Python-side usage, see the Wi-Fi example notebook at `../../sw/wulpus_pro_wi
 # Authors
 
 - Cedric Hirschi, ETH Zurich
-- Sergei Vistrikov (Sergio5714, [ESP32 scripts migration branch](https://github.com/Sergio5714/wulpus-pro/tree/feature/migration_to_xiao_wifi/fw/esp32/scripts))
+- Sergei Vistrikov (Sergio5714 on GitHub)
 
 # License
 
