@@ -1,3 +1,23 @@
+/*
+Copyright (C) 2025 ETH Zurich and contributors. All rights reserved.
+
+Authors:
+    Cedric Hirschi, ETH Zurich
+    Sergei Vostrikov (@Sergio5714 on GitHub)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 #include "provisioner.h"
 
 #include <freertos/FreeRTOS.h>
@@ -7,8 +27,8 @@
 #include <esp_wifi_he.h>
 #include <esp_event.h>
 
-#include <wifi_provisioning/manager.h>
-#include <wifi_provisioning/scheme_softap.h>
+#include <network_provisioning/manager.h>
+#include <network_provisioning/scheme_softap.h>
 
 #define LOG_LOCAL_LEVEL ESP_LOG_INFO
 #include <esp_log.h>
@@ -52,18 +72,18 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
 #ifdef CONFIG_PROVISIONER_RESET_ON_FAILURE
     static int retries;
 #endif
-    if (event_base == WIFI_PROV_EVENT)
+    if (event_base == NETWORK_PROV_EVENT)
     {
         switch (event_id)
         {
-        case WIFI_PROV_START:
+        case NETWORK_PROV_START:
         {
             // Provisioning started
 
             ESP_LOGI(TAG, "Provisioning started");
             break;
         }
-        case WIFI_PROV_CRED_RECV:
+        case NETWORK_PROV_WIFI_CRED_RECV:
         {
             // Credentials received from provisioning service
 
@@ -75,13 +95,13 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
                      (const char *)wifi_sta_cfg->password);
             break;
         }
-        case WIFI_PROV_CRED_FAIL:
+        case NETWORK_PROV_WIFI_CRED_FAIL:
         {
             // Provisioning failed to receive credentials from app
 
             // Log failure reason and reset provisioned credentials if too many retries have been attempted
-            wifi_prov_sta_fail_reason_t *reason = (wifi_prov_sta_fail_reason_t *)event_data;
-            ESP_LOGE(TAG, "Provisioning failed!\n\tReason : %s\n\tPlease reset to factory and retry provisioning", (*reason == WIFI_PROV_STA_AUTH_ERROR) ? "Wi-Fi station authentication failed" : "Wi-Fi access-point not found");
+            network_prov_wifi_sta_fail_reason_t *reason = (network_prov_wifi_sta_fail_reason_t *)event_data;
+            ESP_LOGE(TAG, "Provisioning failed!\n\tReason : %s\n\tPlease reset to factory and retry provisioning", (*reason == NETWORK_PROV_WIFI_STA_AUTH_ERROR) ? "Wi-Fi station authentication failed" : "Wi-Fi access-point not found");
 
 #ifdef CONFIG_PROVISIONER_RESET_ON_FAILURE
             // Reset provisioned credentials on failure if too many retries have been attempted
@@ -89,13 +109,13 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
             if (retries >= CONFIG_PROVISIONER_RESET_ON_FAILURE_TRIES)
             {
                 ESP_LOGI(TAG, "Failed to connect with provisioned AP, reseting provisioned credentials");
-                wifi_prov_mgr_reset_sm_state_on_failure();
+                network_prov_mgr_reset_wifi_sm_state_on_failure();
                 retries = 0;
             }
 #endif
             break;
         }
-        case WIFI_PROV_CRED_SUCCESS:
+        case NETWORK_PROV_WIFI_CRED_SUCCESS:
         {
             // Provisioning successful
 
@@ -106,10 +126,10 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
 #endif
             break;
         }
-        case WIFI_PROV_END:
+        case NETWORK_PROV_END:
         {
             // Deinit provisioning manager since we don't need it anymore
-            wifi_prov_mgr_deinit();
+            network_prov_mgr_deinit();
 
             // Restart Wi-Fi in station mode
             ESP_ERROR_CHECK(esp_wifi_stop());
@@ -311,7 +331,7 @@ esp_err_t provisioner_init(void)
     }
 
     // Register event handlers for provisioning and general Wi-Fi events
-    status = esp_event_handler_register(WIFI_PROV_EVENT, ESP_EVENT_ANY_ID, &provisioner_event_handler, NULL);
+    status = esp_event_handler_register(NETWORK_PROV_EVENT, ESP_EVENT_ANY_ID, &provisioner_event_handler, NULL);
     if (status != ESP_OK)
     {
         ESP_LOGE(TAG, "Error registering provisioning event handler %d", status);
@@ -377,7 +397,7 @@ esp_err_t provisioner_reset(void)
     esp_err_t status = ESP_OK;
 
     // Reset provisioning manager
-    status = wifi_prov_mgr_reset_provisioning();
+    status = network_prov_mgr_reset_wifi_provisioning();
 
     return status;
 }
@@ -414,7 +434,7 @@ static void provisioner_task(void *pvParameter)
 
     // Check if device is provisioned
     bool provisioned = false;
-    ESP_ERROR_CHECK(wifi_prov_mgr_is_provisioned(&provisioned));
+    ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned));
 
     // If not provisioned, start provisioning service
     if (!provisioned)
@@ -426,13 +446,13 @@ static void provisioner_task(void *pvParameter)
         get_device_provisioning_name(service_name, sizeof(service_name));
 
         // Set provisioning parameters
-        wifi_prov_security_t security = WIFI_PROV_SECURITY_1;
+        network_prov_security_t security = NETWORK_PROV_SECURITY_1;
         const char *pop = CONFIG_PROVISIONER_POP;
-        wifi_prov_security1_params_t *sec_params = pop;
+        network_prov_security1_params_t *sec_params = pop;
         const char *service_key = NULL;
 
         // Start provisioning service
-        ESP_ERROR_CHECK(wifi_prov_mgr_start_provisioning(security, (const void *)sec_params, service_name, service_key));
+        ESP_ERROR_CHECK(network_prov_mgr_start_provisioning(security, (const void *)sec_params, service_name, service_key));
 
         // Wait for provisioning to finish
         xEventGroupWaitBits(provisioner_event_group, PROVISIONER_DONE_EVENT, false, true, portMAX_DELAY);
@@ -444,7 +464,7 @@ static void provisioner_task(void *pvParameter)
         ESP_LOGI(TAG, "Already provisioned");
 
         // Deinit provisioning manager since we don't need it anymore
-        wifi_prov_mgr_deinit();
+        network_prov_mgr_deinit();
 
         // Signal provisioning task that we are done provisioning
         xEventGroupSetBits(provisioner_event_group, PROVISIONER_DONE_EVENT);
@@ -485,10 +505,10 @@ esp_err_t provisioner_start(bool reset)
     }
 
     // Initialize provisioning manager
-    wifi_prov_mgr_config_t config = {
-        .scheme = wifi_prov_scheme_softap,
-        .scheme_event_handler = WIFI_PROV_EVENT_HANDLER_NONE};
-    status = wifi_prov_mgr_init(config);
+    network_prov_mgr_config_t config = {
+        .scheme = network_prov_scheme_softap,
+        .scheme_event_handler = NETWORK_PROV_EVENT_HANDLER_NONE};
+    status = network_prov_mgr_init(config);
     if (status != ESP_OK)
     {
         ESP_LOGE(TAG, "Error initializing provisioning manager %d", status);
@@ -530,7 +550,7 @@ esp_err_t provisioner_stop(void)
     }
 
     // Deinit provisioning manager
-    wifi_prov_mgr_deinit();
+    network_prov_mgr_deinit();
 
     ESP_LOGD(TAG, "Provisioner stopped");
 

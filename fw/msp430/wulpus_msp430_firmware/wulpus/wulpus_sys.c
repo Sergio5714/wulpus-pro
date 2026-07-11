@@ -170,11 +170,11 @@ void initAllPowerSwitches(void)
     GPIO_setAsOutputPin(GPIO_PORT_VGA_PWR_EN, GPIO_PIN_VGA_PWR_EN);
     GPIO_setOutputLowOnPin(GPIO_PORT_VGA_PWR_EN, GPIO_PIN_VGA_PWR_EN);
 
-    // Preamp power switch (Off by default, but on dev board is always on in Hardware)
+    // Preamp power switch (On by default)
     GPIO_setAsOutputPin(GPIO_PORT_PREAMP_PWR_EN, GPIO_PIN_PREAMP_PWR_EN);
-    GPIO_setOutputLowOnPin(GPIO_PORT_PREAMP_PWR_EN, GPIO_PIN_PREAMP_PWR_EN);
+    GPIO_setOutputHighOnPin(GPIO_PORT_PREAMP_PWR_EN, GPIO_PIN_PREAMP_PWR_EN);
 
-    // Preamp Shutdown (Enable shutdown by default)
+    // Preamp Shutdown (Disable by default)
     GPIO_setAsOutputPin(GPIO_PORT_PREAMP_EN, GPIO_PIN_PREAMP_EN);
     GPIO_setOutputHighOnPin(GPIO_PORT_PREAMP_EN, GPIO_PIN_PREAMP_EN);
 

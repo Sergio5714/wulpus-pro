@@ -1,4 +1,14 @@
 dependencies:
+  espressif/cjson:
+    component_hash: e788323270d90738662d66fffa910bfe1fba019bba087f01557e70c40485b469
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    version: 1.7.19~2
   espressif/led_strip:
     component_hash: 67d2744208e9c12d8b1992d21c979396c1726e57cb7e35e7c171c515be20f8ea
     dependencies:
@@ -19,10 +29,26 @@ dependencies:
       registry_url: https://components.espressif.com/
       type: service
     version: 1.2.3
+  espressif/network_provisioning:
+    component_hash: 72d27784e3daf807418a34fb00be136ec50c6db49d989ce981d22e031fc0e7f8
+    dependencies:
+    - name: espressif/cjson
+      registry_url: https://components.espressif.com
+      require: private
+      rules:
+      - if: idf_version >= 6.0
+      version: ^1.7.19
+    - name: idf
+      require: private
+      version: '>=5.1'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.2.4
   idf:
     source:
       type: idf
-    version: 5.4.1
+    version: 6.0.1
   mdvorak/double_reset:
     component_hash: 36dc97d6c292fef5f02d6f281df71169518fe8d571069ab1de0f239095abbec4
     dependencies:
@@ -36,7 +62,8 @@ dependencies:
 direct_dependencies:
 - espressif/led_strip
 - espressif/mdns
+- espressif/network_provisioning
 - mdvorak/double_reset
-manifest_hash: 712fd037b7baa13d1b5c7b15465a68cd3319bca3aeaddaa7fd598abe05a086a8
+manifest_hash: 0585b2bbf4731236fee985408d6c6e3607cc181f4fbba6dd5da22e2b9d636830
 target: esp32c6
-version: 2.0.0
+version: 3.0.0

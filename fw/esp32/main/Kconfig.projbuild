@@ -152,6 +152,14 @@ menu "WULPUS PRO Configuration"
             This sets the data ready GPIO pin.
             The default value is 4.
 
+    config WP_GPIO_MSP_RST_N
+        int "MSP430 reset GPIO pin"
+        default 2
+        range 0 39
+        help
+            This sets the active-low open-drain MSP430 reset pin.
+            The default value is 2.
+
     endmenu
 
     menu "Data Handling"
