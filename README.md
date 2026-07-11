@@ -4,6 +4,8 @@
 
 <p align="center">
   <img src="docs/images/v1_0/wulpus_pro_main.png" alt="WULPUS PRO main" width="80%"/>
+  <br/>
+  WULPUS PRO module with PolyCMUT transducer.
 </p>
 
 # Introduction
@@ -13,7 +15,7 @@ This repository contains the work in progress on the WULPUS PRO ultrasound platf
 ## System diagram
 
 <p align="center">
-  <img src="docs/images/wulpus_pro_system_diagram.png" alt="WULPUS PRO system diagram" width="80%"/>
+  <img src="docs/images/wulpus_pro_system_diagram.png" alt="WULPUS PRO system diagram" width="100%"/>
   <br/>
   WULPUS PRO system diagram
 </p>
@@ -22,10 +24,22 @@ This repository contains the work in progress on the WULPUS PRO ultrasound platf
 
 <table>
   <tr>
-    <td width="90%" align="center">
-      <img src="docs/images/v1_0/eval_board_main.jpg" alt="WULPUS PRO evaluation board" width="80%"/>
+    <td colspan="2" align="center">
+      <img src="docs/images/v1_0/eval_board.jpg" alt="WULPUS PRO evaluation board" width="80%"/>
       <br/>
       WULPUS PRO evaluation board
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/images/v1_0/eval_board_top.jpg" alt="Top view of the WULPUS PRO evaluation board" width="100%"/>
+      <br/>
+      Top view
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/images/v1_0/eval_board_bottom.jpg" alt="Bottom view of the WULPUS PRO evaluation board" width="100%"/>
+      <br/>
+      Bottom view
     </td>
   </tr>
 </table>
