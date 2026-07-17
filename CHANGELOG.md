@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a linked table of contents to the root README.
 - Added the WULPUS PRO arXiv preprint citation and BibTeX entry to the root README.
 - Added PCBWay shared-project production and assembly information to the hardware README.
+- Expanded the root README acknowledgements.
 
 ## [1.0.0] - 2026-07-11
 
