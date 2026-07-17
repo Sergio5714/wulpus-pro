@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a linked table of contents to the root README.
+- Added the WULPUS PRO arXiv preprint citation and BibTeX entry to the root README.
+- Added PCBWay shared-project production and assembly information to the hardware README.
+
+## [1.0.0] - 2026-07-11
+
+### Added
+
 - Added ESP32-C6 Wi-Fi firmware support for the Seeed Studio XIAO ESP32-C6 board, including board-specific defaults and README pin mapping.
 - Added MSP430 board reset control logic to the ESP32 Wi-Fi firmware.
 - Added a Python Wi-Fi example notebook for discovery, connection setup, configuration transfer, and data acquisition over the ESP32 TCP link.
