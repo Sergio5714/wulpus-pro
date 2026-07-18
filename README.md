@@ -8,6 +8,25 @@
   WULPUS PRO module with PolyCMUT transducer.
 </p>
 
+## Table of contents
+
+- [Introduction](#introduction)
+  - [System diagram](#system-diagram)
+  - [Hardware photos](#hardware-photos)
+  - [Specifications](#specifications)
+- [Structure of the repository](#structure-of-the-repository)
+- [Documentation](#documentation)
+- [Build Instructions](#build-instructions)
+  - [PCBWay shared projects for WULPUS PCBs](#pcbway-shared-projects-for-wulpus-pcbs)
+- [Usage](#usage)
+  - [Wi-Fi setup: WULPUS PRO + XIAO ESP32-C6](#wi-fi-setup-wulpus-pro--xiao-esp32-c6)
+  - [BLE setup: WULPUS PRO + nRF52 DK (legacy)](#ble-setup-wulpus-pro--nrf52-dk-legacy)
+- [Citation](#citation)
+- [Changelog](#changelog)
+- [Authors](#authors)
+- [License](#license)
+  - [Limitation of Liability](#limitation-of-liability)
+
 # Introduction
 
 This repository contains the work in progress on the WULPUS PRO ultrasound platform, a successor of the [WULPUS Project](https://github.com/Sergio5714/wulpus). It features +30V unipolar programmable pulser, time-multiplexed multichannel acquisition frontend with TGC, optonal envelope extractor and support of PZTs and CMUTs. The module is compact (40 x 20 mm footprint) and lightweight (5g), allowing integration with external host PCB.
@@ -126,7 +145,7 @@ This option is convenient for outsourced PCB production and assembly, with an es
 
 # Usage
 
-## Wi-Fi setup with XIAO ESP32-C6
+## Wi-Fi setup: WULPUS PRO + XIAO ESP32-C6
 
 1. Connect the ESP32 host module to the WULPUS PRO board using the pin mapping documented in [fw/esp32/README.md](fw/esp32/README.md).
 2. Power the ESP32-based host module, for example the Seeed Studio XIAO ESP32-C6 running the firmware from `fw/esp32`.
@@ -139,7 +158,7 @@ This option is convenient for outsourced PCB production and assembly, with an es
 
 5. Open `wulpus_pro_wifi_example.ipynb` in the browser and follow the notebook instructions for discovery, connection setup, configuration transfer, and acquisition.
 
-## BLE setup with nRF52 (legacy)
+## BLE setup: WULPUS PRO + nRF52 DK (legacy)
 
 1. Connect the nRF52 DK to the WULPUS PRO board using the pin mapping documented in [fw/nrf52/README.md](fw/nrf52/README.md).
 2. Plug in the USB dongle and power the nRF52 DK via USB.
@@ -154,6 +173,18 @@ This option is convenient for outsourced PCB production and assembly, with an es
 6. Open `wulpus_pro_gui.ipynb` in the browser and follow the notebook instructions to begin acquisition.
 
 # Citation
+
+Please cite our [arXiv preprint](https://arxiv.org/abs/2607.12137):
+
+```bibtex
+@article{vostrikov2026wulpuspro,
+  title={WULPUS PRO: Multi-mode Ultra-Low-Power Wearable Ultrasound and Array Imaging with CMUT Support},
+  author={Vostrikov, Sergei and Villani, Federico and Hirschi, Cedric and Lu, Jinhao and Welsch, Jonas and Angerer, Martin and Cretu, Edmond and Rohling, Robert and Cossettini, Andrea and Benini, Luca},
+  journal={arXiv preprint arXiv:2607.12137},
+  year={2026},
+  url={https://arxiv.org/abs/2607.12137}
+}
+```
 
 If you would like to cite this repository, please use:
 
@@ -185,7 +216,9 @@ The WULPUS PRO system was originally developed at the [Integrated Systems Labora
 
 Thanks to all the people who contributed to the WULPUS PRO platform:
 
-- [Sebastian Frey](https://scholar.google.com/citations?user=7jhiqz4AAAAJ&hl=en) (design review)
+- [Sebastian Frey](https://scholar.google.com/citations?user=7jhiqz4AAAAJ&hl=en), ETH Zürich (design review)
+- [Alfonso Blanco Fontao](https://www.linkedin.com/in/alfonso-blanco-fontao-b6214726/), ETH Zürich (design review, PCB fabrication coordination)
+- [Ciara Giles Doran](https://www.linkedin.com/in/ciaragilesdoran/) (preliminary evaluation of the AD8338 VGA)
 
 # License
 
