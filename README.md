@@ -14,6 +14,7 @@
   - [System diagram](#system-diagram)
   - [Hardware photos](#hardware-photos)
   - [Specifications](#specifications)
+- [Clone the repository](#clone-the-repository)
 - [Structure of the repository](#structure-of-the-repository)
 - [Documentation](#documentation)
 - [Build Instructions](#build-instructions)
@@ -82,6 +83,20 @@ WULPUS PRO builds on the original [WULPUS](https://github.com/Sergio5714/wulpus)
 | Form factor | 46 x 25 mm footprint | **40 x 20 mm** footprint |
 
 Full WULPUS PRO specifications are available in [docs/full_specifications.md](docs/full_specifications.md).
+
+# Clone the repository
+
+Clone the repository together with its submodules:
+
+```bash
+git clone --recurse-submodules git@github.com:Sergio5714/wulpus-pro.git
+```
+
+If you have already cloned the repository, initialize and update its submodules with:
+
+```bash
+git submodule update --init --recursive
+```
 
 # Structure of the repository
 

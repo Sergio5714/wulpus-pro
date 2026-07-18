@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added the `kicad_us_lib` repository as a Git submodule under `hw/kicad_us_lib`.
+- Added submodule cloning and initialization instructions to the root README.
 - Added a linked table of contents to the root README.
 - Added the WULPUS PRO arXiv preprint citation and BibTeX entry to the root README.
 - Added PCBWay shared-project production and assembly information to the hardware README.
