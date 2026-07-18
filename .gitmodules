@@ -1,0 +1,4 @@
+[submodule "kicad_us_lib"]
+	path = hw/kicad_us_lib
+	url = git@github.com:Sergio5714/kicad_us_lib.git
+	branch = dev
