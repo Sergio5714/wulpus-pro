@@ -1,0 +1,17 @@
+# KiCad user-specific settings
+*.kicad_prl
+
+# KiCad lock files
+*.lck
+~*.lck
+
+# Autosave and backup files
+_autosave-*
+*.bak
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*.sch-bak
+*-backups/
+
+# Legacy generated cache
+fp-info-cache
