@@ -648,13 +648,25 @@
         "uuid": "939c1465-135d-46db-aee7-7d874dab9895"
       }
     ],
-    "used_designators": "U1,J1",
+    "used_designators": "U1-8,J1-3,L1-4,Q1-6",
     "variants": []
   },
   "sheets": [
     [
       "939c1465-135d-46db-aee7-7d874dab9895",
       "Root"
+    ],
+    [
+      "d15f8ff5-3e62-44bd-8891-7dc2375b4afc",
+      "Power"
+    ],
+    [
+      "46c807b9-99b2-47f0-a0d9-48b595b7b286",
+      "esp32"
+    ],
+    [
+      "b091b669-3a93-4e17-8613-2d1df892afc8",
+      "b2b_connector Sheet"
     ]
   ],
   "text_variables": {},
