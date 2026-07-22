@@ -6,8 +6,8 @@
 	(paper "A4")
 	(lib_symbols)
 	(sheet
-		(at 157.48 54.61)
-		(size 69.85 34.29)
+		(at 46.99 46.99)
+		(size 35.56 27.94)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -22,7 +22,7 @@
 		)
 		(uuid "46c807b9-99b2-47f0-a0d9-48b595b7b286")
 		(property "Sheetname" "esp32"
-			(at 157.48 53.8984 0)
+			(at 46.99 46.2784 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -33,7 +33,7 @@
 			)
 		)
 		(property "Sheetfile" "esp32.kicad_sch"
-			(at 157.48 89.4846 0)
+			(at 46.99 75.5146 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -41,6 +41,56 @@
 					(size 1.27 1.27)
 				)
 				(justify left top)
+			)
+		)
+		(pin "data_rdy" input
+			(at 82.55 50.8 0)
+			(uuid "98f315a0-ef89-47dc-b10a-f5b652a35617")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "ble_rdy" output
+			(at 82.55 53.34 0)
+			(uuid "a913516e-2336-4353-9385-13b52a45541e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "msp_rst_n" input
+			(at 82.55 55.88 0)
+			(uuid "106b7d59-2b93-40fc-a246-943be33045ca")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "VBAT" bidirectional
+			(at 82.55 69.85 0)
+			(uuid "556a4374-9cf7-4120-82be-0bec1a27fac2")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SPI{CLK MISO MOSI SS}" bidirectional
+			(at 82.55 59.69 0)
+			(uuid "a98221f1-c7c1-4ada-a17b-5c790a1e0af2")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
 			)
 		)
 		(instances
@@ -98,7 +148,7 @@
 		)
 	)
 	(sheet
-		(at 50.8 55.88)
+		(at 113.03 46.99)
 		(size 63.5 35.56)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -114,7 +164,7 @@
 		)
 		(uuid "d15f8ff5-3e62-44bd-8891-7dc2375b4afc")
 		(property "Sheetname" "Power"
-			(at 50.8 55.1684 0)
+			(at 113.03 46.2784 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -125,7 +175,7 @@
 			)
 		)
 		(property "Sheetfile" "power.kicad_sch"
-			(at 50.8 92.0246 0)
+			(at 113.03 83.1346 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
