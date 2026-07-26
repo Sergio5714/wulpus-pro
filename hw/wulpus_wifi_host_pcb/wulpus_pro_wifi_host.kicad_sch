@@ -5,9 +5,59 @@
 	(uuid "939c1465-135d-46db-aee7-7d874dab9895")
 	(paper "A4")
 	(lib_symbols)
+	(wire
+		(pts
+			(xy 119.38 111.76) (xy 149.86 111.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "00989c78-8f08-42a9-9747-165969b0ea71")
+	)
+	(wire
+		(pts
+			(xy 119.38 57.15) (xy 149.86 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0105e584-584c-4287-ba5b-76c58b71e53a")
+	)
+	(bus
+		(pts
+			(xy 119.38 116.84) (xy 149.86 116.84)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2e432958-741e-4c85-b48c-3cf5effb9ce0")
+	)
+	(bus
+		(pts
+			(xy 119.38 121.92) (xy 149.86 121.92)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ae77e59f-c57a-4a84-9f96-c08f71dfbbc7")
+	)
+	(wire
+		(pts
+			(xy 119.38 53.34) (xy 149.86 53.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c93af13a-6bdf-4ec3-a394-5f30bd9c1716")
+	)
 	(sheet
-		(at 46.99 46.99)
-		(size 35.56 27.94)
+		(at 62.23 48.26)
+		(size 57.15 83.82)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -22,7 +72,7 @@
 		)
 		(uuid "46c807b9-99b2-47f0-a0d9-48b595b7b286")
 		(property "Sheetname" "esp32"
-			(at 46.99 46.2784 0)
+			(at 62.23 47.5484 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -33,7 +83,7 @@
 			)
 		)
 		(property "Sheetfile" "esp32.kicad_sch"
-			(at 46.99 75.5146 0)
+			(at 62.23 132.6646 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -44,7 +94,7 @@
 			)
 		)
 		(pin "data_rdy" input
-			(at 82.55 50.8 0)
+			(at 119.38 111.76 0)
 			(uuid "98f315a0-ef89-47dc-b10a-f5b652a35617")
 			(effects
 				(font
@@ -53,28 +103,8 @@
 				(justify right)
 			)
 		)
-		(pin "ble_rdy" output
-			(at 82.55 53.34 0)
-			(uuid "a913516e-2336-4353-9385-13b52a45541e")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(pin "msp_rst_n" input
-			(at 82.55 55.88 0)
-			(uuid "106b7d59-2b93-40fc-a246-943be33045ca")
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
 		(pin "VBAT" bidirectional
-			(at 82.55 69.85 0)
+			(at 119.38 57.15 0)
 			(uuid "556a4374-9cf7-4120-82be-0bec1a27fac2")
 			(effects
 				(font
@@ -84,8 +114,28 @@
 			)
 		)
 		(pin "SPI{CLK MISO MOSI SS}" bidirectional
-			(at 82.55 59.69 0)
+			(at 119.38 121.92 0)
 			(uuid "a98221f1-c7c1-4ada-a17b-5c790a1e0af2")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "MSP_JTAG{TEST RST_n TDI TDO TMS TCK}" bidirectional
+			(at 119.38 116.84 0)
+			(uuid "de423630-3463-4463-9e1d-e2fa46ba95f2")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "VBUS" output
+			(at 119.38 53.34 0)
+			(uuid "dd07d0e3-967d-498b-84ac-1e9ff254d7f5")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -96,14 +146,14 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895"
-					(page "3")
+					(page "2")
 				)
 			)
 		)
 	)
 	(sheet
-		(at 115.57 110.49)
-		(size 76.2 41.91)
+		(at 149.86 101.6)
+		(size 63.5 30.48)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -118,7 +168,7 @@
 		)
 		(uuid "b091b669-3a93-4e17-8613-2d1df892afc8")
 		(property "Sheetname" "b2b_connector Sheet"
-			(at 115.57 109.7784 0)
+			(at 149.86 100.8884 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -129,7 +179,7 @@
 			)
 		)
 		(property "Sheetfile" "wulpus_pro_conn.kicad_sch"
-			(at 115.57 152.9846 0)
+			(at 149.86 132.6646 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -137,6 +187,36 @@
 					(size 1.27 1.27)
 				)
 				(justify left top)
+			)
+		)
+		(pin "SPI{CLK MISO MOSI SS}" bidirectional
+			(at 149.86 121.92 180)
+			(uuid "e8bba141-2525-4533-9eb4-9a61da01f173")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "MSP_JTAG{TEST RST_n TDI TDO TMS TCK}" bidirectional
+			(at 149.86 116.84 180)
+			(uuid "8976097f-faa5-4c04-a01d-21ab4877fa83")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "data_rdy" output
+			(at 149.86 111.76 180)
+			(uuid "d45f42d7-13e7-430a-a4f5-f234315a94be")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 		(instances
@@ -148,8 +228,8 @@
 		)
 	)
 	(sheet
-		(at 113.03 46.99)
-		(size 63.5 35.56)
+		(at 149.86 48.26)
+		(size 63.5 34.29)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -164,7 +244,7 @@
 		)
 		(uuid "d15f8ff5-3e62-44bd-8891-7dc2375b4afc")
 		(property "Sheetname" "Power"
-			(at 113.03 46.2784 0)
+			(at 149.86 47.5484 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -175,7 +255,7 @@
 			)
 		)
 		(property "Sheetfile" "power.kicad_sch"
-			(at 113.03 83.1346 0)
+			(at 149.86 83.1346 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -185,10 +265,30 @@
 				(justify left top)
 			)
 		)
+		(pin "VBAT" bidirectional
+			(at 149.86 57.15 180)
+			(uuid "9f6fa5b6-65de-42cf-a010-c3e8783412c5")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "VBUS" input
+			(at 149.86 53.34 180)
+			(uuid "03711f5b-771f-4a14-93cf-fb336f975c02")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895"
-					(page "2")
+					(page "3")
 				)
 			)
 		)
