@@ -2238,6 +2238,18 @@
 		(uuid "9b15b0e0-8b35-412e-9f5f-d3895093a911")
 	)
 	(rectangle
+		(start 26.67 152.4)
+		(end 93.98 189.23)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill
+			(type none)
+		)
+		(uuid "9cbf254f-e86f-43cc-b7f7-6102a548ab5e")
+	)
+	(rectangle
 		(start 26.67 39.37)
 		(end 109.22 138.43)
 		(stroke
@@ -2268,6 +2280,16 @@
 			)
 		)
 		(uuid "8e335731-af04-4f25-985f-bbcc29dda215")
+	)
+	(text "GND Test Points"
+		(exclude_from_sim no)
+		(at 48.26 156.718 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+			)
+		)
+		(uuid "c971983e-2b8c-47e5-970d-9510bdcb0f7d")
 	)
 	(text_box "For +V_MSP"
 		(exclude_from_sim no)
@@ -2681,6 +2703,16 @@
 	)
 	(wire
 		(pts
+			(xy 82.55 175.26) (xy 82.55 173.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2dc5469f-2fb4-4d63-82ae-02d288007ac5")
+	)
+	(wire
+		(pts
 			(xy 220.98 101.6) (xy 241.3 101.6)
 		)
 		(stroke
@@ -2808,6 +2840,16 @@
 			(type default)
 		)
 		(uuid "70057294-5f8a-4d75-a0cd-65fc4e1f8754")
+	)
+	(wire
+		(pts
+			(xy 66.04 175.26) (xy 66.04 173.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7a14ea52-a528-4ec9-8bd3-1fec5be81b2c")
 	)
 	(wire
 		(pts
@@ -3361,6 +3403,85 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 82.55 175.26 0)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "13b57bc5-6fb8-4bad-883b-14ceffa8122b")
+		(property "Reference" "#PWR040"
+			(at 82.55 181.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 82.55 180.34 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 82.55 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 82.55 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 82.55 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f97a93c6-ae3c-4954-9a1c-a5934c0907cf")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
+					(reference "#PWR040")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Ultrasound:DF40C-50DP-0.4V_51_")
 		(at 208.28 96.52 0)
 		(mirror x)
@@ -3737,6 +3858,85 @@
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
 					(reference "J2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 66.04 175.26 0)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "260fbfc5-ced3-490b-b4e1-70c857475403")
+		(property "Reference" "#PWR039"
+			(at 66.04 181.61 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 66.04 180.34 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 66.04 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 66.04 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 66.04 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "dba089be-276f-41f0-b771-e80fbe578ee0")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
+					(reference "#PWR039")
 					(unit 1)
 				)
 			)
@@ -4304,6 +4504,85 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
+		(at 66.04 173.99 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "9e4dcbae-5d10-4a71-8085-c90fe39ade86")
+		(property "Reference" "TP6"
+			(at 66.294 168.656 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TestPoint"
+			(at 68.834 168.656 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_1.0x1.0mm"
+			(at 71.12 173.99 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 71.12 173.99 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 66.04 173.99 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f2b8516a-cdd0-434a-9714-dc8b7d72bccd")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
+					(reference "TP6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
 		(at 243.84 99.06 270)
 		(unit 1)
 		(body_style 1)
@@ -4691,6 +4970,85 @@
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
 					(reference "#PWR034")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 82.55 173.99 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "ddf9f00d-8da4-40b3-8cfe-548ea0356798")
+		(property "Reference" "TP7"
+			(at 82.804 168.656 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TestPoint"
+			(at 85.344 168.656 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_1.0x1.0mm"
+			(at 87.63 173.99 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 87.63 173.99 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 82.55 173.99 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "c59a52aa-4ba8-4c20-94c2-58433614eff3")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
+					(reference "TP7")
 					(unit 1)
 				)
 			)
