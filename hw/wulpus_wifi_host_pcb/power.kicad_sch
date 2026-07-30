@@ -4731,7 +4731,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 63.1952 93.98 0)
 			(hide yes)
 			(show_name no)
@@ -6007,7 +6007,7 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -6196,7 +6196,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 77.1652 93.98 0)
 			(hide yes)
 			(show_name no)
@@ -6378,6 +6378,28 @@
 		)
 		(property "Description" "P-MOSFET transistor, gate/source/drain"
 			(at 237.49 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "LP0404N3T5G"
+			(at 237.49 55.88 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "LRC"
+			(at 237.49 55.88 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6894,7 +6916,7 @@
 				)
 			)
 		)
-		(property "Value" "o"
+		(property "Value" "0"
 			(at 33.274 57.912 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7421,6 +7443,17 @@
 				(justify bottom)
 			)
 		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 175.26 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "7885e39a-9ac5-4cdb-aac0-dbaccfbac70f")
 		)
@@ -7905,6 +7938,17 @@
 				(justify bottom)
 			)
 		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 86.36 57.15 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "d933e84b-76f5-4afb-a467-e1b25285c984")
 		)
@@ -8167,6 +8211,28 @@
 				)
 			)
 		)
+		(property "MP" "LMBR4010BST5G"
+			(at 256.54 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "LRC"
+			(at 256.54 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "ee062dd9-fb91-4d95-842c-8e8482ba8e13")
 		)
@@ -8294,7 +8360,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 152.0952 93.98 0)
 			(hide yes)
 			(show_name no)
@@ -8819,7 +8885,7 @@
 				(justify bottom)
 			)
 		)
-		(property "MP" "FS8205"
+		(property "MP" "FS8205A"
 			(at 53.34 182.88 0)
 			(hide yes)
 			(show_name no)
@@ -8843,7 +8909,7 @@
 				(justify bottom)
 			)
 		)
-		(property "MANUFACTURER" "Fortune"
+		(property "MANUFACTURER" "FUXINSEMI"
 			(at 53.34 182.88 0)
 			(hide yes)
 			(show_name no)
@@ -8967,7 +9033,7 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -9046,7 +9112,7 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -9141,7 +9207,7 @@
 				)
 			)
 		)
-		(property "Value" "o"
+		(property "Value" "0"
 			(at 120.904 57.912 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9674,7 +9740,7 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -9941,7 +10007,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 166.0652 93.98 0)
 			(hide yes)
 			(show_name no)
