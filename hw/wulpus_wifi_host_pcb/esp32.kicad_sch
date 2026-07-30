@@ -2663,6 +2663,28 @@
 				)
 			)
 		)
+		(property "MP" " XIAO ESP32C6"
+			(at 152.4 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Seeed Studio"
+			(at 152.4 99.06 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "16"
 			(uuid "e4fa1b1c-27b5-47cf-a1bb-e907910d2be0")
 		)
