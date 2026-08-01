@@ -1792,6 +1792,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 104.14 91.44 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 104.14 91.44 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "48952617-58bd-4953-9420-27f8aff39089")
 		)
@@ -1871,6 +1893,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 104.14 104.14 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 104.14 104.14 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "d032e073-e91c-4b23-8245-d8772c25cf9a")
 		)
@@ -1941,6 +1985,28 @@
 		)
 		(property "Description" "Resistor"
 			(at 213.36 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 213.36 121.92 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 213.36 121.92 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2108,6 +2174,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 213.36 102.87 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 213.36 102.87 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "1b61f24f-a8cf-4524-a69c-1226ac58cfdc")
 		)
@@ -2178,6 +2266,28 @@
 		)
 		(property "Description" "Resistor"
 			(at 104.14 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 104.14 123.19 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 104.14 123.19 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2266,6 +2376,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 213.36 115.57 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 213.36 115.57 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "e64401dd-9e81-495a-bac4-070c6139bd1b")
 		)
@@ -2336,6 +2468,28 @@
 		)
 		(property "Description" "Resistor"
 			(at 104.14 97.79 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 104.14 97.79 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 104.14 97.79 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2424,6 +2578,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 104.14 129.54 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 104.14 129.54 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "17958bea-5fa1-4ff0-b4bc-dc4eae3d7129")
 		)
@@ -2503,6 +2679,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 104.14 110.49 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 104.14 110.49 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "02c324ac-9d95-4db1-b468-b394ab0d7f63")
 		)
@@ -2573,6 +2771,28 @@
 		)
 		(property "Description" "Resistor"
 			(at 104.14 116.84 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 104.14 116.84 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 104.14 116.84 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2821,6 +3041,28 @@
 		)
 		(property "Description" "Resistor"
 			(at 213.36 109.22 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 213.36 109.22 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-1347RL"
+			(at 213.36 109.22 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)

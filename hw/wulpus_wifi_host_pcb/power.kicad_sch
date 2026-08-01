@@ -4764,6 +4764,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 62.23 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GRM187R60J226ME15"
+			(at 62.23 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "82d5b78c-c9f8-4f75-86d6-1158fa05b03e")
 		)
@@ -5507,6 +5529,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 116.84 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-07330RL"
+			(at 116.84 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "8aba1031-e5fa-4549-8b9b-8177654c21b7")
 		)
@@ -5748,6 +5792,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 237.49 81.28 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GCM155R71H104KE02J"
+			(at 237.49 81.28 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "f5d92cca-2365-450b-9b92-c5dd3541a563")
 		)
@@ -5818,6 +5884,28 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 124.46 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 124.46 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-0736K5L"
 			(at 124.46 62.23 0)
 			(hide yes)
 			(show_name no)
@@ -6147,6 +6235,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 227.33 81.28 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-07100KL"
+			(at 227.33 81.28 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "6f0a4546-fbf4-4135-b21f-6e45a4fc37a0")
 		)
@@ -6219,6 +6329,28 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 76.2 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 76.2 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GRM188R61A106ME69"
 			(at 76.2 90.17 0)
 			(hide yes)
 			(show_name no)
@@ -6564,6 +6696,28 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 33.02 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 33.02 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-072K2L"
 			(at 33.02 161.29 0)
 			(hide yes)
 			(show_name no)
@@ -6959,6 +7113,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 31.75 62.23 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402JR-070RL"
+			(at 31.75 62.23 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "b3671d25-f582-4b97-b012-4454817ba2c0")
 		)
@@ -7119,6 +7295,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 64.77 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-075M1L"
+			(at 64.77 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "7176bd34-3758-46ee-8ff2-38f4b4a8ba5d")
 		)
@@ -7189,6 +7387,28 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 36.83 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 36.83 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-0716K2L"
 			(at 36.83 62.23 0)
 			(hide yes)
 			(show_name no)
@@ -7694,6 +7914,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 41.91 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-075M1L"
+			(at 41.91 175.26 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "d8ab380e-0b2b-4ed1-bda3-2261b7fcb5b7")
 		)
@@ -8029,6 +8271,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 114.3 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402JR-070RL"
+			(at 114.3 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "596e011e-d0fa-406c-882a-ee2cea143361")
 		)
@@ -8099,6 +8363,28 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 26.67 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Yageo"
+			(at 26.67 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402JR-070RL"
 			(at 26.67 62.23 0)
 			(hide yes)
 			(show_name no)
@@ -8383,6 +8669,28 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 151.13 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 151.13 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GRM187R60J226ME15"
 			(at 151.13 90.17 0)
 			(hide yes)
 			(show_name no)
@@ -9250,6 +9558,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 119.38 62.23 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402JR-070RL"
+			(at 119.38 62.23 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "1ec05b02-233f-4e68-9041-e7be4a1dc318")
 		)
@@ -9675,7 +10005,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "0.1uF"
+		(property "Value" "100 nF"
 			(at 120.65 154.9399 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9709,6 +10039,28 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 116.84 153.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 116.84 153.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GCM155R71H104KE02J"
 			(at 116.84 153.67 0)
 			(hide yes)
 			(show_name no)
@@ -9880,6 +10232,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Yageo"
+			(at 237.49 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "RC0402FR-07100RL"
+			(at 237.49 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "0f74943c-d225-46c9-b845-15e4dfd1183b")
 		)
@@ -10030,6 +10404,28 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 165.1 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 165.1 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GRM188R61A106ME69"
 			(at 165.1 90.17 0)
 			(hide yes)
 			(show_name no)
