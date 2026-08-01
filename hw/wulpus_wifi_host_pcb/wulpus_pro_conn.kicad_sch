@@ -4167,6 +4167,28 @@
 				)
 			)
 		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 137.16 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GRM188R61A106ME69"
+			(at 137.16 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "8aa00b09-d29e-42b7-86bc-861c0422b811")
 		)
@@ -4477,6 +4499,28 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 156.21 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 156.21 115.57 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GRM188R61A106ME69"
 			(at 156.21 115.57 0)
 			(hide yes)
 			(show_name no)
