@@ -1,0 +1,12 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "IXDD609D2TR") (type "Altium") (uri "${KIPRJMOD}/IXDD609D2TR.SchLib") (options "") (descr ""))
+	(lib (name "MD01000") (type "Altium") (uri "${KIPRJMOD}/MD01000.SchLib") (options "") (descr ""))
+	(lib (name "SN74AVC4T774RSVR") (type "Altium") (uri "${KIPRJMOD}/SN74AVC4T774RSVR.SchLib") (options "") (descr ""))
+	(lib (name "TPS22916CYFPR") (type "Altium") (uri "${KIPRJMOD}/TPS22916CYFPR.SchLib") (options "") (descr ""))
+	(lib (name "TS5A3159AYZPR") (type "Altium") (uri "${KIPRJMOD}/TS5A3159AYZPR.SchLib") (options "") (descr ""))
+	(lib (name "cmut_conn") (type "Altium") (uri "${KIPRJMOD}/cmut_conn.SCHLIB") (options "") (descr ""))
+	(lib (name "host_connectors") (type "Altium") (uri "${KIPRJMOD}/host_connectors.SCHLIB") (options "") (descr ""))
+	(lib (name "wulpus") (type "Altium") (uri "${KIPRJMOD}/wulpus.SCHLIB") (options "") (descr ""))
+	(lib (name "wulpus_hv") (type "Altium") (uri "${KIPRJMOD}/wulpus_hv.SCHLIB") (options "") (descr ""))
+)
