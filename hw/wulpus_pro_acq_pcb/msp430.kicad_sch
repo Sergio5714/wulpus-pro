@@ -5081,236 +5081,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "wulpus:U_msp430_0_mirrored_MOLEX_5051100892_wulpus.SCHLIB"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "*MOLEX_5051100892*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "U_msp430_0_mirrored_MOLEX_5051100892_wulpus.SCHLIB_1_0"
-				(rectangle
-					(start 15.24 5.08)
-					(end -7.62 -1.27)
-					(stroke
-						(width 0.0254)
-						(type solid)
-						(color 128 0 0 1)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(pin bidirectional line
-					(at 12.7 12.7 270)
-					(length 7.62)
-					(name "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 10.16 12.7 270)
-					(length 7.62)
-					(name "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 7.62 12.7 270)
-					(length 7.62)
-					(name "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 5.08 12.7 270)
-					(length 7.62)
-					(name "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 2.54 12.7 270)
-					(length 7.62)
-					(name "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 0 12.7 270)
-					(length 7.62)
-					(name "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -2.54 12.7 270)
-					(length 7.62)
-					(name "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -5.08 12.7 270)
-					(length 7.62)
-					(name "8"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "8"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "wulpus_pro_acq_pcb-altium-import:+VCC_MSP430_BAR"
 			(power global)
 			(exclude_from_sim no)
@@ -5613,19 +5383,6 @@
 		(uuid "2665b9a2-1893-426b-8314-62b8be092c3e")
 	)
 	(rectangle
-		(start 392.43 139.5222)
-		(end 302.26 170.0022)
-		(stroke
-			(width 0.0254)
-			(type solid)
-			(color 0 0 0 1)
-		)
-		(fill
-			(type none)
-		)
-		(uuid "2ef303d6-9381-481f-9582-c7fe4883dff9")
-	)
-	(rectangle
 		(start 60.96 16.3322)
 		(end 20.32 34.1122)
 		(stroke
@@ -5740,19 +5497,6 @@
 		)
 		(uuid "34d3e15a-64e1-453f-b4c0-b62ada946d5f")
 	)
-	(text "BSL Signals"
-		(exclude_from_sim no)
-		(at 326.39 148.59 0)
-		(effects
-			(font
-				(size 2.286 2.286)
-				(thickness 0.4572)
-				(bold yes)
-			)
-			(justify bottom)
-		)
-		(uuid "5a82109c-f8ba-46c9-b482-9510f7839eee")
-	)
 	(text "Ultrasound Subsystem Oscillator"
 		(exclude_from_sim no)
 		(at 161.29 232.41 0)
@@ -5815,28 +5559,6 @@
 			(justify bottom)
 		)
 		(uuid "fcf0753f-eb83-4b72-b6b8-4d3ec90a9f5a")
-	)
-	(text_box "Legacy connector for WULPUS v1"
-		(exclude_from_sim no)
-		(at 308.61 185.2422 0)
-		(size -21.59 7.62)
-		(margins 0.9525 0.9525 0.9525 0.9525)
-		(stroke
-			(width 0)
-			(type default)
-			(color 0 0 0 1)
-		)
-		(fill
-			(type color)
-			(color 255 255 150 1)
-		)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left top)
-		)
-		(uuid "178f97f6-3a48-4025-a71a-bedb0715b851")
 	)
 	(text_box ""
 		(exclude_from_sim no)
@@ -6231,8 +5953,16 @@
 		(uuid "ff21f1a3-c9ba-4012-b74e-be58210f10e0")
 	)
 	(no_connect
+		(at 109.22 74.93)
+		(uuid "13589f05-41ab-423f-a637-c452f04ee9c4")
+	)
+	(no_connect
 		(at 109.22 95.25)
 		(uuid "2031265c-ee1f-425e-937f-5689e0581806")
+	)
+	(no_connect
+		(at 109.22 72.39)
+		(uuid "77f6c6dd-8e18-4aab-9704-158680e3507e")
 	)
 	(no_connect
 		(at 109.22 105.41)
@@ -6254,15 +5984,6 @@
 			(type default)
 		)
 		(uuid "2041d731-71a2-4100-86ab-055921a11f01")
-	)
-	(bus_entry
-		(at 363.22 160.02)
-		(size -2.54 2.54)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "244430ee-2596-4e7c-bcfe-a6a865c67ec1")
 	)
 	(bus_entry
 		(at 340.36 210.82)
@@ -6317,15 +6038,6 @@
 			(type default)
 		)
 		(uuid "a0779578-64fc-4fb4-9d56-5e00c7c51ee5")
-	)
-	(bus_entry
-		(at 363.22 154.94)
-		(size -2.54 2.54)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a374f749-9c07-42dc-a8bd-2c9d2eb6c073")
 	)
 	(bus_entry
 		(at 340.36 208.28)
@@ -6444,16 +6156,6 @@
 	)
 	(wire
 		(pts
-			(xy 85.09 74.93) (xy 109.22 74.93)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0ad4e5e2-6ef4-42ff-8afc-b0ba22700bdf")
-	)
-	(wire
-		(pts
 			(xy 31.75 193.04) (xy 44.45 193.04)
 		)
 		(stroke
@@ -6511,6 +6213,16 @@
 			(type default)
 		)
 		(uuid "10f8b62d-2f3b-4309-b5d8-cb5129dd2586")
+	)
+	(wire
+		(pts
+			(xy 320.04 213.36) (xy 340.36 213.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "12506b27-e6f4-47c2-9a9b-e560a70b524c")
 	)
 	(wire
 		(pts
@@ -6581,16 +6293,6 @@
 			(type default)
 		)
 		(uuid "1666d12c-de17-4cd5-ab11-ee57d18117cb")
-	)
-	(wire
-		(pts
-			(xy 321.31 220.98) (xy 321.31 229.87)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "16a7df2a-1f12-4d36-aec7-9118f47c6413")
 	)
 	(wire
 		(pts
@@ -6756,16 +6458,6 @@
 	)
 	(wire
 		(pts
-			(xy 299.72 220.98) (xy 321.31 220.98)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "2ea5d47e-cccd-48ca-80ce-e9526765fa69")
-	)
-	(wire
-		(pts
 			(xy 374.65 107.95) (xy 374.65 113.03)
 		)
 		(stroke
@@ -6773,16 +6465,6 @@
 			(type default)
 		)
 		(uuid "2ef39269-59d4-4bac-b996-24aaf1eeea62")
-	)
-	(bus
-		(pts
-			(xy 367.03 154.94) (xy 363.22 154.94)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "30695983-7371-48af-a793-c4a2185792ce")
 	)
 	(wire
 		(pts
@@ -6906,16 +6588,6 @@
 	)
 	(wire
 		(pts
-			(xy 314.96 162.56) (xy 360.68 162.56)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3a341cf2-b8db-4fa2-affb-549a85a155cc")
-	)
-	(wire
-		(pts
 			(xy 256.54 120.65) (xy 251.46 120.65)
 		)
 		(stroke
@@ -6993,16 +6665,6 @@
 			(type default)
 		)
 		(uuid "40c881c8-a262-4bc3-a134-ff4e0e594469")
-	)
-	(bus
-		(pts
-			(xy 363.22 154.94) (xy 363.22 160.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "419e6ef6-9969-481a-a493-abcfce6f185b")
 	)
 	(wire
 		(pts
@@ -7176,7 +6838,7 @@
 	)
 	(wire
 		(pts
-			(xy 299.72 205.74) (xy 340.36 205.74)
+			(xy 320.04 205.74) (xy 340.36 205.74)
 		)
 		(stroke
 			(width 0)
@@ -7447,7 +7109,7 @@
 	)
 	(wire
 		(pts
-			(xy 299.72 215.9) (xy 340.36 215.9)
+			(xy 320.04 215.9) (xy 340.36 215.9)
 		)
 		(stroke
 			(width 0)
@@ -7720,16 +7382,6 @@
 	)
 	(wire
 		(pts
-			(xy 85.09 72.39) (xy 109.22 72.39)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9c37cf66-81d2-44b7-ad25-913feea2dde2")
-	)
-	(wire
-		(pts
 			(xy 160.02 241.3) (xy 160.02 240.03)
 		)
 		(stroke
@@ -7737,16 +7389,6 @@
 			(type default)
 		)
 		(uuid "a0d439e2-d02c-4b5a-8450-c34c0aefb22d")
-	)
-	(wire
-		(pts
-			(xy 299.72 213.36) (xy 340.36 213.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a213f959-640e-4540-b899-9dc8920d911d")
 	)
 	(wire
 		(pts
@@ -7760,7 +7402,7 @@
 	)
 	(wire
 		(pts
-			(xy 299.72 210.82) (xy 340.36 210.82)
+			(xy 320.04 210.82) (xy 340.36 210.82)
 		)
 		(stroke
 			(width 0)
@@ -7847,16 +7489,6 @@
 			(type default)
 		)
 		(uuid "b47933a5-5532-4a35-a7d2-4e08fa66b0f1")
-	)
-	(wire
-		(pts
-			(xy 314.96 157.48) (xy 360.68 157.48)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b6110324-1ad0-4bcb-9da6-33a9af1ddcde")
 	)
 	(wire
 		(pts
@@ -8181,6 +7813,16 @@
 	)
 	(wire
 		(pts
+			(xy 320.04 208.28) (xy 340.36 208.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d9530dd2-7510-42b8-9a1b-44e56543365e")
+	)
+	(wire
+		(pts
 			(xy 184.15 240.03) (xy 194.31 240.03)
 		)
 		(stroke
@@ -8198,16 +7840,6 @@
 			(type default)
 		)
 		(uuid "d9e7b1d6-5c4a-4030-8149-c3e7cfd2ad40")
-	)
-	(wire
-		(pts
-			(xy 299.72 208.28) (xy 340.36 208.28)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "da7bc352-84e5-433e-83ae-5e721181d23f")
 	)
 	(wire
 		(pts
@@ -8301,7 +7933,7 @@
 	)
 	(wire
 		(pts
-			(xy 299.72 218.44) (xy 340.36 218.44)
+			(xy 320.04 218.44) (xy 340.36 218.44)
 		)
 		(stroke
 			(width 0)
@@ -8715,7 +8347,7 @@
 		(uuid "0753ee52-1b64-4882-8ea9-72a447ced84c")
 	)
 	(label "JTAG_TMS"
-		(at 321.31 215.9 0)
+		(at 320.04 215.9 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -8733,16 +8365,6 @@
 			(justify left bottom)
 		)
 		(uuid "08c8b578-488e-4b7c-a083-e872b0df3fb8")
-	)
-	(label "BSL_UART_RX"
-		(at 314.96 157.48 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "0a485b94-8d31-4208-993c-d00050953ef8")
 	)
 	(label "JTAG_TDI"
 		(at 262.89 29.21 180)
@@ -8763,16 +8385,6 @@
 			(justify right bottom)
 		)
 		(uuid "0d4ef63a-a699-431c-b8d9-827739ae8d50")
-	)
-	(label "BSL_UART_RX"
-		(at 85.09 74.93 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "0e3a0636-1766-4727-bfdd-4bec5ad14a7c")
 	)
 	(label "HFXIN"
 		(at 67.31 213.36 0)
@@ -8795,7 +8407,7 @@
 		(uuid "17ebd38b-b535-4873-9170-fe5bcb33ae0b")
 	)
 	(label "JTAG_TCK"
-		(at 321.31 218.44 0)
+		(at 320.04 218.44 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -8944,16 +8556,6 @@
 		)
 		(uuid "391f307d-e3a5-45a3-9f46-700a65075328")
 	)
-	(label "MSP430_BSL.TX"
-		(at 339.09 162.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "39b5ee0a-015e-43ad-ac55-53ee1f0bd24e")
-	)
 	(label "PVCC"
 		(at 91.44 41.91 0)
 		(effects
@@ -9053,16 +8655,6 @@
 			(justify left bottom)
 		)
 		(uuid "4b2a2194-da3d-4a66-b454-2ca26d539256")
-	)
-	(label "BSL_UART_TX"
-		(at 314.96 162.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "50a2cbfb-b59c-4fc3-ac96-445bbeb9327f")
 	)
 	(label "HV_POS_EN"
 		(at 72.39 107.95 180)
@@ -9183,16 +8775,6 @@
 			(justify right bottom)
 		)
 		(uuid "6eb22cfe-2bfc-4fa4-8668-a75f24bb0466")
-	)
-	(label "MSP430_BSL.RX"
-		(at 339.09 157.48 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "74cd99b0-92b4-4730-8a28-de78b4110c11")
 	)
 	(label "LINK_READY"
 		(at 85.09 128.27 0)
@@ -9325,7 +8907,7 @@
 		(uuid "9f90a414-db67-4ea2-a743-56e051d8e257")
 	)
 	(label "JTAG_TDO"
-		(at 321.31 213.36 0)
+		(at 320.04 213.36 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -9335,7 +8917,7 @@
 		(uuid "a1201015-f7e3-4283-a810-bec651553b16")
 	)
 	(label "JTAG_RESET_N"
-		(at 321.31 208.28 0)
+		(at 320.04 208.28 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -9415,7 +8997,7 @@
 		(uuid "adf46bf9-bbb9-4b2e-9697-332407c42f6f")
 	)
 	(label "JTAG_TDI"
-		(at 321.31 210.82 0)
+		(at 320.04 210.82 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -9443,16 +9025,6 @@
 			(justify left bottom)
 		)
 		(uuid "bbbdc856-5f7c-4ae0-9e78-cc7b67241c7f")
-	)
-	(label "BSL_UART_TX"
-		(at 85.09 72.39 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "c211c6b3-02df-441d-b075-b190100e6f47")
 	)
 	(label "JTAG_RESET_N"
 		(at 265.43 74.93 180)
@@ -9595,7 +9167,7 @@
 		(uuid "ecbc4d3e-526c-4ad8-9af6-e9ec4c658ef5")
 	)
 	(label "JTAG_TEST"
-		(at 321.31 205.74 0)
+		(at 320.04 205.74 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -9838,17 +9410,6 @@
 			(justify right)
 		)
 		(uuid "8bea6be4-caf7-435d-8990-a39f774decdb")
-	)
-	(hierarchical_label "MSP430_BSL{BSL_UART}"
-		(shape passive)
-		(at 367.03 154.94 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "a69364e9-9bdb-4156-9204-836761ee75b3")
 	)
 	(hierarchical_label "VGA_GAIN_RC_SINK"
 		(shape bidirectional)
@@ -21786,80 +21347,6 @@
 		)
 	)
 	(symbol
-		(lib_id "wulpus_pro_acq_pcb-altium-import:GND_POWER_GROUND")
-		(at 321.31 229.87 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "f10af368-7103-4cc6-82b4-9574ab16b63e")
-		(property "Reference" "#PWR0107"
-			(at 321.31 229.87 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 321.31 236.22 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 321.31 229.87 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 321.31 229.87 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 321.31 229.87 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin ""
-			(uuid "c2bd340d-b328-4b77-bde0-9d5c931f4041")
-		)
-		(instances
-			(project "wulpus_pro_acq_pcb"
-				(path "/df5f746a-1533-45d7-bc2d-bdcb5acdf5b4/8869b563-37ef-408c-81e4-2b60025c099b"
-					(reference "#PWR0107")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Altium Content Vault:U_msp430_0_PAS-IND-INDUCTOR-2_Altium Content Vault")
 		(at 340.36 49.53 90)
 		(unit 1)
@@ -22043,181 +21530,6 @@
 			(project "wulpus_pro_acq_pcb"
 				(path "/df5f746a-1533-45d7-bc2d-bdcb5acdf5b4/8869b563-37ef-408c-81e4-2b60025c099b"
 					(reference "L1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "wulpus:U_msp430_0_mirrored_MOLEX_5051100892_wulpus.SCHLIB")
-		(at 287.02 218.44 270)
-		(mirror x)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "f7fd58b1-bfa2-4bd1-a735-50dc82386f88")
-		(property "Reference" "PJ1"
-			(at 285.75 203.2 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "5051100892"
-			(at 285.75 228.6 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Footprint" "MOLEX_5051100892"
-			(at 287.02 218.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 287.02 218.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 287.02 218.44 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "c7607fa4-8505-4bbb-8df6-8a0cd3d3cf84")
-		)
-		(pin "3"
-			(uuid "0a1da937-940f-4ecf-a86c-be5b13fcd99c")
-		)
-		(pin "8"
-			(uuid "55a75cdb-b869-470f-a0a4-ad182af4abe9")
-		)
-		(pin "6"
-			(uuid "75c407bf-6bd8-468b-8814-367d236a235e")
-		)
-		(pin "2"
-			(uuid "f70c8183-9525-45c1-8129-52c661ea0d9f")
-		)
-		(pin "4"
-			(uuid "c508d10d-005b-4c3a-a7a2-9d7d8c2f4cb5")
-		)
-		(pin "7"
-			(uuid "5718f79a-333c-4d19-920c-4a85aeb24071")
-		)
-		(pin "5"
-			(uuid "e84eb304-1494-4b73-818d-ff56cd711358")
-		)
-		(instances
-			(project "wulpus_pro_acq_pcb"
-				(path "/df5f746a-1533-45d7-bc2d-bdcb5acdf5b4/8869b563-37ef-408c-81e4-2b60025c099b"
-					(reference "PJ1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "wulpus_pro_acq_pcb-altium-import:+VCC_MSP430_BAR")
-		(at 299.72 223.52 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "fa9d14d2-a785-4e18-a406-b1c94d47a48b")
-		(property "Reference" "#PWR0104"
-			(at 299.72 223.52 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "+VCC_MSP430"
-			(at 303.53 223.52 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" ""
-			(at 299.72 223.52 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 299.72 223.52 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" ""
-			(at 299.72 223.52 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin ""
-			(uuid "fb030621-9a17-4c74-a842-7e16c89f78d8")
-		)
-		(instances
-			(project "wulpus_pro_acq_pcb"
-				(path "/df5f746a-1533-45d7-bc2d-bdcb5acdf5b4/8869b563-37ef-408c-81e4-2b60025c099b"
-					(reference "#PWR0104")
 					(unit 1)
 				)
 			)

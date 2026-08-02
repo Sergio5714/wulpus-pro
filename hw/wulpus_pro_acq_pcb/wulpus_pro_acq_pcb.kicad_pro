@@ -63,10 +63,10 @@
           "min_clearance": 0.5,
           "min_island_area": 10.0,
           "min_thickness": 0.25,
-          "pad_connection": 1,
+          "pad_connection": 2,
           "remove_islands": 0,
-          "thermal_relief_gap": 0.5,
-          "thermal_relief_spoke_width": 0.5
+          "thermal_relief_gap": 0.254,
+          "thermal_relief_spoke_width": 0.254
         }
       },
       "diff_pair_dimensions": [],
@@ -825,7 +825,7 @@
         "uuid": "df5f746a-1533-45d7-bc2d-bdcb5acdf5b4"
       }
     ],
-    "used_designators": "#PWR1-188",
+    "used_designators": "",
     "variants": [
       {
         "name": "polycmuts_tia_direct_bias"
