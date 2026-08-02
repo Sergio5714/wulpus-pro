@@ -3257,7 +3257,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "0b6477ad-cf1b-47e1-9dbc-d56446a1693f")
-		(property "Reference" "#PWR031"
+		(property "Reference" "#PWR037"
 			(at 156.21 125.73 0)
 			(hide yes)
 			(show_name no)
@@ -3317,7 +3317,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR031")
+					(reference "#PWR037")
 					(unit 1)
 				)
 			)
@@ -3335,7 +3335,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "0b7a28c6-43bc-498c-863c-63bc40f5b4b2")
-		(property "Reference" "#PWR033"
+		(property "Reference" "#PWR039"
 			(at 187.96 78.74 0)
 			(hide yes)
 			(show_name no)
@@ -3396,7 +3396,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR033")
+					(reference "#PWR039")
 					(unit 1)
 				)
 			)
@@ -3415,7 +3415,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "13b57bc5-6fb8-4bad-883b-14ceffa8122b")
-		(property "Reference" "#PWR040"
+		(property "Reference" "#PWR033"
 			(at 82.55 181.61 0)
 			(hide yes)
 			(show_name no)
@@ -3475,7 +3475,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR040")
+					(reference "#PWR033")
 					(unit 1)
 				)
 			)
@@ -3876,7 +3876,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "260fbfc5-ced3-490b-b4e1-70c857475403")
-		(property "Reference" "#PWR039"
+		(property "Reference" "#PWR032"
 			(at 66.04 181.61 0)
 			(hide yes)
 			(show_name no)
@@ -3936,7 +3936,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR039")
+					(reference "#PWR032")
 					(unit 1)
 				)
 			)
@@ -3955,7 +3955,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "39d42d5d-9dde-4659-8764-8db5638269dc")
-		(property "Reference" "#PWR037"
+		(property "Reference" "#PWR043"
 			(at 236.22 83.82 0)
 			(hide yes)
 			(show_name no)
@@ -4016,7 +4016,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR037")
+					(reference "#PWR043")
 					(unit 1)
 				)
 			)
@@ -4033,7 +4033,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "4db4e43d-e38e-4f81-beec-c6b594c58246")
-		(property "Reference" "#PWR028"
+		(property "Reference" "#PWR034"
 			(at 137.16 115.57 0)
 			(hide yes)
 			(show_name no)
@@ -4094,7 +4094,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR028")
+					(reference "#PWR034")
 					(unit 1)
 				)
 			)
@@ -4112,7 +4112,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5d14c279-c7cb-4c2b-b221-cf4eb8ddb588")
-		(property "Reference" "C7"
+		(property "Reference" "C9"
 			(at 140.97 114.2999 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4198,7 +4198,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "C7")
+					(reference "C9")
 					(unit 1)
 				)
 			)
@@ -4215,7 +4215,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "5e70575e-e3a5-46f6-9e18-c4927d4b18e7")
-		(property "Reference" "#PWR030"
+		(property "Reference" "#PWR036"
 			(at 156.21 115.57 0)
 			(hide yes)
 			(show_name no)
@@ -4276,7 +4276,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR030")
+					(reference "#PWR036")
 					(unit 1)
 				)
 			)
@@ -4295,7 +4295,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "61d6bb8a-4f48-4545-9c78-e487422850e9")
-		(property "Reference" "#PWR036"
+		(property "Reference" "#PWR042"
 			(at 180.34 109.22 0)
 			(hide yes)
 			(show_name no)
@@ -4356,7 +4356,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR036")
+					(reference "#PWR042")
 					(unit 1)
 				)
 			)
@@ -4375,7 +4375,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6de5f65f-4fd5-4f81-97bd-e432744c471f")
-		(property "Reference" "#PWR038"
+		(property "Reference" "#PWR044"
 			(at 236.22 109.22 0)
 			(hide yes)
 			(show_name no)
@@ -4436,7 +4436,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR038")
+					(reference "#PWR044")
 					(unit 1)
 				)
 			)
@@ -4454,7 +4454,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8b45076d-f025-4cc3-88fc-e6d8461ac80f")
-		(property "Reference" "C8"
+		(property "Reference" "C10"
 			(at 160.02 114.2999 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4540,7 +4540,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "C8")
+					(reference "C10")
 					(unit 1)
 				)
 			)
@@ -4557,7 +4557,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "9e4dcbae-5d10-4a71-8085-c90fe39ade86")
-		(property "Reference" "TP6"
+		(property "Reference" "TP5"
 			(at 66.294 168.656 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4619,7 +4619,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "TP6")
+					(reference "TP5")
 					(unit 1)
 				)
 			)
@@ -4636,7 +4636,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "ae226fc9-e377-4d47-b198-92ebdadc29a5")
-		(property "Reference" "TP4"
+		(property "Reference" "TP7"
 			(at 249.174 99.314 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4698,7 +4698,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "TP4")
+					(reference "TP7")
 					(unit 1)
 				)
 			)
@@ -4715,7 +4715,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "b2dbec1c-86b8-42c9-b030-9e22f156043c")
-		(property "Reference" "#PWR032"
+		(property "Reference" "#PWR038"
 			(at 181.61 68.58 0)
 			(hide yes)
 			(show_name no)
@@ -4776,7 +4776,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR032")
+					(reference "#PWR038")
 					(unit 1)
 				)
 			)
@@ -4794,7 +4794,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "bcd5bb6e-cd8e-4f44-afe3-bc35323423ac")
-		(property "Reference" "#PWR035"
+		(property "Reference" "#PWR041"
 			(at 187.96 91.44 0)
 			(hide yes)
 			(show_name no)
@@ -4855,7 +4855,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR035")
+					(reference "#PWR041")
 					(unit 1)
 				)
 			)
@@ -4874,7 +4874,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d10885b0-b436-42ab-b9f6-863acdc4a363")
-		(property "Reference" "#PWR029"
+		(property "Reference" "#PWR035"
 			(at 137.16 125.73 0)
 			(hide yes)
 			(show_name no)
@@ -4934,7 +4934,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR029")
+					(reference "#PWR035")
 					(unit 1)
 				)
 			)
@@ -4952,7 +4952,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "dadaaa82-5543-4742-8a53-dad1d523959e")
-		(property "Reference" "#PWR034"
+		(property "Reference" "#PWR040"
 			(at 187.96 86.36 0)
 			(hide yes)
 			(show_name no)
@@ -5013,7 +5013,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "#PWR034")
+					(reference "#PWR040")
 					(unit 1)
 				)
 			)
@@ -5030,7 +5030,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "ddf9f00d-8da4-40b3-8cfe-548ea0356798")
-		(property "Reference" "TP7"
+		(property "Reference" "TP6"
 			(at 82.804 168.656 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5092,7 +5092,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/b091b669-3a93-4e17-8613-2d1df892afc8"
-					(reference "TP7")
+					(reference "TP6")
 					(unit 1)
 				)
 			)

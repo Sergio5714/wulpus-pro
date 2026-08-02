@@ -4699,7 +4699,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 62.23 90.17 0)
+		(at 69.85 90.17 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -4709,8 +4709,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "038c49f9-5125-4383-8dad-341c9925533d")
-		(property "Reference" "C1"
-			(at 66.04 88.8999 0)
+		(property "Reference" "C2"
+			(at 73.66 88.8999 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4721,7 +4721,7 @@
 			)
 		)
 		(property "Value" "22 uF"
-			(at 66.04 91.4399 0)
+			(at 73.66 91.4399 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4732,7 +4732,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 63.1952 93.98 0)
+			(at 70.8152 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4743,7 +4743,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 62.23 90.17 0)
+			(at 69.85 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4754,7 +4754,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 62.23 90.17 0)
+			(at 69.85 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4765,7 +4765,7 @@
 			)
 		)
 		(property "MANUFACTURER" "Murata Electronics"
-			(at 62.23 90.17 0)
+			(at 69.85 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4776,7 +4776,7 @@
 			)
 		)
 		(property "MP" "GRM187R60J226ME15"
-			(at 62.23 90.17 0)
+			(at 69.85 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4795,7 +4795,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "C1")
+					(reference "C2")
 					(unit 1)
 				)
 			)
@@ -4813,7 +4813,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "09760d51-79e6-4928-90bf-b3a91f6970c7")
-		(property "Reference" "#PWR025"
+		(property "Reference" "#PWR029"
 			(at 179.07 44.45 0)
 			(hide yes)
 			(show_name no)
@@ -4874,7 +4874,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR025")
+					(reference "#PWR029")
 					(unit 1)
 				)
 			)
@@ -5120,7 +5120,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "09d5cd3f-2741-4657-b828-8c57aef4e4b9")
-		(property "Reference" "#PWR027"
+		(property "Reference" "#PWR031"
 			(at 267.97 54.61 0)
 			(hide yes)
 			(show_name no)
@@ -5181,7 +5181,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR027")
+					(reference "#PWR031")
 					(unit 1)
 				)
 			)
@@ -5386,7 +5386,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 76.2 86.36 0)
+		(at 83.82 86.36 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -5395,8 +5395,8 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "0f2ddcf6-898a-4c89-9f03-da1628f46682")
-		(property "Reference" "#PWR012"
-			(at 76.2 90.17 0)
+		(property "Reference" "#PWR014"
+			(at 83.82 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5407,7 +5407,7 @@
 			)
 		)
 		(property "Value" "+V_board"
-			(at 72.39 81.28 0)
+			(at 80.01 81.28 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5418,7 +5418,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 76.2 86.36 0)
+			(at 83.82 86.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5429,7 +5429,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 76.2 86.36 0)
+			(at 83.82 86.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5440,7 +5440,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 76.2 86.36 0)
+			(at 83.82 86.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5456,7 +5456,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR012")
+					(reference "#PWR014")
 					(unit 1)
 				)
 			)
@@ -5579,7 +5579,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "13748966-a732-498e-ba91-10fe89bb1d57")
-		(property "Reference" "#PWR018"
+		(property "Reference" "#PWR020"
 			(at 134.62 161.29 0)
 			(hide yes)
 			(show_name no)
@@ -5639,7 +5639,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR018")
+					(reference "#PWR020")
 					(unit 1)
 				)
 			)
@@ -5737,7 +5737,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "1ee88223-23e9-4951-94c1-e2dff7361447")
-		(property "Reference" "C6"
+		(property "Reference" "C8"
 			(at 241.3 80.0099 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5823,7 +5823,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "C6")
+					(reference "C8")
 					(unit 1)
 				)
 			)
@@ -5933,7 +5933,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 76.2 93.98 0)
+		(at 83.82 93.98 0)
 		(mirror y)
 		(unit 1)
 		(body_style 1)
@@ -5944,8 +5944,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2ab4283b-61aa-419e-a84a-ee6717713542")
-		(property "Reference" "#PWR013"
-			(at 76.2 100.33 0)
+		(property "Reference" "#PWR015"
+			(at 83.82 100.33 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5956,7 +5956,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 76.2 99.06 0)
+			(at 83.82 99.06 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5966,7 +5966,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 76.2 93.98 0)
+			(at 83.82 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5977,7 +5977,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 76.2 93.98 0)
+			(at 83.82 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5988,7 +5988,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 76.2 93.98 0)
+			(at 83.82 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6004,7 +6004,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR013")
+					(reference "#PWR015")
 					(unit 1)
 				)
 			)
@@ -6012,7 +6012,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 151.13 93.98 0)
+		(at 144.78 95.25 0)
 		(mirror y)
 		(unit 1)
 		(body_style 1)
@@ -6022,9 +6022,9 @@
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "30287812-9d7d-4dd1-ac35-91d24051933e")
-		(property "Reference" "#PWR020"
-			(at 151.13 100.33 0)
+		(uuid "2d21a071-6ae3-4f20-8af7-f7def65b4cd1")
+		(property "Reference" "#PWR022"
+			(at 144.78 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6035,7 +6035,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 151.13 99.06 0)
+			(at 144.78 100.33 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6045,7 +6045,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 151.13 93.98 0)
+			(at 144.78 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6056,7 +6056,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 151.13 93.98 0)
+			(at 144.78 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6067,7 +6067,86 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 151.13 93.98 0)
+			(at 144.78 95.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d55f16b5-4675-4b05-aa31-e02a2da24c0d")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
+					(reference "#PWR022")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 158.75 95.25 0)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "30287812-9d7d-4dd1-ac35-91d24051933e")
+		(property "Reference" "#PWR024"
+			(at 158.75 101.6 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 158.75 100.33 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 158.75 95.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 158.75 95.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 158.75 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6083,7 +6162,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR020")
+					(reference "#PWR024")
 					(unit 1)
 				)
 			)
@@ -6100,7 +6179,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "32fe02e3-357d-409e-9c8e-483c154c2f5c")
-		(property "Reference" "TP3"
+		(property "Reference" "TP4"
 			(at 273.304 53.594 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6162,7 +6241,111 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "TP3")
+					(reference "TP4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 144.78 91.44 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3ab9695c-1aed-4d5d-9c00-323ac2520fcf")
+		(property "Reference" "C5"
+			(at 148.59 90.1699 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "22 uF"
+			(at 148.59 92.7099 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 145.7452 95.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 144.78 91.44 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 144.78 91.44 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 144.78 91.44 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GRM187R60J226ME15"
+			(at 144.78 91.44 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "2f0caea3-9716-41b4-8239-6fdabc9f29a8")
+		)
+		(pin "1"
+			(uuid "f48c7817-bb38-4b19-8c88-de2e951eb930")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
+					(reference "C5")
 					(unit 1)
 				)
 			)
@@ -6274,7 +6457,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 76.2 90.17 0)
+		(at 83.82 90.17 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6284,8 +6467,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "459a7461-4cef-4d63-930b-b388356bfa8f")
-		(property "Reference" "C2"
-			(at 80.01 88.8999 0)
+		(property "Reference" "C3"
+			(at 87.63 88.8999 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6296,7 +6479,7 @@
 			)
 		)
 		(property "Value" "10 uF"
-			(at 80.01 91.4399 0)
+			(at 87.63 91.4399 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6307,7 +6490,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 77.1652 93.98 0)
+			(at 84.7852 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6318,7 +6501,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 76.2 90.17 0)
+			(at 83.82 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6329,7 +6512,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 76.2 90.17 0)
+			(at 83.82 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6340,7 +6523,7 @@
 			)
 		)
 		(property "MANUFACTURER" "Murata Electronics"
-			(at 76.2 90.17 0)
+			(at 83.82 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6351,7 +6534,7 @@
 			)
 		)
 		(property "MP" "GRM188R61A106ME69"
-			(at 76.2 90.17 0)
+			(at 83.82 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6370,7 +6553,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "C2")
+					(reference "C3")
 					(unit 1)
 				)
 			)
@@ -6572,7 +6755,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "501bf93f-04df-4962-8aee-6a97da6d96ff")
-		(property "Reference" "#PWR016"
+		(property "Reference" "#PWR018"
 			(at 115.57 46.99 0)
 			(hide yes)
 			(show_name no)
@@ -6633,7 +6816,85 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR016")
+					(reference "#PWR018")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 55.88 86.36 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "50696ebb-0877-4a6d-8d69-750df13fefdb")
+		(property "Reference" "#PWR08"
+			(at 55.88 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 55.88 81.28 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 55.88 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 55.88 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 55.88 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5510c63c-5f37-46a9-ad46-03366c391c0a")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
+					(reference "#PWR08")
 					(unit 1)
 				)
 			)
@@ -6982,7 +7243,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5d4d7223-5d0e-461d-983b-c1d8cfcaedd5")
-		(property "Reference" "#PWR021"
+		(property "Reference" "#PWR025"
 			(at 161.29 72.39 0)
 			(hide yes)
 			(show_name no)
@@ -7042,7 +7303,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR021")
+					(reference "#PWR025")
 					(unit 1)
 				)
 			)
@@ -7152,7 +7413,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 165.1 93.98 0)
+		(at 172.72 95.25 0)
 		(mirror y)
 		(unit 1)
 		(body_style 1)
@@ -7163,8 +7424,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7454c413-c675-4d6f-a326-df1ec24792be")
-		(property "Reference" "#PWR024"
-			(at 165.1 100.33 0)
+		(property "Reference" "#PWR028"
+			(at 172.72 101.6 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7175,7 +7436,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 165.1 99.06 0)
+			(at 172.72 100.33 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7185,7 +7446,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 165.1 93.98 0)
+			(at 172.72 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7196,7 +7457,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 165.1 93.98 0)
+			(at 172.72 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7207,7 +7468,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 165.1 93.98 0)
+			(at 172.72 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7223,7 +7484,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR024")
+					(reference "#PWR028")
 					(unit 1)
 				)
 			)
@@ -7445,7 +7706,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "7ed353ec-12f8-447c-9490-6af0c06d5c79")
-		(property "Reference" "#PWR022"
+		(property "Reference" "#PWR026"
 			(at 158.75 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -7506,7 +7767,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR022")
+					(reference "#PWR026")
 					(unit 1)
 				)
 			)
@@ -7702,7 +7963,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8aa8e955-12ee-452f-977b-e80f5ba467fa")
-		(property "Reference" "#PWR026"
+		(property "Reference" "#PWR030"
 			(at 237.49 97.79 0)
 			(hide yes)
 			(show_name no)
@@ -7762,7 +8023,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR026")
+					(reference "#PWR030")
 					(unit 1)
 				)
 			)
@@ -7781,7 +8042,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9842d3fa-9d64-4e27-8291-4567f6583550")
-		(property "Reference" "#PWR011"
+		(property "Reference" "#PWR013"
 			(at 73.66 72.39 0)
 			(hide yes)
 			(show_name no)
@@ -7841,7 +8102,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR011")
+					(reference "#PWR013")
 					(unit 1)
 				)
 			)
@@ -7964,7 +8225,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a18e6c30-565d-4770-af66-32a1702627ba")
-		(property "Reference" "#PWR015"
+		(property "Reference" "#PWR017"
 			(at 119.38 76.2 0)
 			(hide yes)
 			(show_name no)
@@ -8024,7 +8285,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR015")
+					(reference "#PWR017")
 					(unit 1)
 				)
 			)
@@ -8545,7 +8806,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "bb54cbde-c65d-4d0e-bcb6-b9fc1dd4fb4d")
-		(property "Reference" "#PWR010"
+		(property "Reference" "#PWR012"
 			(at 69.85 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -8606,7 +8867,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR010")
+					(reference "#PWR012")
 					(unit 1)
 				)
 			)
@@ -8614,7 +8875,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 151.13 90.17 0)
+		(at 158.75 91.44 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -8624,8 +8885,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "bd362c4b-701d-4c83-83a7-86ae52ce51a7")
-		(property "Reference" "C4"
-			(at 154.94 88.8999 0)
+		(property "Reference" "C6"
+			(at 162.56 90.1699 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8636,7 +8897,7 @@
 			)
 		)
 		(property "Value" "22 uF"
-			(at 154.94 91.4399 0)
+			(at 162.56 92.7099 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8647,7 +8908,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 152.0952 93.98 0)
+			(at 159.7152 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8658,7 +8919,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 151.13 90.17 0)
+			(at 158.75 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8669,7 +8930,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 151.13 90.17 0)
+			(at 158.75 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8680,7 +8941,7 @@
 			)
 		)
 		(property "MANUFACTURER" "Murata Electronics"
-			(at 151.13 90.17 0)
+			(at 158.75 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8691,7 +8952,7 @@
 			)
 		)
 		(property "MP" "GRM187R60J226ME15"
-			(at 151.13 90.17 0)
+			(at 158.75 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8710,7 +8971,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "C4")
+					(reference "C6")
 					(unit 1)
 				)
 			)
@@ -8718,7 +8979,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 62.23 86.36 0)
+		(at 144.78 87.63 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -8727,9 +8988,9 @@
 		(in_pos_files yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "c239764e-92e5-4d73-b58c-0866ae941a20")
-		(property "Reference" "#PWR08"
-			(at 62.23 90.17 0)
+		(uuid "c0c1f03c-2e00-4a18-8221-d297b9bc649e")
+		(property "Reference" "#PWR021"
+			(at 144.78 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8739,8 +9000,8 @@
 				)
 			)
 		)
-		(property "Value" "+3V3"
-			(at 62.23 81.28 0)
+		(property "Value" "+5V"
+			(at 144.78 82.55 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8750,7 +9011,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 62.23 86.36 0)
+			(at 144.78 87.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8761,7 +9022,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 62.23 86.36 0)
+			(at 144.78 87.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8772,7 +9033,85 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 62.23 86.36 0)
+			(at 144.78 87.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "692d6842-79a1-4b86-97a5-8553597fb568")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
+					(reference "#PWR021")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3V3")
+		(at 69.85 86.36 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c239764e-92e5-4d73-b58c-0866ae941a20")
+		(property "Reference" "#PWR010"
+			(at 69.85 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3V3"
+			(at 69.85 81.28 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 69.85 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 69.85 86.36 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3V3\""
+			(at 69.85 86.36 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8788,7 +9127,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR08")
+					(reference "#PWR010")
 					(unit 1)
 				)
 			)
@@ -8796,7 +9135,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 151.13 86.36 0)
+		(at 158.75 87.63 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -8806,8 +9145,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c29f295d-c5b5-4d89-8ba8-1628286baeb3")
-		(property "Reference" "#PWR019"
-			(at 151.13 90.17 0)
+		(property "Reference" "#PWR023"
+			(at 158.75 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8818,7 +9157,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 151.13 81.28 0)
+			(at 158.75 82.55 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8828,7 +9167,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 151.13 86.36 0)
+			(at 158.75 87.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8839,7 +9178,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 151.13 86.36 0)
+			(at 158.75 87.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8850,7 +9189,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 151.13 86.36 0)
+			(at 158.75 87.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8866,7 +9205,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR019")
+					(reference "#PWR023")
 					(unit 1)
 				)
 			)
@@ -8953,7 +9292,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 62.23 93.98 0)
+		(at 69.85 93.98 0)
 		(mirror y)
 		(unit 1)
 		(body_style 1)
@@ -8964,8 +9303,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c57fa1c5-100c-4edc-81a6-acaf65224137")
-		(property "Reference" "#PWR09"
-			(at 62.23 100.33 0)
+		(property "Reference" "#PWR011"
+			(at 69.85 100.33 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8976,7 +9315,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 62.23 99.06 0)
+			(at 69.85 99.06 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8986,7 +9325,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 62.23 93.98 0)
+			(at 69.85 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8997,7 +9336,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 62.23 93.98 0)
+			(at 69.85 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9008,7 +9347,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 62.23 93.98 0)
+			(at 69.85 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9024,7 +9363,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR09")
+					(reference "#PWR011")
 					(unit 1)
 				)
 			)
@@ -9268,7 +9607,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d2542e68-dcad-48e4-9bfa-4e930ca045f8")
-		(property "Reference" "#PWR014"
+		(property "Reference" "#PWR016"
 			(at 86.36 44.45 0)
 			(hide yes)
 			(show_name no)
@@ -9329,7 +9668,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR014")
+					(reference "#PWR016")
 					(unit 1)
 				)
 			)
@@ -9346,7 +9685,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "d8510b47-d350-4a89-b1a8-29afc587d970")
-		(property "Reference" "TP1"
+		(property "Reference" "TP2"
 			(at 89.154 39.116 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9408,7 +9747,86 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "TP1")
+					(reference "TP2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 55.88 93.98 0)
+		(mirror y)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d892fcec-1c78-4a47-bb30-bbb3e9b322ce")
+		(property "Reference" "#PWR09"
+			(at 55.88 100.33 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 55.88 99.06 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 55.88 93.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 55.88 93.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 55.88 93.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3a1b253b-60b0-482f-b472-47e550dd104a")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
+					(reference "#PWR09")
 					(unit 1)
 				)
 			)
@@ -9425,7 +9843,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "dd7f7473-a811-4789-92a5-377fa8e4330b")
-		(property "Reference" "TP2"
+		(property "Reference" "TP3"
 			(at 180.594 37.846 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9487,7 +9905,111 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "TP2")
+					(reference "TP3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 55.88 90.17 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "df34d4bd-9bb2-40b4-85f6-eb13d9ada0c5")
+		(property "Reference" "C1"
+			(at 59.69 88.8999 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "22 uF"
+			(at 59.69 91.4399 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 56.8452 93.98 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 55.88 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 55.88 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MANUFACTURER" "Murata Electronics"
+			(at 55.88 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MP" "GRM187R60J226ME15"
+			(at 55.88 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "c8355d4b-4a09-4c51-ac09-d26e5e0bc06c")
+		)
+		(pin "1"
+			(uuid "dd77b73d-b069-4824-a5c2-a5e54dcb9fdb")
+		)
+		(instances
+			(project "wulpus_pro_wifi_host"
+				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
+					(reference "C1")
 					(unit 1)
 				)
 			)
@@ -9606,7 +10128,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "e4666fc4-9aad-4b0f-97af-420b0500c9ac")
-		(property "Reference" "#PWR017"
+		(property "Reference" "#PWR019"
 			(at 124.46 46.99 0)
 			(hide yes)
 			(show_name no)
@@ -9667,7 +10189,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR017")
+					(reference "#PWR019")
 					(unit 1)
 				)
 			)
@@ -9994,7 +10516,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f2a2d38d-4f82-4eb2-9dc7-42391522c56e")
-		(property "Reference" "C3"
+		(property "Reference" "C4"
 			(at 120.65 152.3999 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10080,7 +10602,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "C3")
+					(reference "C4")
 					(unit 1)
 				)
 			)
@@ -10097,7 +10619,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "f9945d75-0f1e-4749-859b-9c47e031151f")
-		(property "Reference" "TP5"
+		(property "Reference" "TP1"
 			(at 53.594 172.466 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10159,7 +10681,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "TP5")
+					(reference "TP1")
 					(unit 1)
 				)
 			)
@@ -10271,7 +10793,7 @@
 	)
 	(symbol
 		(lib_id "power:+3V3")
-		(at 165.1 86.36 0)
+		(at 172.72 87.63 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -10280,8 +10802,8 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "fc0cae6b-0c75-41d1-a90a-67a701af4df4")
-		(property "Reference" "#PWR023"
-			(at 165.1 90.17 0)
+		(property "Reference" "#PWR027"
+			(at 172.72 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10292,7 +10814,7 @@
 			)
 		)
 		(property "Value" "+V_board"
-			(at 161.29 81.28 0)
+			(at 168.91 82.55 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10303,7 +10825,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 165.1 86.36 0)
+			(at 172.72 87.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10314,7 +10836,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 165.1 86.36 0)
+			(at 172.72 87.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10325,7 +10847,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3V3\""
-			(at 165.1 86.36 0)
+			(at 172.72 87.63 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10341,7 +10863,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "#PWR023")
+					(reference "#PWR027")
 					(unit 1)
 				)
 			)
@@ -10349,7 +10871,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 165.1 90.17 0)
+		(at 172.72 91.44 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -10359,8 +10881,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fc959b78-68f1-430d-9ece-3abcef9eb23d")
-		(property "Reference" "C5"
-			(at 168.91 88.8999 0)
+		(property "Reference" "C7"
+			(at 176.53 90.1699 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10371,7 +10893,7 @@
 			)
 		)
 		(property "Value" "10 uF"
-			(at 168.91 91.4399 0)
+			(at 176.53 92.7099 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10382,7 +10904,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
-			(at 166.0652 93.98 0)
+			(at 173.6852 95.25 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10393,7 +10915,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 165.1 90.17 0)
+			(at 172.72 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10404,7 +10926,7 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 165.1 90.17 0)
+			(at 172.72 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10415,7 +10937,7 @@
 			)
 		)
 		(property "MANUFACTURER" "Murata Electronics"
-			(at 165.1 90.17 0)
+			(at 172.72 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10426,7 +10948,7 @@
 			)
 		)
 		(property "MP" "GRM188R61A106ME69"
-			(at 165.1 90.17 0)
+			(at 172.72 91.44 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10445,7 +10967,7 @@
 		(instances
 			(project "wulpus_pro_wifi_host"
 				(path "/939c1465-135d-46db-aee7-7d874dab9895/d15f8ff5-3e62-44bd-8891-7dc2375b4afc"
-					(reference "C5")
+					(reference "C7")
 					(unit 1)
 				)
 			)
