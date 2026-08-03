@@ -65,6 +65,7 @@
           "B.Cu",
           "B.Mask",
           "B.SilkS",
+          "B.Fab",
           "In30.Cu",
           "In29.Cu",
           "In28.Cu",
@@ -98,6 +99,7 @@
           "F.Cu",
           "F.Mask",
           "F.SilkS",
+          "F.Fab",
           "Edge.Cuts"
         ],
         "layers_to_include_on_all_layers": [],

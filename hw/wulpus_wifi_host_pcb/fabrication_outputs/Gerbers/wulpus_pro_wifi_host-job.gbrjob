@@ -5,7 +5,7 @@
       "Application": "Pcbnew",
       "Version": "10.0.3"
     },
-    "CreationDate": "2026-08-02T08:23:05+02:00"
+    "CreationDate": "2026-08-03T08:43:12+02:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
@@ -84,6 +84,16 @@
     {
       "Path": "wulpus_pro_wifi_host-Edge_Cuts.gm1",
       "FileFunction": "Profile",
+      "FilePolarity": "Positive"
+    },
+    {
+      "Path": "wulpus_pro_wifi_host-F_Fab.gbr",
+      "FileFunction": "AssemblyDrawing,Top",
+      "FilePolarity": "Positive"
+    },
+    {
+      "Path": "wulpus_pro_wifi_host-B_Fab.gbr",
+      "FileFunction": "AssemblyDrawing,Bot",
       "FilePolarity": "Positive"
     }
   ],
