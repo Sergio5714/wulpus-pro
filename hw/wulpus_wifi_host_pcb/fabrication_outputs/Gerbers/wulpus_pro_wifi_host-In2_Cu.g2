@@ -1,12 +1,12 @@
 %TF.GenerationSoftware,KiCad,Pcbnew,10.0.3*%
-%TF.CreationDate,2026-08-02T08:23:05+02:00*%
+%TF.CreationDate,2026-08-03T08:43:12+02:00*%
 %TF.ProjectId,wulpus_pro_wifi_host,77756c70-7573-45f7-9072-6f5f77696669,rev?*%
 %TF.SameCoordinates,Original*%
 %TF.FileFunction,Copper,L3,Inr*%
 %TF.FilePolarity,Positive*%
 %FSLAX45Y45*%
 G04 Gerber Fmt 4.5, Leading zero omitted, Abs format (unit mm)*
-G04 Created by KiCad (PCBNEW 10.0.3) date 2026-08-02 08:23:05*
+G04 Created by KiCad (PCBNEW 10.0.3) date 2026-08-03 08:43:12*
 %MOMM*%
 %LPD*%
 G01*
@@ -96,14 +96,14 @@ X9833000Y-9694000D03*
 X7028942Y-9185025D03*
 X6992950Y-9093890D03*
 X9906000Y-9676000D03*
+%TO.N,+5V*%
+X9115000Y-9687000D03*
+X6988478Y-9254995D03*
 %TO.N,+3V3 ESP*%
 X6805000Y-9208000D03*
 X8549000Y-8764000D03*
 X8550000Y-8838000D03*
 X6818000Y-9281000D03*
-%TO.N,+5V*%
-X9115000Y-9687000D03*
-X6988478Y-9254995D03*
 %TD*%
 %TA.AperFunction,Conductor*%
 %TO.N,GND*%
