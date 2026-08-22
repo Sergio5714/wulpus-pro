@@ -86,13 +86,20 @@ Full WULPUS PRO specifications are available in [docs/full_specifications.md](do
 
 # Clone the repository
 
-Clone the repository together with its submodules:
+Clone the public repository without its private development submodule:
 
 ```bash
-git clone --recurse-submodules git@github.com:Sergio5714/wulpus-pro.git
+git clone git@github.com:Sergio5714/wulpus-pro.git
 ```
 
-If you have already cloned the repository, initialize and update its submodules with:
+The `hw/kicad_us_lib` submodule is an internal development library hosted in a
+private repository. External users do not have access to it and do not need to
+initialize it to use the released fabrication outputs. For editing the KiCad
+designs, generate project-specific symbol and footprint libraries from the
+symbols and footprints embedded in the corresponding project files. See the
+[hardware README](hw/README.md#internal-kicad-library) for details.
+
+Authorized developers can initialize the private submodule after cloning:
 
 ```bash
 git submodule update --init --recursive
@@ -104,6 +111,7 @@ This repository has the following folders:
 
 - `hw`, containing the CAD source files for:
   - WULPUS PRO acquisition PCB, located at `hw/wulpus_pro_acq_pcb_dev_board`
+  - WULPUS PRO Wifi host PCB, located at `hw/wulpus_wifi_host_pcb`
   - optional WULPUS adapter PCB for polyCMUT transducers, located at `hw/wulpus_polycmut_adapter`; this board was developed for research purposes
 - `fw`, containing the firmware source code, namely:
   - MSP430 ultrasound MCU firmware required for the WULPUS PRO module, located at `fw/msp430`
@@ -142,6 +150,12 @@ To build your own instance of the WULPUS PRO platform, complete the following st
 
    - ESP32-based Wi-Fi host, for example the Seeed Studio XIAO ESP32-C6. Follow the instructions in [fw/esp32/README.md](fw/esp32/README.md) to build and flash the ESP32 firmware. After flashing, complete the provisioning step so WULPUS PRO can connect to your Wi-Fi network.
    - nRF52 BLE host, using the nRF52832 DK board and nRF52840 USB dongle. This is the legacy BLE setup. Follow the instructions in [fw/nrf52/README.md](fw/nrf52/README.md) to compile and flash both firmwares.
+
+   > **Note:** The new [WULPUS PRO WiFi host PCB](hw/wulpus_wifi_host_pcb) is currently undergoing testing
+   > and will be integrated into the platform soon. It will support standard
+   > Adafruit-compatible batteries for operation in WiFi mode, as well as
+   > USB-only power and data streaming for WULPUS PRO. Until its integration is
+   > complete, please use an external Seeed Studio XIAO ESP32-C6 module.
 
 4. *Python dependencies installation on the host PC*<br>
    Follow the instructions in `sw` to install the Python dependencies. With `uv`, the basic setup is:
@@ -241,9 +255,11 @@ The following files are released under Apache License 2.0 (`Apache-2.0`) (see `s
 
 - `sw/`
 
-The following files are released under Solderpad v0.51 (`SHL-0.51`) (see `hw/LICENSE`):
+The hardware designs are released under Solderpad v0.51 (`SHL-0.51`):
 
 - `hw/`
+
+See the [hardware license table](hw/README.md#license) for the applicable license file and copyright holder for each PCB design.
 
 The `fw/msp430/`, `fw/nrf52/`, and `fw/esp32/` directories contain third-party sources that come with their own licenses. See the respective folders and source files for the licenses used.
 
