@@ -1,0 +1,4 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "Ultrasound") (type "KiCad") (uri "${KIPRJMOD}/../kicad_us_lib/symbols/Ultrasound.kicad_sym") (options "") (descr ""))
+)
