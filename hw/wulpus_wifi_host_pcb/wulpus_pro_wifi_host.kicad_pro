@@ -260,7 +260,7 @@
       "internal_id": "",
       "mfg": "",
       "mpn": "",
-      "sch_revision": ""
+      "sch_revision": "v1.0.0"
     },
     "layer_pairs": [],
     "layer_presets": [],
@@ -544,7 +544,7 @@
     "last_paths": {
       "idf": "",
       "netlist": "",
-      "plot": "Gerbers",
+      "plot": "wulpus_pro_wifi_host_assembly.pdf",
       "specctra_dsn": "",
       "vrml": ""
     },

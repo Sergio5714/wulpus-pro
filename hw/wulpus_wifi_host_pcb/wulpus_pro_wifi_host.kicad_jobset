@@ -1,7 +1,7 @@
 {
   "jobs": [
     {
-      "description": "",
+      "description": "Export Schematics",
       "id": "5cb6a5b2-557a-4382-a605-35c258fa4b5b",
       "settings": {
         "black_and_white": false,
@@ -10,7 +10,7 @@
         "drawing_sheet": "",
         "format": "pdf",
         "min_pen_width": 847,
-        "output_filename": "wulpus_pro_wifi_host.pdf",
+        "output_filename": "wulpus_pro_wifi_host_schematics.pdf",
         "page_size": "auto",
         "pdf_hierarchical_links": true,
         "pdf_metadata": true,
@@ -265,6 +265,76 @@
         "variant": ""
       },
       "type": "pcb_export_pos"
+    },
+    {
+      "description": "Assembly Drawings",
+      "id": "3589b4f2-9e3c-4fa1-9eee-46a947b4422e",
+      "settings": {
+        "back_fp_property_popups": true,
+        "background_color": "rgb(255, 255, 255)",
+        "black_and_white": false,
+        "check_zones": false,
+        "color_theme": "",
+        "crossout_dnp_footprints_on_fab_layers": true,
+        "description": "",
+        "drawing_sheet": "",
+        "drill_shape": "none",
+        "front_fp_property_popups": true,
+        "hide_dnp_footprints_on_fab_layers": false,
+        "layers": [
+          "B.Fab",
+          "In30.Cu",
+          "In29.Cu",
+          "In28.Cu",
+          "In27.Cu",
+          "In26.Cu",
+          "In25.Cu",
+          "In24.Cu",
+          "In23.Cu",
+          "In22.Cu",
+          "In21.Cu",
+          "In20.Cu",
+          "In19.Cu",
+          "In18.Cu",
+          "In17.Cu",
+          "In16.Cu",
+          "In15.Cu",
+          "In14.Cu",
+          "In13.Cu",
+          "In12.Cu",
+          "In11.Cu",
+          "In10.Cu",
+          "In9.Cu",
+          "In8.Cu",
+          "In7.Cu",
+          "In6.Cu",
+          "In5.Cu",
+          "In4.Cu",
+          "In3.Cu",
+          "F.Fab",
+          "Dwgs.User"
+        ],
+        "layers_to_include_on_all_layers": [
+          "Edge.Cuts"
+        ],
+        "mirror": false,
+        "negative": false,
+        "output_filename": "wulpus_pro_wifi_host_assembly.pdf",
+        "pdf_gen_mode": "one-page-per-layer-one-file",
+        "pdf_metadata": true,
+        "plot_drawing_sheet": true,
+        "plot_footprint_values": true,
+        "plot_pad_numbers": false,
+        "plot_ref_des": true,
+        "scale": 1.0,
+        "single_document": true,
+        "sketch_dnp_footprints_on_fab_layers": true,
+        "sketch_pads_on_fab_layers": false,
+        "subtract_solder_mask_from_silk": false,
+        "use_drill_origin": false,
+        "variant": ""
+      },
+      "type": "pcb_export_pdf"
     }
   ],
   "meta": {
@@ -290,8 +360,8 @@
       "id": "10f968c7-834a-4b07-8299-112a742df83d",
       "only": [
         "5cb6a5b2-557a-4382-a605-35c258fa4b5b",
-        "d0790388-f9ad-47e9-9606-8837a69ed119",
-        "87a61762-c5da-4379-8902-3e087520c57f"
+        "87a61762-c5da-4379-8902-3e087520c57f",
+        "3589b4f2-9e3c-4fa1-9eee-46a947b4422e"
       ],
       "settings": {
         "output_path": "C:\\Users\\Sergei\\Documents\\repos\\wulpus-pro\\hw\\wulpus_wifi_host_pcb\\docs\\"
