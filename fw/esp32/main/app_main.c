@@ -54,7 +54,9 @@ limitations under the License.
 #define TCP_PORT_MUTEX_TIMEOUT pdMS_TO_TICKS(1000)
 #define SPI_MUTEX_TIMEOUT pdMS_TO_TICKS(1000)
 #define DATA_READY_TIMEOUT pdMS_TO_TICKS(1000)
+#define MSP_SHUTDOWN_TIMEOUT pdMS_TO_TICKS(2000)
 #define MSP_BOOT_DELAY_MS 100
+#define MSP_RESTART_COMMAND 0xFB
 
 static const char *TAG = "main";
 
@@ -67,19 +69,81 @@ TaskHandle_t data_handler_task_handle = NULL;
 static QueueHandle_t gpio_evt_queue = NULL;
 
 SemaphoreHandle_t data_ready_semaphore = NULL;
+SemaphoreHandle_t shutdown_data_ready_semaphore = NULL;
 SemaphoreHandle_t tcp_port_mutex = NULL;
 SemaphoreHandle_t spi_mutex = NULL;
 
 bool transmits_enabled = false;
+static volatile bool msp_shutdown_in_progress = false;
 
 uint8_t spi_rx_buffer[CONFIG_WP_DATA_RX_LENGTH + HEADER_LEN];
 
 static void tcp_server_task(void *pvParameters);
 static void data_handler_task(void *pvParameters);
+static esp_err_t msp_graceful_shutdown(void);
 
 static esp_err_t msp_reset_set(bool reset_active)
 {
     return gpio_set_level(CONFIG_WP_GPIO_MSP_RST_N, reset_active ? 0 : 1);
+}
+
+static esp_err_t msp_graceful_shutdown(void)
+{
+    uint8_t restart_buffer[CONFIG_WP_DATA_RX_LENGTH] = {MSP_RESTART_COMMAND};
+    spi_transaction_t restart = {
+        .length = sizeof(restart_buffer) * 8,
+        .tx_buffer = restart_buffer,
+        .rx_buffer = NULL,
+    };
+
+    transmits_enabled = false;
+    msp_shutdown_in_progress = true;
+    xSemaphoreTake(shutdown_data_ready_semaphore, 0);
+
+    // A high DATA_READY means the MSP430 is already waiting for an SPI
+    // transaction. Otherwise wait for the current acquisition to complete.
+    if (gpio_get_level(CONFIG_WP_GPIO_DATA_READY) == 0 &&
+        xSemaphoreTake(shutdown_data_ready_semaphore, MSP_SHUTDOWN_TIMEOUT) != pdTRUE)
+    {
+        ESP_LOGE(TAG, "Timed out waiting to send MSP430 shutdown command");
+        return ESP_ERR_TIMEOUT;
+    }
+
+    if (xSemaphoreTake(spi_mutex, SPI_MUTEX_TIMEOUT) != pdTRUE)
+    {
+        ESP_LOGE(TAG, "Failed to take SPI mutex for MSP430 shutdown");
+        return ESP_ERR_TIMEOUT;
+    }
+    esp_err_t ret = spi_device_transmit(spi, &restart);
+    xSemaphoreGive(spi_mutex);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to send MSP430 shutdown command: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    // Discard the edge associated with the transaction above. The next rising
+    // edge is the MSP430 requesting a new configuration after disableAll().
+    TickType_t wait_started = xTaskGetTickCount();
+    while (gpio_get_level(CONFIG_WP_GPIO_DATA_READY) != 0)
+    {
+        if ((xTaskGetTickCount() - wait_started) >= MSP_SHUTDOWN_TIMEOUT)
+        {
+            ESP_LOGE(TAG, "Timed out waiting for MSP430 DATA_READY to clear");
+            return ESP_ERR_TIMEOUT;
+        }
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+    xSemaphoreTake(shutdown_data_ready_semaphore, 0);
+
+    if (xSemaphoreTake(shutdown_data_ready_semaphore, MSP_SHUTDOWN_TIMEOUT) != pdTRUE)
+    {
+        ESP_LOGE(TAG, "Timed out waiting for MSP430 safe-state acknowledgement");
+        return ESP_ERR_TIMEOUT;
+    }
+
+    ESP_LOGI(TAG, "MSP430 reached safe state");
+    return ESP_OK;
 }
 
 static void IRAM_ATTR data_ready_handler(void *arg)
@@ -92,6 +156,21 @@ void app_main(void)
 {
     ESP_LOGI(TAG, "Entering app_main");
     ESP_ERROR_CHECK(bsp_init());
+
+    // Keep the MSP430 in reset throughout ESP32 startup and until a TCP client
+    // connects. Reset replaces the former dedicated host-ready signal on the
+    // integrated XIAO host PCB.
+    gpio_config_t gpio_cfg = {
+        .intr_type = GPIO_INTR_DISABLE,
+        .mode = GPIO_MODE_OUTPUT_OD,
+        .pin_bit_mask = (1ULL << CONFIG_WP_GPIO_MSP_RST_N),
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+    };
+    ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
+    ESP_ERROR_CHECK(msp_reset_set(true));
+    ESP_ERROR_CHECK(gpio_sleep_sel_dis(CONFIG_WP_GPIO_MSP_RST_N));
+    ESP_LOGI(TAG, "Hold MSP430 in reset on GPIO %d", CONFIG_WP_GPIO_MSP_RST_N);
 
 #if CONFIG_WP_DOUBLE_RESET
     // Check double reset
@@ -122,28 +201,7 @@ void app_main(void)
     ESP_ERROR_CHECK(mdns_manager_init("wulpus"));
     ESP_ERROR_CHECK(mdns_manager_add("wulpus", MDNS_PROTO_TCP, CONFIG_WP_SOCKET_PORT));
 
-    // Initialize GPIO
-    gpio_config_t gpio_cfg = {
-        .intr_type = GPIO_INTR_DISABLE,
-        .mode = GPIO_MODE_OUTPUT,
-        .pin_bit_mask = (1ULL << CONFIG_WP_GPIO_LINK_READY),
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
-    };
-    ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
-    ESP_ERROR_CHECK(gpio_set_level(CONFIG_WP_GPIO_LINK_READY, 0));
-    ESP_ERROR_CHECK(gpio_sleep_sel_dis(CONFIG_WP_GPIO_LINK_READY));
-
-    gpio_cfg.intr_type = GPIO_INTR_DISABLE;
-    gpio_cfg.mode = GPIO_MODE_OUTPUT_OD;
-    gpio_cfg.pin_bit_mask = (1ULL << CONFIG_WP_GPIO_MSP_RST_N);
-    gpio_cfg.pull_down_en = GPIO_PULLDOWN_DISABLE;
-    gpio_cfg.pull_up_en = GPIO_PULLUP_DISABLE;
-    ESP_ERROR_CHECK(gpio_config(&gpio_cfg));
-    ESP_ERROR_CHECK(msp_reset_set(true));
-    ESP_ERROR_CHECK(gpio_sleep_sel_dis(CONFIG_WP_GPIO_MSP_RST_N));
-    ESP_LOGI(TAG, "Reset MSP430 on GPIO %d", CONFIG_WP_GPIO_MSP_RST_N);
-
+    // Configure the MSP430 data-ready input.
     gpio_cfg.intr_type = GPIO_INTR_POSEDGE;
     gpio_cfg.mode = GPIO_MODE_INPUT;
     gpio_cfg.pin_bit_mask = (1ULL << CONFIG_WP_GPIO_DATA_READY);
@@ -163,6 +221,13 @@ void app_main(void)
     if (data_ready_semaphore == NULL)
     {
         ESP_LOGE(TAG, "Failed to create semaphore");
+        return;
+    }
+
+    shutdown_data_ready_semaphore = xSemaphoreCreateBinary();
+    if (shutdown_data_ready_semaphore == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create shutdown semaphore");
         return;
     }
 
@@ -286,6 +351,7 @@ static void tcp_server_task(void *pvParameters)
         }
 
         provisioner_twt_suspend(1);
+        msp_shutdown_in_progress = false;
         ESP_ERROR_CHECK(msp_reset_set(false));
         ESP_LOGI(TAG, "Boot MSP430 after TCP connection");
         vTaskDelay(pdMS_TO_TICKS(MSP_BOOT_DELAY_MS));
@@ -312,10 +378,6 @@ static void tcp_server_task(void *pvParameters)
             {
             case SET_CONFIG:
                 ESP_LOGI(TAG, "Received set config command");
-
-                // FIXME: This could be made tidier in the connection callback, but it's the same in the nRF52 firmware
-                ESP_ERROR_CHECK(gpio_set_level(CONFIG_WP_GPIO_LINK_READY, 1));
-                ESP_LOGD(TAG, "Link ready signal set");
 
                 // Wait for data ready signal
                 if (xSemaphoreTake(data_ready_semaphore, DATA_READY_TIMEOUT) != pdTRUE)
@@ -377,7 +439,11 @@ static void tcp_server_task(void *pvParameters)
                 break;
             case RESET:
                 ESP_LOGI(TAG, "Received reset command");
-                // Reset self
+                if (msp_graceful_shutdown() != ESP_OK)
+                {
+                    ESP_LOGW(TAG, "Graceful MSP430 shutdown failed; using reset fallback");
+                }
+                ESP_ERROR_CHECK(msp_reset_set(true));
                 esp_restart();
                 break;
             case CLOSE:
@@ -410,6 +476,10 @@ static void tcp_server_task(void *pvParameters)
         }
 
         transmits_enabled = false;
+        if (msp_graceful_shutdown() != ESP_OK)
+        {
+            ESP_LOGW(TAG, "Graceful MSP430 shutdown failed; using reset fallback");
+        }
         ESP_ERROR_CHECK(msp_reset_set(true));
         ESP_LOGI(TAG, "Reset MSP430 after TCP disconnect");
 
@@ -459,6 +529,12 @@ static void data_handler_task(void *pvParameters)
             // Give data ready semaphore
             xSemaphoreGive(data_ready_semaphore);
 
+            if (msp_shutdown_in_progress)
+            {
+                xSemaphoreGive(shutdown_data_ready_semaphore);
+                continue;
+            }
+
             // If socket is open, send data
             // Header: "data <length>"
             // Data: <data>
@@ -484,6 +560,7 @@ static void data_handler_task(void *pvParameters)
                 {
                     ESP_LOGE(TAG, "Failed to send data: %s", esp_err_to_name(ret));
                     transmits_enabled = false;
+                    msp_shutdown_in_progress = true;
                     ESP_ERROR_CHECK(msp_reset_set(true));
                     continue;
                 }
