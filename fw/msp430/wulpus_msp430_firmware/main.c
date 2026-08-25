@@ -125,7 +125,7 @@ void configAfterPowerUp(void)
     usSpiInit();
     hvMuxInit();
 
-    // Init BLE ready input and LED GPIOs
+    // Initialize board GPIOs
     initOtherGpios();
     // Init power switches
     initAllPowerSwitches();
@@ -180,19 +180,15 @@ static void receiveUssConfPackage(void)
         // Sleep for 10 ms
         timerSlowDelay(327, LPM3_bits);
 
-        // Check that nRF52 BLE connection is ready
-        if (isBleReady())
-        {
-            // Receive configuration package from nRF
-            getConfigPack();
+        // The host only releases MSP430 reset after a client connects.
+        getConfigPack();
 
-            // Process received package and update Uss config
-            if (extractUsConfig(usSpiGetRxPtr(), &msp_config))
-            {
-                // Update Ultrasound config
-                setNewUsConfig(&msp_config);
-                return;
-            }
+        // Process received package and update Uss config
+        if (extractUsConfig(usSpiGetRxPtr(), &msp_config))
+        {
+            // Update Ultrasound config
+            setNewUsConfig(&msp_config);
+            return;
         }
     }
 }
@@ -204,10 +200,6 @@ static void usAcquisitionLoop(void)
 
     while(1)
     {
-        // Check if nRF52 BLE connection is ready
-        if(isBleReady())
-        {
-
             // Update the measurement header
             meas_header[0] = MEAS_START_OF_FRAME_MASK;
             meas_header[1] = tx_rx_id;
@@ -297,7 +289,6 @@ static void usAcquisitionLoop(void)
             tx_rx_id++;
             if(tx_rx_id == msp_config.txRxConfLen)
                 tx_rx_id = 0;
-        }
     }
 }
 

@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.0] - 
+
+### Fixed
+
+- Matched the XIAO ESP32-C6 defaults to the WULPUS PRO Wi-Fi host PCB routing.
+
+### Changed
+
+- Replaced the dedicated host-ready handshake with MSP430 reset gating: the ESP32 now holds the MSP430 in reset until a TCP client connects and asserts reset again after disconnects or communication failures.
+- Added a bounded graceful-shutdown handshake that sends the MSP430 restart command and waits for its post-`disableAll()` configuration request before asserting reset, with immediate reset retained as a timeout/error fallback.
+
+### Removed
+
+- Removed the dedicated host-ready GPIO configuration and output handling.
+
+## [1.0.0] - 2026-07-11
 
 ### Added
 

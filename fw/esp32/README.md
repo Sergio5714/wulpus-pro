@@ -47,19 +47,18 @@ Follow Espressif's provisioning documentation for the first-time setup flow: [ES
 
 ### Connection to WULPUS PRO
 
-Use the following default pin mappings to connect the WULPUS PRO acquisition board to the ESP32-C6 board.
+Use the following pin mapping for the integrated WULPUS PRO Wi-Fi host PCB.
 
 Seeed Studio XIAO ESP32-C6:
 
 | **Signal**         | **ESP32-C6 GPIO** | **XIAO ESP32-C6 Pin** | **WULPUS PRO Connector Pin** |
 |--------------------|-------------------|-----------------------|------------------------------|
-| `SPI_SS`           | 21                | D3                    | X3.4                         |
-| `SPI_CLK`          | 19                | D8 / SCK              | X3.3                         |
+| `SPI_SS`           | 17                | D7                    | X3.4                         |
+| `SPI_CLK`          | 18                | D10                   | X3.3                         |
 | `SPI_MISO`         | 20                | D9 / MISO             | X3.1                         |
-| `SPI_MOSI`         | 18                | D10 / MOSI            | X3.2                         |
+| `SPI_MOSI`         | 19                | D8 / SCK              | X3.2                         |
 | `Data_ready`       | 1                 | D1                    | X4.2                         |
-| `BLE_conn_ready`   | 0                 | D0                    | X4.3                         |
-| `MSP_RST_N`        | 2                 | D2                    | X1.5                         |
+| `MSP_RST_N`        | 0                 | D0                    | X1.5                         |
 
 ESP32-C6-DEVKITM-1:
 
@@ -70,13 +69,13 @@ ESP32-C6-DEVKITM-1:
 | `SPI_MISO`         | 7                 | 7                      | X3.1                         |
 | `SPI_MOSI`         | 2                 | 2                      | X3.2                         |
 | `Data_ready`       | 1                 | 1/N                    | X4.2                         |
-| `BLE_conn_ready`   | 0                 | 0/N                    | X4.3                         |
 | `MSP_RST_N`        | 3                 | 3                      | X1.5                         |
 
 For the ESP32-C6-DEVKITM-1 defaults, GPIO2 is used for `SPI_MOSI`; `MSP_RST_N` is therefore mapped to GPIO3.
 
-On the XIAO ESP32-C6 side headers shown in the board pinout, the exposed SPI-labeled pins are `D10`/GPIO18 (`MOSI`), `D9`/GPIO20 (`MISO`), and `D8`/GPIO19 (`SCK`). Chip select uses `D3`/GPIO21.
-`MSP_RST_N` is configured as an open-drain active-low output without an internal pull-up. It is asserted low while no TCP client is connected, released high after a TCP client connects, and held for 100 ms before command handling continues. It is asserted low again when the TCP connection closes or is lost.
+The WULPUS PRO WiFi host PCB routing intentionally differs from the SPI functions printed on the XIAO headers. Use the GPIO assignments above rather than the header function names.
+
+The dedicated `BLE_conn_ready`/host-ready signal used by the earlier wired nRF52 setup is not used. `MSP_RST_N` is configured as an open-drain active-low output without an internal pull-up. It is asserted while no TCP client is connected, released after a TCP client connects, and allowed 100 ms for MSP430 boot before command handling continues. Before a normal reset or TCP disconnect, the ESP32 sends the MSP430 restart command and waits for the next configuration-request edge, which confirms that the acquisition loop returned and `disableAll()` ran. It then asserts reset. A bounded timeout and hard communication-error path retain immediate reset as an emergency fallback. The matching MSP430 firmware therefore starts configuration and acquisition without polling link ready pin.
 
 For a new board revision, copy one of the files in `boards/`, change only the `CONFIG_WP_*` and board hardware values, then pass that file in `SDKCONFIG_DEFAULTS`.
 

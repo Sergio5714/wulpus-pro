@@ -136,14 +136,6 @@ menu "WULPUS PRO Configuration"
 
     menu "GPIO"
 
-    config WP_GPIO_LINK_READY
-        int "Link ready GPIO pin"
-        default 2
-        range 0 39
-        help
-            This sets the link ready GPIO pin.
-            The default value is 2.
-
     config WP_GPIO_DATA_READY
         int "Data ready GPIO pin"
         default 4
