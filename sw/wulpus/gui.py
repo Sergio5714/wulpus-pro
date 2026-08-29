@@ -90,6 +90,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         # Ultrasound Subsystem Configurator
         self.uss_conf = uss_conf
+        self.com_link.acq_length = uss_conf.num_samples
 
         # Allocate memory to store the data and other parameters
         self.data_arr = np.zeros(
@@ -570,7 +571,11 @@ class WulpusGuiSingleCh(widgets.VBox):
         self.log.info("Starting data acquisition loop")
         while self.data_cnt < number_of_acq and self.acquisition_running:
             # Receive the data
-            rf_arr, acq_nr, tx_rx_id = self.com_link.receive_data()
+            packet = self.com_link.receive_data()
+            if packet is None:
+                self.log.warning("Timed out waiting for acquisition data")
+                continue
+            rf_arr, acq_nr, tx_rx_id = packet
             # self.save_data_label.value = (
             #     f"{np.array(rf_arr).shape}, {acq_nr}, {tx_rx_id}"
             # )

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Renamed the BLE serial transport from `dongle.py` / `WulpusDongle` to `ble_dongle.py` / `WulpusBleDongle`.
 - Decoupled `WulpusGuiSingleCh` from the BLE transport and made its device controls transport-neutral.
+- Renamed the Wi-Fi transport and discovery APIs for WULPUS PRO and hardened TCP framing, command handling, connection cleanup, and acquisition lifecycle management.
 
 - Extended the number of channels to 16.
 - Modified TX/RX pin mapping.
