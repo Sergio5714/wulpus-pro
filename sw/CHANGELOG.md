@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the BLE serial transport from `dongle.py` / `WulpusDongle` to `ble_dongle.py` / `WulpusBleDongle`.
+
 - Extended the number of channels to 16.
 - Modified TX/RX pin mapping.
 - Added two new configuration parameters for VGA control:

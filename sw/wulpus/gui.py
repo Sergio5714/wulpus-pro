@@ -25,7 +25,7 @@ from threading import Thread
 import os.path
 import logging
 
-from wulpus.dongle import WulpusDongle
+from wulpus.ble_dongle import WulpusBleDongle
 
 # plt.ioff()
 
@@ -61,7 +61,7 @@ gui_logger.addHandler(file_handler)
 
 
 class WulpusGuiSingleCh(widgets.VBox):
-    def __init__(self, com_link: WulpusDongle, uss_conf, max_vis_fps=20):
+    def __init__(self, com_link: WulpusBleDongle, uss_conf, max_vis_fps=20):
         super().__init__()
         self.log = gui_logger
 
