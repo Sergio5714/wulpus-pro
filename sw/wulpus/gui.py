@@ -24,7 +24,8 @@ import time
 from threading import Thread
 import os.path
 import logging
-from typing import Any, Optional, Protocol, Sequence
+from collections.abc import Mapping
+from typing import Any, Optional, Protocol, Sequence, Union
 
 
 class WulpusProCommunicationLink(Protocol):
@@ -79,13 +80,26 @@ gui_logger.addHandler(file_handler)
 
 class WulpusGuiSingleCh(widgets.VBox):
     def __init__(
-        self, com_link: WulpusProCommunicationLink, uss_conf, max_vis_fps=20
+        self,
+        com_link: Union[
+            WulpusProCommunicationLink,
+            Mapping[str, WulpusProCommunicationLink],
+        ],
+        uss_conf,
+        max_vis_fps=20,
     ):
         super().__init__()
         self.log = gui_logger
 
-        # Communication link
-        self.com_link = com_link
+        # Communication links. Passing one link preserves the original API;
+        # passing a mapping enables transport selection in the GUI.
+        if isinstance(com_link, Mapping):
+            if not com_link:
+                raise ValueError("At least one communication link is required")
+            self.com_links = dict(com_link)
+        else:
+            self.com_links = {type(com_link).__name__: com_link}
+        self.com_link = next(iter(self.com_links.values()))
         self.log.debug(f"Communication link: {self.com_link}")
 
         # Ultrasound Subsystem Configurator
@@ -115,6 +129,14 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         # Define widgets
         # Communication-device related
+        self.transport_dd = widgets.Dropdown(
+            options=list(self.com_links),
+            value=next(iter(self.com_links)),
+            description="Transport:",
+            disabled=len(self.com_links) == 1,
+            style={"description_width": "initial"},
+        )
+
         self.ser_scan_button = widgets.Button(
             description="Scan devices",
             disabled=False,
@@ -224,6 +246,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         controls_2 = widgets.VBox(
             [
+                self.transport_dd,
                 widgets.HBox([self.ser_open_button, self.ser_scan_button]),
                 self.ports_dd,
                 self.tx_rx_sel_dd,
@@ -244,6 +267,7 @@ class WulpusGuiSingleCh(widgets.VBox):
         # Connect callbacks
 
         # To serial port related buttons
+        self.transport_dd.observe(self.change_transport, "value")
         self.ser_scan_button.on_click(self.click_scan_ports)
         self.ser_open_button.on_click(self.click_open_port)
 
@@ -374,6 +398,21 @@ class WulpusGuiSingleCh(widgets.VBox):
 
     # Callbacks
 
+    def change_transport(self, change):
+        """Select a communication link and scan its available devices."""
+        if not change.new or change.new == change.old:
+            return
+        if self.port_opened:
+            self.com_link.close()
+            self.port_opened = False
+            self.ser_open_button.description = "Open device"
+            self.start_stop_button.disabled = True
+
+        self.com_link = self.com_links[change.new]
+        self.com_link.acq_length = self.uss_conf.num_samples
+        self.log.info(f"Communication transport changed to {change.new}")
+        self.click_scan_ports(self.ser_scan_button)
+
     def click_scan_ports(self, b):
         self.log.info("Scanning ports...")
 
@@ -417,6 +456,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             b.description = "Close device"
             self.port_opened = True
             self.start_stop_button.disabled = False
+            self.transport_dd.disabled = True
 
             self.log.debug("Port opened")
 
@@ -427,6 +467,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             b.description = "Open device"
             self.port_opened = False
             self.start_stop_button.disabled = True
+            self.transport_dd.disabled = len(self.com_links) == 1
 
             self.log.debug("Port closed")
 

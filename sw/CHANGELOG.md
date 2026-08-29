@@ -5,7 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-05-01
+## [Unreleased]
+
+### Added
+
+- Selectable Wi-Fi and BLE communication transports in `WulpusGuiSingleCh`.
+
+### Changed
+
+- Renamed the BLE serial transport from `dongle.py` / `WulpusDongle` to `ble_dongle.py` / `WulpusBleDongle`.
+- Decoupled `WulpusGuiSingleCh` from the BLE transport and made its device controls transport-neutral.
+- Renamed the Wi-Fi transport and discovery APIs for WULPUS PRO and hardened TCP framing, command handling, connection cleanup, and acquisition lifecycle management.
+- Reorganized `wulpus_pro_wifi_example.ipynb` to launch the GUI after explicit TX/RX and interactive ultrasound configuration, followed by the detailed manual Wi-Fi workflow.
+
+### Removed
+
+- Removed the legacy 8-channel WULPUS configuration, packet, and channel-GUI modules. This repository now exposes only the WULPUS PRO configuration stack.
+
+## [0.1.0] - 2025-05-01
 
 ### Added
 
@@ -15,10 +32,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 ### Changed
-
-- Renamed the BLE serial transport from `dongle.py` / `WulpusDongle` to `ble_dongle.py` / `WulpusBleDongle`.
-- Decoupled `WulpusGuiSingleCh` from the BLE transport and made its device controls transport-neutral.
-- Renamed the Wi-Fi transport and discovery APIs for WULPUS PRO and hardened TCP framing, command handling, connection cleanup, and acquisition lifecycle management.
 
 - Extended the number of channels to 16.
 - Modified TX/RX pin mapping.
@@ -30,4 +43,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Removed `Capture restart time` and `Capture timeout time` from the old GUI.
-- Removed the legacy 8-channel WULPUS configuration, packet, and channel-GUI modules. This repository now exposes only the WULPUS PRO configuration stack.
