@@ -1,5 +1,5 @@
 """
-Copyright (C) 2023 ETH Zurich. All rights reserved.
+Copyright (C) 2026 ETH Zurich. All rights reserved.
 Author: Sergei Vostrikov, ETH Zurich
         Cedric Hirschi, ETH Zurich
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,8 +24,25 @@ import time
 from threading import Thread
 import os.path
 import logging
+from typing import Any, Optional, Protocol, Sequence
 
-from wulpus.ble_dongle import WulpusBleDongle
+
+class WulpusProCommunicationLink(Protocol):
+    """Communication operations required by :class:`WulpusGuiSingleCh`."""
+
+    acq_length: int
+
+    def get_available(self) -> Sequence[Any]: ...
+
+    def open(self, device: Optional[Any] = None) -> bool: ...
+
+    def close(self) -> bool: ...
+
+    def send_config(self, conf_bytes_pack: bytes) -> Any: ...
+
+    def receive_data(self) -> Any: ...
+
+    def toggle_rx(self, state: bool) -> Any: ...
 
 # plt.ioff()
 
@@ -61,7 +78,9 @@ gui_logger.addHandler(file_handler)
 
 
 class WulpusGuiSingleCh(widgets.VBox):
-    def __init__(self, com_link: WulpusBleDongle, uss_conf, max_vis_fps=20):
+    def __init__(
+        self, com_link: WulpusProCommunicationLink, uss_conf, max_vis_fps=20
+    ):
         super().__init__()
         self.log = gui_logger
 
@@ -94,14 +113,14 @@ class WulpusGuiSingleCh(widgets.VBox):
         )
 
         # Define widgets
-        # Serial port related
+        # Communication-device related
         self.ser_scan_button = widgets.Button(
-            description="Scan ports",
+            description="Scan devices",
             disabled=False,
             style={"description_width": "initial"},
         )
 
-        self.ser_open_button = widgets.Button(description="Open port", disabled=True)
+        self.ser_open_button = widgets.Button(description="Open device", disabled=True)
 
         self.port_opened = False
         self.acquisition_running = False
@@ -112,7 +131,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.ports_dd = widgets.Dropdown(
                 options=["No ports found"],
                 value="No ports found",
-                description="Serial port:",
+                description="Device:",
                 disabled=True,
                 style={"description_width": "initial"},
             )
@@ -120,7 +139,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.ports_dd = widgets.Dropdown(
                 options=[device.description for device in devices],
                 value=devices[0].description,
-                description="Serial port:",
+                description="Device:",
                 disabled=True,
                 style={"description_width": "initial"},
             )
@@ -388,13 +407,13 @@ class WulpusGuiSingleCh(widgets.VBox):
             device = self.found_devices[self.ports_dd.index]
 
             if not self.com_link.open(device):
-                b.description = "Open port"
+                b.description = "Open device"
                 self.port_opened = False
                 self.start_stop_button.disabled = True
                 self.log.error("Port not opened")
                 return
 
-            b.description = "Close port"
+            b.description = "Close device"
             self.port_opened = True
             self.start_stop_button.disabled = False
 
@@ -404,7 +423,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.log.info("Closing port")
 
             self.com_link.close()
-            b.description = "Open port"
+            b.description = "Open device"
             self.port_opened = False
             self.start_stop_button.disabled = True
 
