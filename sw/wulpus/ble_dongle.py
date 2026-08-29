@@ -23,9 +23,9 @@ import numpy as np
 ACQ_LENGTH_SAMPLES = 400
 
 
-class WulpusDongle:
+class WulpusBleDongle:
     """
-    Class representing the Wulpus dongle.
+    Class representing the WULPUS BLE dongle.
     """
 
     def __init__(self, port: str = "", timeout_write: int = 3, baudrate: int = 4000000):

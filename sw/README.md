@@ -9,7 +9,7 @@ The supported configuration implementation is the WULPUS PRO stack:
 - `wulpus/uss_conf_gui_pro.py`: configuration widgets
 - `wulpus/wifi.py` and `wulpus/scanner.py`: Wi-Fi transport and discovery
 
-The generic `gui.py` and `dongle.py` modules are retained because WULPUS PRO notebooks use them for acquisition display and serial-host compatibility.
+The generic `gui.py` module and the `ble_dongle.py` transport are retained because WULPUS PRO notebooks use them for acquisition display and BLE-dongle serial-host compatibility.
 
 # How to get started?
 
