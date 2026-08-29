@@ -26,3 +26,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Removed `Capture restart time` and `Capture timeout time` from the old GUI.
+- Removed the legacy 8-channel WULPUS configuration, packet, and channel-GUI modules. This repository now exposes only the WULPUS PRO configuration stack.
