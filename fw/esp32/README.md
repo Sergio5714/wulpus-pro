@@ -81,7 +81,7 @@ For a new board revision, copy one of the files in `boards/`, change only the `C
 
 ### Python Wi-Fi Example
 
-For Python-side usage, see the Wi-Fi example notebook at `../../sw/wulpus_pro_wifi_example.ipynb`. It shows device discovery, connection setup with `WulpusWiFi`, configuration transfer, and data acquisition over the TCP link.
+For Python-side usage, see the Wi-Fi example notebook at `../../sw/wulpus_pro_wifi_example.ipynb`. It shows mDNS discovery, connection setup with `WulpusProWiFiLink`, configuration transfer, and data acquisition over the TCP link.
 
 # Authors
 
