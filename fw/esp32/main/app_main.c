@@ -45,6 +45,8 @@ limitations under the License.
 #include "double_reset.h"
 #include "commander.h"
 #include "sock.h"
+#include "wulpus_tcp_transport.h"
+#include "wulpus_usb_transport.h"
 
 #include "helpers.h"
 
@@ -60,10 +62,10 @@ limitations under the License.
 
 static const char *TAG = "main";
 
-socket_instance_t response_socket;
 spi_device_handle_t spi = NULL;
 
 TaskHandle_t tcp_server_task_handle = NULL;
+TaskHandle_t usb_server_task_handle = NULL;
 TaskHandle_t data_handler_task_handle = NULL;
 
 static QueueHandle_t gpio_evt_queue = NULL;
@@ -72,6 +74,15 @@ SemaphoreHandle_t data_ready_semaphore = NULL;
 SemaphoreHandle_t shutdown_data_ready_semaphore = NULL;
 SemaphoreHandle_t tcp_port_mutex = NULL;
 SemaphoreHandle_t spi_mutex = NULL;
+static SemaphoreHandle_t session_mutex = NULL;
+#if CONFIG_WP_ENABLE_PM
+static esp_pm_lock_handle_t usb_session_pm_lock = NULL;
+#endif
+
+// Exactly one byte stream owns the MSP430 and receives RF frames. Listener
+// tasks may block independently, but this pointer changes only under the
+// session mutex.
+static wulpus_transport_t *active_transport = NULL;
 
 bool transmits_enabled = false;
 static volatile bool msp_shutdown_in_progress = false;
@@ -79,8 +90,10 @@ static volatile bool msp_shutdown_in_progress = false;
 uint8_t spi_rx_buffer[CONFIG_WP_DATA_RX_LENGTH + HEADER_LEN];
 
 static void tcp_server_task(void *pvParameters);
+static void usb_server_task(void *pvParameters);
 static void data_handler_task(void *pvParameters);
 static esp_err_t msp_graceful_shutdown(void);
+static void wulpus_session_run(wulpus_transport_t *transport);
 
 static esp_err_t msp_reset_set(bool reset_active)
 {
@@ -157,9 +170,9 @@ void app_main(void)
     ESP_LOGI(TAG, "Entering app_main");
     ESP_ERROR_CHECK(bsp_init());
 
-    // Keep the MSP430 in reset throughout ESP32 startup and until a TCP client
-    // connects. Reset replaces the former dedicated host-ready signal on the
-    // integrated XIAO host PCB.
+    // Keep the MSP430 in reset throughout ESP32 startup and until either TCP
+    // or USB CDC owns a session. Reset replaces the former dedicated host-ready
+    // signal on the integrated XIAO host PCB.
     gpio_config_t gpio_cfg = {
         .intr_type = GPIO_INTR_DISABLE,
         .mode = GPIO_MODE_OUTPUT_OD,
@@ -190,6 +203,15 @@ void app_main(void)
         .light_sleep_enable = true,
     };
     ESP_ERROR_CHECK(esp_pm_configure(&pm_config));
+    // Native USB must remain responsive for the complete binary session. The
+    // lock is acquired only by a USB owner, so idle Wi-Fi operation retains
+    // automatic light-sleep behavior.
+    ESP_ERROR_CHECK(esp_pm_lock_create(ESP_PM_NO_LIGHT_SLEEP, 0,
+                                       "wulpus_usb", &usb_session_pm_lock));
+    // Keep USB enumeration alive from the moment automatic light sleep is
+    // enabled. Ownership of this initial lock is transferred to the USB task,
+    // which releases it only after confirming that no USB host is connected.
+    ESP_ERROR_CHECK(esp_pm_lock_acquire(usb_session_pm_lock));
 #endif
 
     esp_log_level_set(TAG, LOG_LOCAL_LEVEL);
@@ -243,6 +265,12 @@ void app_main(void)
         ESP_LOGE(TAG, "Failed to create mutex");
         return;
     }
+    session_mutex = xSemaphoreCreateMutex();
+    if (session_mutex == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create transport-session mutex");
+        return;
+    }
 
     // Create data handler
     xTaskCreate(data_handler_task, "data_handler", CONFIG_WP_HANDLER_STACK_SIZE, NULL, CONFIG_WP_HANDLER_PRIORITY, &data_handler_task_handle);
@@ -294,6 +322,18 @@ void app_main(void)
 #else
     ESP_ERROR_CHECK(provisioner_start(false));
 #endif
+
+    // USB must remain usable while Wi-Fi is unprovisioned or reconnecting.
+    // provisioner_wait() can block indefinitely, so create the USB listener
+    // before waiting for the network connection.
+    xTaskCreate(usb_server_task, "usb_server", CONFIG_WP_SERVER_STACK_SIZE, NULL,
+                CONFIG_WP_SERVER_PRIORITY, &usb_server_task_handle);
+    if (usb_server_task_handle == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create USB server task");
+        return;
+    }
+
     ESP_ERROR_CHECK(provisioner_wait());
 
     // Start but suspend TWT
@@ -310,194 +350,358 @@ void app_main(void)
     ESP_LOGI(TAG, "Returning from app_main()");
 }
 
-static void tcp_server_task(void *pvParameters)
+static bool session_try_acquire(wulpus_transport_t *transport)
 {
-    ESP_LOGI(TAG, "TCP server task started");
-
-    uint8_t rx_buffer[CONFIG_WP_SERVER_RX_BUFFER_SIZE];
-
-    socket_instance_t listen_sock = sock_create();
-    if (listen_sock.mutex == NULL)
+    bool acquired = false;
+    xSemaphoreTake(session_mutex, portMAX_DELAY);
+    if (active_transport == NULL)
     {
-        ESP_LOGE(TAG, "Failed to create listen socket");
-        vTaskDelete(NULL);
-        return;
+        active_transport = transport;
+        acquired = true;
     }
+    xSemaphoreGive(session_mutex);
+    return acquired;
+}
 
-    response_socket = sock_create();
-    if (response_socket.mutex == NULL)
+static void session_release(wulpus_transport_t *transport)
+{
+    xSemaphoreTake(session_mutex, portMAX_DELAY);
+    if (active_transport == transport)
     {
-        ESP_LOGE(TAG, "Failed to create response socket");
-        vTaskDelete(NULL);
-        return;
+        active_transport = NULL;
     }
+    xSemaphoreGive(session_mutex);
+}
 
-    // Initialize and bind listening socket
-    ESP_ERROR_CHECK(sock_init(&listen_sock));
-    ESP_ERROR_CHECK(sock_listen(&listen_sock, INADDR_ANY, CONFIG_WP_SOCKET_PORT));
+/*
+ * Wait for the first valid protocol header without claiming the session.
+ *
+ * This makes arbitration demand-driven: an attached USB cable used only for
+ * power/JTAG, or an idle TCP connection, cannot block the other transport.
+ * The header is copied into transport->prefetch so command_recv() processes it
+ * normally after this listener wins ownership.
+ */
+static esp_err_t transport_wait_for_header(wulpus_transport_t *transport)
+{
+    static const uint8_t magic[] = "wulpus";
+    size_t matched = 0;
 
-    // Initialize response socket
-    ESP_ERROR_CHECK(sock_init(&response_socket));
-
-    esp_err_t err = ESP_OK;
-    while (1)
+    while (wulpus_transport_is_connected(transport))
     {
-        // Accept a connection
-        err = sock_accept(&listen_sock, &response_socket);
-        if (err != ESP_OK)
+        uint8_t byte = 0;
+        int received = transport->read(transport->context, &byte, 1, pdMS_TO_TICKS(100));
+        if (received <= 0)
         {
-            ESP_LOGE(TAG, "Failed to accept connection");
             continue;
         }
 
-        provisioner_twt_suspend(1);
-        msp_shutdown_in_progress = false;
-        ESP_ERROR_CHECK(msp_reset_set(false));
-        ESP_LOGI(TAG, "Boot MSP430 after TCP connection");
-        vTaskDelay(pdMS_TO_TICKS(MSP_BOOT_DELAY_MS));
-
-        // Clear data ready signal
-        xSemaphoreTake(data_ready_semaphore, 0);
-
-        bool run = true;
-        while (run)
+        if (byte == magic[matched])
         {
-            wulpus_command_header_t recv_header;
-
-            // Receive command from the socket (blocking)
-            size_t data_len = sizeof(rx_buffer);
-            err = command_recv(&response_socket, &recv_header, rx_buffer, &data_len);
-            if (err != ESP_OK)
-            {
-                ESP_LOGE(TAG, "Failed to receive header");
-                run = false;
-                break;
-            }
-
-            switch (recv_header.command)
-            {
-            case SET_CONFIG:
-                ESP_LOGI(TAG, "Received set config command");
-
-                // Wait for data ready signal
-                if (xSemaphoreTake(data_ready_semaphore, DATA_READY_TIMEOUT) != pdTRUE)
-                {
-                    ESP_LOGE(TAG, "Failed to take data ready semaphore");
-                    break;
-                }
-
-                uint8_t spi_tx_buffer[804] = {0};
-                memcpy(spi_tx_buffer, rx_buffer, data_len);
-
-                ESP_LOGD(TAG, "Configuration package (%u bytes):", recv_header.data_length);
-                for (size_t i = 0; i < recv_header.data_length; i++)
-                {
-                    ESP_LOGD(TAG, "  0x%02X ", spi_tx_buffer[i]);
-                }
-
-                // Send configuration via SPI to the device
-                spi_transaction_t tx = {
-                    .length = 804 * 8,
-                    .tx_buffer = spi_tx_buffer,
-                    .rx_buffer = NULL,
-                };
-                if (xSemaphoreTake(spi_mutex, SPI_MUTEX_TIMEOUT) != pdTRUE)
-                {
-                    ESP_LOGE(TAG, "Failed to take SPI mutex");
-                    break;
-                }
-                esp_err_t ret = spi_device_transmit(spi, &tx);
-                xSemaphoreGive(spi_mutex);
-                if (ret != ESP_OK)
-                {
-                    ESP_LOGE(TAG, "Error occurred during SPI transmission: %s", esp_err_to_name(ret));
-                    break;
-                }
-                else
-                {
-                    ESP_LOGD(TAG, "Configuration package sent successfully");
-                }
-
-                break;
-            case GET_DATA:
-                ESP_LOGW(TAG, "GET_DATA is not implemented");
-                break;
-            case PING:
-                ESP_LOGI(TAG, "Received ping command");
-                // Send response
-                wulpus_command_header_t response = {
-                    .magic = "wulpus",
-                    .command = PONG,
-                    .data_length = 4,
-                };
-                err = command_send(&response_socket, &response, "pong", 4);
-                if (err != ESP_OK)
-                {
-                    ESP_LOGE(TAG, "Failed to send ping response");
-                    break;
-                }
-                break;
-            case RESET:
-                ESP_LOGI(TAG, "Received reset command");
-                if (msp_graceful_shutdown() != ESP_OK)
-                {
-                    ESP_LOGW(TAG, "Graceful MSP430 shutdown failed; using reset fallback");
-                }
-                ESP_ERROR_CHECK(msp_reset_set(true));
-                esp_restart();
-                break;
-            case CLOSE:
-                ESP_LOGI(TAG, "Received close command");
-                // Exit loop
-                run = false;
-                break;
-            case START_RX:
-                ESP_LOGI(TAG, "Received start RX command");
-                // Enable transmits
-                transmits_enabled = true;
-
-                // By now, MSP could have sent a data ready signal, but we missed it
-                if (xSemaphoreTake(data_ready_semaphore, 0) == pdTRUE)
-                {
-                    // Push dummy event into queue, since handler had to ignore last valid one
-                    uint32_t io_num = CONFIG_WP_GPIO_DATA_READY;
-                    xQueueSend(gpio_evt_queue, &io_num, 0);
-                }
-
-                break;
-            case STOP_RX:
-                ESP_LOGI(TAG, "Received stop RX command");
-                // Disable transmits
-                transmits_enabled = false;
-                break;
-            }
-
-            ESP_LOGI(TAG, "Command %s processed", command_name(recv_header.command));
-        }
-
-        transmits_enabled = false;
-        if (msp_graceful_shutdown() != ESP_OK)
-        {
-            ESP_LOGW(TAG, "Graceful MSP430 shutdown failed; using reset fallback");
-        }
-        ESP_ERROR_CHECK(msp_reset_set(true));
-        ESP_LOGI(TAG, "Reset MSP430 after TCP disconnect");
-
-        // Close socket
-        err = sock_close(&response_socket);
-        if (err != ESP_OK)
-        {
-            ESP_LOGE(TAG, "Failed to close socket");
+            transport->prefetch[matched++] = byte;
         }
         else
         {
-            ESP_LOGI(TAG, "Socket closed successfully");
+            matched = byte == magic[0] ? 1 : 0;
+            if (matched == 1)
+            {
+                transport->prefetch[0] = byte;
+            }
         }
 
-        provisioner_twt_suspend(0);
+        if (matched == sizeof(magic) - 1)
+        {
+            size_t header_bytes = sizeof(magic) - 1;
+            while (header_bytes < HEADER_LEN && wulpus_transport_is_connected(transport))
+            {
+                int result = transport->read(
+                    transport->context, transport->prefetch + header_bytes,
+                    HEADER_LEN - header_bytes, pdMS_TO_TICKS(100));
+                if (result > 0)
+                {
+                    header_bytes += (size_t)result;
+                }
+            }
+            if (header_bytes != HEADER_LEN)
+            {
+                return ESP_FAIL;
+            }
+
+            wulpus_command_header_t header;
+            memcpy(&header, transport->prefetch, HEADER_LEN);
+            if (header.command >= MIN_COMMAND_ID && header.command <= MAX_COMMAND_ID)
+            {
+                transport->prefetch_length = HEADER_LEN;
+                transport->prefetch_offset = 0;
+                return ESP_OK;
+            }
+            matched = 0;
+            transport->prefetch_length = 0;
+        }
+    }
+    return ESP_FAIL;
+}
+
+static void transport_send_busy(wulpus_transport_t *transport)
+{
+    const wulpus_command_header_t busy = {
+        .magic = {'w', 'u', 'l', 'p', 'u', 's'},
+        .command = BUSY,
+        .data_length = 0,
+    };
+    if (command_send(transport, &busy, NULL, 0) != ESP_OK)
+    {
+        ESP_LOGW(TAG, "Could not report busy transport");
+    }
+}
+
+/*
+ * Reject the command whose header was consumed during arbitration.
+ *
+ * USB is a persistent byte stream rather than an accepted connection. If a
+ * losing SET_CONFIG payload were left unread, its bytes could later be mistaken
+ * for the start of another header. Drain exactly the advertised payload before
+ * returning the USB listener to its magic-word scanner.
+ */
+static void transport_reject_prefetched_command(wulpus_transport_t *transport)
+{
+    wulpus_command_header_t rejected;
+    memcpy(&rejected, transport->prefetch, HEADER_LEN);
+    transport_send_busy(transport);
+    transport->prefetch_length = 0;
+    transport->prefetch_offset = 0;
+
+    uint8_t discard[64];
+    size_t remaining = rejected.data_length;
+    while (remaining > 0 && wulpus_transport_is_connected(transport))
+    {
+        size_t requested = remaining < sizeof(discard) ? remaining : sizeof(discard);
+        int received = transport->read(transport->context, discard, requested,
+                                       transport->io_timeout);
+        if (received <= 0)
+        {
+            ESP_LOGW(TAG, "Timed out while discarding rejected command payload");
+            break;
+        }
+        remaining -= (size_t)received;
+    }
+}
+
+static void wulpus_session_run(wulpus_transport_t *transport)
+{
+    uint8_t rx_buffer[CONFIG_WP_SERVER_RX_BUFFER_SIZE];
+
+    provisioner_twt_suspend(1);
+    msp_shutdown_in_progress = false;
+    ESP_ERROR_CHECK(msp_reset_set(false));
+    ESP_LOGI(TAG, "Boot MSP430 for %s session",
+             transport->kind == WULPUS_TRANSPORT_TCP ? "TCP" : "USB CDC");
+    vTaskDelay(pdMS_TO_TICKS(MSP_BOOT_DELAY_MS));
+    xSemaphoreTake(data_ready_semaphore, 0);
+
+    bool run = true;
+    while (run && wulpus_transport_is_connected(transport))
+    {
+        wulpus_command_header_t recv_header;
+        size_t data_len = sizeof(rx_buffer);
+        esp_err_t err = command_recv(transport, &recv_header, rx_buffer, &data_len);
+        if (err != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Transport command receive failed");
+            break;
+        }
+
+        switch (recv_header.command)
+        {
+        case SET_CONFIG:
+        {
+            ESP_LOGI(TAG, "Received set config command");
+            if (xSemaphoreTake(data_ready_semaphore, DATA_READY_TIMEOUT) != pdTRUE)
+            {
+                ESP_LOGE(TAG, "Failed to take data ready semaphore");
+                break;
+            }
+
+            uint8_t spi_tx_buffer[CONFIG_WP_DATA_RX_LENGTH] = {0};
+            memcpy(spi_tx_buffer, rx_buffer, data_len);
+            spi_transaction_t tx = {
+                .length = sizeof(spi_tx_buffer) * 8,
+                .tx_buffer = spi_tx_buffer,
+                .rx_buffer = NULL,
+            };
+            if (xSemaphoreTake(spi_mutex, SPI_MUTEX_TIMEOUT) != pdTRUE)
+            {
+                ESP_LOGE(TAG, "Failed to take SPI mutex");
+                break;
+            }
+            esp_err_t result = spi_device_transmit(spi, &tx);
+            xSemaphoreGive(spi_mutex);
+            if (result != ESP_OK)
+            {
+                ESP_LOGE(TAG, "SPI configuration transfer failed: %s",
+                         esp_err_to_name(result));
+            }
+            break;
+        }
+        case GET_DATA:
+            ESP_LOGW(TAG, "GET_DATA is not implemented");
+            break;
+        case PING:
+        {
+            const wulpus_command_header_t response = {
+                .magic = {'w', 'u', 'l', 'p', 'u', 's'},
+                .command = PONG,
+                .data_length = 4,
+            };
+            if (command_send(transport, &response, "pong", 4) != ESP_OK)
+            {
+                run = false;
+            }
+            break;
+        }
+        case RESET:
+            if (msp_graceful_shutdown() != ESP_OK)
+            {
+                ESP_LOGW(TAG, "Graceful MSP430 shutdown failed; using reset fallback");
+            }
+            ESP_ERROR_CHECK(msp_reset_set(true));
+            esp_restart();
+            break;
+        case CLOSE:
+            run = false;
+            break;
+        case START_RX:
+            transmits_enabled = true;
+            if (xSemaphoreTake(data_ready_semaphore, 0) == pdTRUE)
+            {
+                uint32_t io_num = CONFIG_WP_GPIO_DATA_READY;
+                xQueueSend(gpio_evt_queue, &io_num, 0);
+            }
+            break;
+        case STOP_RX:
+            transmits_enabled = false;
+            break;
+        case PONG:
+        case BUSY:
+            ESP_LOGW(TAG, "Ignoring host-only command %s",
+                     command_name(recv_header.command));
+            break;
+        }
+        ESP_LOGI(TAG, "Command %s processed", command_name(recv_header.command));
     }
 
-    vTaskDelete(NULL);
+    transmits_enabled = false;
+    if (msp_graceful_shutdown() != ESP_OK)
+    {
+        ESP_LOGW(TAG, "Graceful MSP430 shutdown failed; using reset fallback");
+    }
+    ESP_ERROR_CHECK(msp_reset_set(true));
+    wulpus_transport_close(transport);
+    transport->prefetch_length = 0;
+    transport->prefetch_offset = 0;
+    session_release(transport);
+    provisioner_twt_suspend(0);
+    ESP_LOGI(TAG, "Released WULPUS transport session");
+}
+
+static void tcp_server_task(void *pvParameters)
+{
+    (void)pvParameters;
+    ESP_LOGI(TAG, "TCP listener task started");
+
+    socket_instance_t listen_socket = sock_create();
+    socket_instance_t client_socket = sock_create();
+    if (listen_socket.mutex == NULL || client_socket.mutex == NULL)
+    {
+        ESP_LOGE(TAG, "Failed to create TCP sockets");
+        vTaskDelete(NULL);
+        return;
+    }
+
+    ESP_ERROR_CHECK(sock_init(&listen_socket));
+    ESP_ERROR_CHECK(sock_listen(&listen_socket, INADDR_ANY, CONFIG_WP_SOCKET_PORT));
+    ESP_ERROR_CHECK(sock_init(&client_socket));
+
+    wulpus_transport_t transport;
+    ESP_ERROR_CHECK(wulpus_tcp_transport_create(&transport, &client_socket));
+
+    while (true)
+    {
+        if (sock_accept(&listen_socket, &client_socket) != ESP_OK)
+        {
+            ESP_LOGE(TAG, "Failed to accept TCP connection");
+            continue;
+        }
+        if (transport_wait_for_header(&transport) != ESP_OK)
+        {
+            wulpus_transport_close(&transport);
+            continue;
+        }
+        if (!session_try_acquire(&transport))
+        {
+            ESP_LOGW(TAG, "Rejecting TCP client: another transport is active");
+            transport_send_busy(&transport);
+            wulpus_transport_close(&transport);
+            continue;
+        }
+        wulpus_session_run(&transport);
+    }
+}
+
+static void usb_server_task(void *pvParameters)
+{
+    (void)pvParameters;
+    ESP_LOGI(TAG, "USB CDC listener task started");
+
+    static wulpus_transport_t transport;
+    ESP_ERROR_CHECK(wulpus_usb_transport_install(&transport));
+#if CONFIG_WP_ENABLE_PM
+    // app_main() acquires the initial lock before USB task creation so the
+    // device cannot enter light sleep during USB enumeration.
+    bool usb_pm_lock_held = true;
+#endif
+
+    while (true)
+    {
+#if CONFIG_WP_ENABLE_PM
+        if (!usb_pm_lock_held)
+        {
+            ESP_ERROR_CHECK(esp_pm_lock_acquire(usb_session_pm_lock));
+            usb_pm_lock_held = true;
+        }
+
+        // Wake briefly before sampling the USB connection monitor. If the
+        // status is checked while automatic light sleep is already active,
+        // USB SOF packets cannot update it and the listener never reaches the
+        // lock acquisition needed to receive the first command.
+        vTaskDelay(pdMS_TO_TICKS(10));
+        if (!wulpus_transport_is_connected(&transport))
+        {
+            ESP_ERROR_CHECK(esp_pm_lock_release(usb_session_pm_lock));
+            usb_pm_lock_held = false;
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
+        }
+
+        // ESP32-C6 cannot keep USB Serial/JTAG responsive during automatic
+        // light sleep. Acquire the lock before waiting for the first protocol
+        // header; acquiring it only after the header creates a deadlock where
+        // the host cannot deliver the bytes needed to start a USB session.
+#endif
+        if (transport_wait_for_header(&transport) != ESP_OK)
+        {
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
+        }
+        if (!session_try_acquire(&transport))
+        {
+            ESP_LOGW(TAG, "Rejecting USB command: another transport is active");
+            transport_reject_prefetched_command(&transport);
+            continue;
+        }
+        // Keep the lock after session cleanup while the USB host remains
+        // physically connected. The next loop releases it on disconnection.
+        wulpus_session_run(&transport);
+    }
 }
 
 static void data_handler_task(void *pvParameters)
@@ -512,7 +716,7 @@ static void data_handler_task(void *pvParameters)
         .rx_buffer = spi_rx_buffer + HEADER_LEN,
     };
     wulpus_command_header_t response = {
-        .magic = "wulpus",
+        .magic = {'w', 'u', 'l', 'p', 'u', 's'},
         .command = GET_DATA,
         .data_length = CONFIG_WP_DATA_RX_LENGTH,
     };
@@ -535,10 +739,16 @@ static void data_handler_task(void *pvParameters)
                 continue;
             }
 
-            // If socket is open, send data
-            // Header: "data <length>"
-            // Data: <data>
-            if (transmits_enabled & (response_socket.fd >= 0))
+            wulpus_transport_t *transport = NULL;
+            xSemaphoreTake(session_mutex, portMAX_DELAY);
+            transport = active_transport;
+            xSemaphoreGive(session_mutex);
+
+            // A command acknowledgement and an RF frame may be emitted from
+            // different tasks. command_send() holds the transport TX mutex for
+            // the complete header+payload packet, preventing interleaving.
+            if (transmits_enabled && transport != NULL &&
+                wulpus_transport_is_connected(transport))
             {
                 // Read data from the device
                 if (xSemaphoreTake(spi_mutex, SPI_MUTEX_TIMEOUT) != pdTRUE)
@@ -554,8 +764,8 @@ static void data_handler_task(void *pvParameters)
                     continue;
                 }
 
-                // Send header and data
-                ret = sock_send(&response_socket, spi_rx_buffer, CONFIG_WP_DATA_RX_LENGTH + HEADER_LEN);
+                ret = command_send(transport, &response, spi_rx_buffer + HEADER_LEN,
+                                   CONFIG_WP_DATA_RX_LENGTH);
                 if (ret != ESP_OK)
                 {
                     ESP_LOGE(TAG, "Failed to send data: %s", esp_err_to_name(ret));

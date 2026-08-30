@@ -10,6 +10,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Selectable Wi-Fi and BLE communication transports in `WulpusGuiSingleCh`.
+- Native ESP32-C6 USB CDC transport for wired WULPUS PRO communication.
+- Added a standalone USB frame-rate profiler with acquisition-number gap,
+  timeout, latency, and achieved-FPS reporting.
+### Fixed
+
+- Worked around the Windows pySerial `SetCommState` error 31 affecting the
+  ESP32-C6 USB Serial/JTAG CDC port while preserving all other configuration
+  errors.
+- Removed multi-second USB receive stalls by blocking for the first byte and
+  then draining only the bytes already available from the serial driver.
+- Prevented asynchronous `GET_DATA` frames from being mistaken for command
+  acknowledgements, including during acquisition shutdown.
+- Preserved partial serial writes and reported write timeouts instead of
+  silently truncating protocol packets.
 
 ### Changed
 
@@ -17,6 +31,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Decoupled `WulpusGuiSingleCh` from the BLE transport and made its device controls transport-neutral.
 - Renamed the Wi-Fi transport and discovery APIs for WULPUS PRO and hardened TCP framing, command handling, connection cleanup, and acquisition lifecycle management.
 - Reorganized `wulpus_pro_wifi_example.ipynb` to launch the GUI after explicit TX/RX and interactive ultrasound configuration, followed by the detailed manual Wi-Fi workflow.
+- Added single-owner TCP/USB session arbitration to the ESP32 firmware while preserving the existing WULPUS wire protocol.
+- Made the common framed-packet backlog and parser serve both command responses
+  and acquisition data so packet boundaries remain synchronized.
 
 ### Removed
 

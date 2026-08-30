@@ -48,6 +48,7 @@ class WulpusProWiFiCommand(IntEnum):
     CLOSE = 0x5C
     START_RX = 0x5D
     STOP_RX = 0x5E
+    BUSY = 0x5F
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}.{self.name}"
@@ -260,9 +261,41 @@ class WulpusProWiFiLink:
     def receive_command(
         self, timeout: Optional[float] = None
     ) -> Tuple[WulpusProWiFiHeader, bytes]:
-        header = self._decode_header(self._recv_exact(HEADER_LENGTH, timeout))
-        payload = self._recv_exact(header.length, timeout)
-        return header, payload
+        return self._receive_packet(timeout)
+
+    def _receive_packet(
+        self, timeout: Optional[float] = None
+    ) -> Tuple[WulpusProWiFiHeader, bytes]:
+        """Receive one complete framed packet through the shared backlog."""
+        sock = self._require_socket()
+        original_timeout = sock.gettimeout()
+        deadline = None if timeout is None else time.monotonic() + timeout
+        try:
+            while True:
+                packet = self._extract_packet_from_backlog()
+                if packet is not None:
+                    return packet
+
+                remaining = None if deadline is None else deadline - time.monotonic()
+                if remaining is not None and remaining <= 0:
+                    raise WulpusProWiFiTimeout("Timed out waiting for a packet")
+                sock.settimeout(original_timeout if remaining is None else remaining)
+                try:
+                    chunk = sock.recv(4096)
+                except socket.timeout as exc:
+                    raise WulpusProWiFiTimeout(
+                        "Timed out waiting for a packet"
+                    ) from exc
+                except OSError as exc:
+                    self._discard_socket()
+                    raise WulpusProWiFiDisconnected(str(exc)) from exc
+                if not chunk:
+                    self._discard_socket()
+                    raise WulpusProWiFiDisconnected("Connection closed")
+                self.backlog += chunk
+        finally:
+            if self.sock is sock:
+                sock.settimeout(original_timeout)
 
     def send_command(
         self,
@@ -290,12 +323,29 @@ class WulpusProWiFiLink:
         if expected_response is None:
             return None, None
 
-        header, payload = self.receive_command(timeout)
-        if header.command != expected_response:
+        deadline = None if timeout is None else time.monotonic() + timeout
+        while True:
+            remaining = None if deadline is None else deadline - time.monotonic()
+            if remaining is not None and remaining <= 0:
+                raise WulpusProWiFiTimeout(
+                    f"Timed out waiting for {expected_response} acknowledgement"
+                )
+            header, payload = self.receive_command(remaining)
+            if header.command == expected_response:
+                return header, payload
+            if header.command == WulpusProWiFiCommand.GET_DATA:
+                logger.debug(
+                    "Discarding asynchronous RF frame while waiting for %s",
+                    expected_response,
+                )
+                continue
+            if header.command == WulpusProWiFiCommand.BUSY:
+                raise WulpusProWiFiProtocolError(
+                    "WULPUS PRO is controlled through another transport"
+                )
             raise WulpusProWiFiProtocolError(
                 f"Expected {expected_response}, received {header.command}"
             )
-        return header, payload
 
     def flush(self) -> None:
         if self.sock is None:
@@ -368,42 +418,24 @@ class WulpusProWiFiLink:
             return header, payload
 
     def receive_frame(self, timeout: float = 5.0) -> Optional[WulpusProFrame]:
-        sock = self._require_socket()
         deadline = time.monotonic() + timeout
-        original_timeout = sock.gettimeout()
-        try:
-            while True:
-                packet = self._extract_packet_from_backlog()
-                if packet is not None:
-                    header, payload = packet
-                    if header.command != WulpusProWiFiCommand.GET_DATA:
-                        logger.debug("Ignoring asynchronous %s packet", header.command)
-                        continue
-                    frame = self._decode_rf_frame(payload)
-                    if len(frame.samples) != self.acq_length:
-                        raise WulpusProWiFiProtocolError(
-                            f"Expected {self.acq_length} samples, got {len(frame.samples)}"
-                        )
-                    return frame
-
-                remaining = deadline - time.monotonic()
-                if remaining <= 0:
-                    return None
-                sock.settimeout(remaining)
-                try:
-                    chunk = sock.recv(4096)
-                except socket.timeout:
-                    return None
-                except OSError as exc:
-                    self._discard_socket()
-                    raise WulpusProWiFiDisconnected(str(exc)) from exc
-                if not chunk:
-                    self._discard_socket()
-                    raise WulpusProWiFiDisconnected("Wi-Fi host closed the connection")
-                self.backlog += chunk
-        finally:
-            if self.sock is sock:
-                sock.settimeout(original_timeout)
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return None
+            try:
+                header, payload = self._receive_packet(remaining)
+            except WulpusProWiFiTimeout:
+                return None
+            if header.command != WulpusProWiFiCommand.GET_DATA:
+                logger.debug("Ignoring asynchronous %s packet", header.command)
+                continue
+            frame = self._decode_rf_frame(payload)
+            if len(frame.samples) != self.acq_length:
+                raise WulpusProWiFiProtocolError(
+                    f"Expected {self.acq_length} samples, got {len(frame.samples)}"
+                )
+            return frame
 
     def receive_data(
         self, timeout: float = 5.0

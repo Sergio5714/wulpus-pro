@@ -9,9 +9,45 @@ The supported configuration implementation is the WULPUS PRO stack:
 - `wulpus/uss_conf_gui_pro.py`: configuration widgets
 - `wulpus/wifi_link.py`: robust TCP transport and acquisition lifecycle
 - `wulpus/wifi_discovery.py`: mDNS discovery
+- `wulpus/usb_cdc_link.py`: native ESP32-C6 USB CDC transport
 
 The generic `gui.py` module and the `ble_dongle.py` transport are retained because WULPUS PRO notebooks use them for acquisition display and BLE-dongle serial-host compatibility.
-`WulpusGuiSingleCh` depends on the `WulpusProCommunicationLink` protocol rather than a concrete transport, so it can operate with either `WulpusBleDongle` or `WulpusProWiFiLink`.
+`WulpusGuiSingleCh` depends on the `WulpusProCommunicationLink` protocol rather than a concrete transport, so it can operate with `WulpusBleDongle`, `WulpusProWiFiLink`, or `WulpusProUsbCdcLink`.
+
+## USB CDC operation
+
+Select **USB CDC** in the example GUI when the XIAO ESP32-C6 is connected
+directly to the PC. The link scans for the Espressif USB Serial/JTAG CDC port
+and runs the same WULPUS command and RF-frame protocol used by Wi-Fi.
+
+Only one application can own the COM port. Before flashing or opening IDF
+Monitor, stop acquisition and close the device in the GUI. Flash normally with:
+
+```powershell
+idf.py -p COM9 flash
+```
+
+Replace `COM9` with the detected port. Reopen it in the GUI after the ESP32
+restarts. JTAG is a separate interface of the ESP32-C6 composite USB device and
+remains available, although halting the CPU interrupts live acquisition.
+
+### USB frame-rate profiling
+
+Close the GUI and all serial monitors, then run the standalone profiler with
+explicit acquisition periods. TX is disabled by default, so this exercises the
+capture and USB transport without firing the pulser:
+
+```powershell
+uv run python profile_usb_fps.py --port COM9 --period-us 10000 5000 2000 --frames 500
+```
+
+The profiler reports target and measured FPS, 95th-percentile frame latency,
+timeouts, and acquisition-number gaps. The fastest passing period is the
+maximum stable rate among the values tested. As an additional profiling safety
+invariant, `dcdc_turnon` is always configured 1 ms later than the acquisition
+period, after timer quantization, and the default TX mask is zero. Enabling TX
+with `--tx-mask` requires an independently verified safe pulse-repetition rate
+for the connected hardware and transducer.
 
 # How to get started?
 
