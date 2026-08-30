@@ -25,28 +25,22 @@ limitations under the License.
 
 #include <string.h>
 
-#include "sock.h"
+#include "wulpus_transport.h"
 
-esp_err_t command_recv(socket_instance_t *socket, wulpus_command_header_t *header, void *data, size_t *len)
+esp_err_t command_recv(wulpus_transport_t *transport,
+                       wulpus_command_header_t *header, void *data, size_t *len)
 {
     esp_log_level_set(TAG, LOG_LOCAL_LEVEL);
 
     ESP_LOGD(TAG, "Receiving command...");
     esp_err_t err = ESP_OK;
 
-    size_t recv_len = HEADER_LEN;
-    err = sock_recv(socket, header, &recv_len);
+    err = wulpus_transport_read_exact(transport, header, HEADER_LEN);
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to receive header");
         return err;
     }
-    if (recv_len != HEADER_LEN)
-    {
-        ESP_LOGW(TAG, "Header length mismatch: expected %d, got %d", HEADER_LEN, recv_len);
-        return ESP_FAIL;
-    }
-
     if (strncmp(header->magic, "wulpus", 6) != 0)
     {
         ESP_LOGW(TAG, "Invalid magic: Expected 'wulpus'");
@@ -57,7 +51,7 @@ esp_err_t command_recv(socket_instance_t *socket, wulpus_command_header_t *heade
     wulpus_command_header_t resp_header = *header;
     resp_header.data_length = 0; // Set data length to 0 for the header response
 
-    err = command_send(socket, &resp_header, NULL, 0);
+    err = command_send(transport, &resp_header, NULL, 0);
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to send response");
@@ -81,16 +75,11 @@ esp_err_t command_recv(socket_instance_t *socket, wulpus_command_header_t *heade
 
         // Receive data
         *len = header->data_length;
-        err = sock_recv(socket, data, len);
+        err = wulpus_transport_read_exact(transport, data, *len);
         if (err != ESP_OK)
         {
             ESP_LOGE(TAG, "Failed to receive data");
             return err;
-        }
-        else if (*len != header->data_length)
-        {
-            ESP_LOGW(TAG, "Data length mismatch: expected %d, got %d", header->data_length, *len);
-            return ESP_FAIL;
         }
     }
 
@@ -98,7 +87,9 @@ esp_err_t command_recv(socket_instance_t *socket, wulpus_command_header_t *heade
     return err;
 }
 
-esp_err_t command_send(socket_instance_t *socket, wulpus_command_header_t *header, const void *data, size_t len)
+esp_err_t command_send(wulpus_transport_t *transport,
+                       const wulpus_command_header_t *header,
+                       const void *data, size_t len)
 {
     ESP_LOGD(TAG, "Sending command...");
     esp_err_t err = ESP_OK;
@@ -109,24 +100,32 @@ esp_err_t command_send(socket_instance_t *socket, wulpus_command_header_t *heade
         return ESP_FAIL;
     }
 
-    socket->persist = true; // Set socket to persist mode (keep mutex locked)
-    err = sock_send(socket, header, HEADER_LEN);
-    socket->persist = false; // Reset socket to non-persist mode for future operations
+    // Keep the transport lock across header and payload. RF frames are emitted
+    // by another task and must never be inserted between these two writes.
+    err = wulpus_transport_tx_begin(transport);
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+    err = wulpus_transport_write_all_locked(transport, header, HEADER_LEN);
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "Failed to send header");
+        wulpus_transport_tx_end(transport);
         return err;
     }
 
     if (len > 0 && data != NULL)
     {
-        err = sock_send(socket, data, len);
+        err = wulpus_transport_write_all_locked(transport, data, len);
         if (err != ESP_OK)
         {
             ESP_LOGE(TAG, "Failed to send data");
+            wulpus_transport_tx_end(transport);
             return err;
         }
     }
+    wulpus_transport_tx_end(transport);
     ESP_LOGD(TAG, "Command sent successfully");
 
     return err;
@@ -152,6 +151,8 @@ char *command_name(wulpus_command_type_e command)
         return "START_RX";
     case STOP_RX:
         return "STOP_RX";
+    case BUSY:
+        return "BUSY";
     default:
         return "UNKNOWN_COMMAND";
     }

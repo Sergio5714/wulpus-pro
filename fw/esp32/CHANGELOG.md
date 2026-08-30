@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Added native ESP32-C6 USB CDC as a wired WULPUS PRO command and RF-data transport.
+- Added first-valid-command arbitration between concurrent TCP and USB listeners, including a `BUSY` response for the losing transport.
+- Added a transport-neutral byte-stream layer with exact reads, complete writes, header prefetching, and packet-level TX locking.
+
+### Changed
+
+- Moved command handling, MSP430 lifecycle management, and acquisition cleanup into one transport-independent session runner.
+- Routed RF frames through the active session transport instead of the TCP socket directly.
+- Reserved USB CDC for binary protocol data and disabled the conflicting application console by default.
+- Prevented automatic light sleep whenever a USB host connection is detected,
+  keeping enumeration and USB CDC communication responsive until physical
+  disconnection.
+- Started the USB listener before waiting for Wi-Fi provisioning or association,
+  allowing wired operation when the network is unavailable or unconfigured.
+- Expanded the firmware README with communication architecture, arbitration, USB flashing/JTAG coexistence, logging, and power-management behavior.
+
 ## [1.1.0] - 
 
 ### Fixed

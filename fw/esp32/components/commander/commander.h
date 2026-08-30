@@ -23,11 +23,11 @@ limitations under the License.
 
 #include "esp_err.h"
 
-#include "sock.h"
+#include "wulpus_transport.h"
 
 #define HEADER_LEN sizeof(wulpus_command_header_t)
 #define MIN_COMMAND_ID 0x57
-#define MAX_COMMAND_ID 0x5E
+#define MAX_COMMAND_ID 0x5F
 
 typedef enum
 {
@@ -39,6 +39,7 @@ typedef enum
     CLOSE = 0x5C,
     START_RX = 0x5D,
     STOP_RX = 0x5E,
+    BUSY = 0x5F,
 } wulpus_command_type_e;
 
 typedef struct __attribute__((packed))
@@ -54,8 +55,11 @@ typedef struct
     uint16_t data_length; // Length of data
 } wulpus_command_data_t;
 
-esp_err_t command_recv(socket_instance_t *socket, wulpus_command_header_t *header, void *data, size_t *len);
-esp_err_t command_send(socket_instance_t *socket, wulpus_command_header_t *header, const void *data, size_t len);
+esp_err_t command_recv(wulpus_transport_t *transport, wulpus_command_header_t *header,
+                       void *data, size_t *len);
+esp_err_t command_send(wulpus_transport_t *transport,
+                       const wulpus_command_header_t *header,
+                       const void *data, size_t len);
 
 char *command_name(wulpus_command_type_e command);
 

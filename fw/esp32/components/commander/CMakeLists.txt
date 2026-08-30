@@ -1,3 +1,3 @@
 idf_component_register(SRCS "commander.c"
                        INCLUDE_DIRS "."
-                       REQUIRES sock)
+                       REQUIRES wulpus_transport)

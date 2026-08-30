@@ -6,6 +6,33 @@ For the detailed description, please explore nested folders and corresponding CH
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Added native ESP32-C6 USB CDC communication as a wired alternative to Wi-Fi,
+  using the existing WULPUS command and acquisition-data protocol.
+- Added concurrent TCP/USB session arbitration and an explicit `BUSY` protocol
+  response when another transport owns the device.
+- Added a standalone Python USB frame-rate profiler.
+
+### Fixed
+
+- Kept the ESP32-C6 out of automatic light sleep whenever a USB host is
+  connected, preventing missed USB CDC commands and enumeration failures.
+- Fixed Windows ESP32-C6 CDC opening, partial writes, receive latency, and
+  asynchronous acquisition frames arriving while command acknowledgements are
+  pending.
+
+### Changed
+
+- Refactored ESP32 command processing and acquisition streaming around a shared,
+  transport-independent session layer used by TCP and USB CDC.
+- Reserved the native USB CDC interface for binary protocol traffic and disabled
+  the conflicting application console in the default ESP32-C6 configuration.
+- Made USB communication available before Wi-Fi provisioning or association
+  completes.
+
 ## [1.1.0] - 2026-08-22
 
 ### Added
