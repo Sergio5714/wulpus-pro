@@ -1,6 +1,7 @@
 """Profile WULPUS PRO frame rate over ESP32-C6 native USB CDC."""
 
 import argparse
+import json
 import statistics
 import sys
 import time
@@ -10,7 +11,7 @@ from wulpus.usb_cdc_link import WulpusProUsbCdcLink
 from wulpus.uss_conf_pro import WulpusProUssConfig
 from wulpus.wifi_link import WulpusProWiFiError
 
-DCDC_AFTER_PERIOD_MARGIN_US = 1000
+DEFAULT_DCDC_AFTER_PERIOD_MARGIN_US = 1000
 MAX_SLOW_TIMER_PERIOD_US = 2_000_000
 
 
@@ -23,27 +24,66 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--port", default="COM9", help="USB CDC port (default: COM9)")
     parser.add_argument(
+        "--mode",
+        choices=("custom", "simplified", "active-all"),
+        default="custom",
+        help=(
+            "configuration preset: simplified uses TX/RX 0x0000 and the "
+            "default DC-DC margin; active-all uses TX/RX 0xFFFF and fixed "
+            "dcdc_turnon=100 us; custom uses the explicit mask/timing options"
+        ),
+    )
+    parser.add_argument(
         "--period-us",
         type=int,
         nargs="+",
-        required=True,
-        help="Explicit acquisition periods to test, in microseconds",
+        help=(
+            "acquisition periods to test, in microseconds; when omitted with "
+            "--config, use meas_period from the saved configuration"
+        ),
+    )
+    parser.add_argument(
+        "--config",
+        help="GUI-saved WULPUS PRO acquisition configuration JSON file",
     )
     parser.add_argument("--frames", type=int, default=500, help="Measured frames per period")
     parser.add_argument("--warmup", type=int, default=10, help="Frames discarded before timing")
-    parser.add_argument("--samples", type=int, default=400, help="16-bit samples per frame")
+    parser.add_argument(
+        "--samples",
+        type=int,
+        default=None,
+        help="override 16-bit samples per frame (default: saved value or 400)",
+    )
     parser.add_argument("--timeout", type=float, default=5.0, help="Per-frame timeout in seconds")
+    parser.add_argument(
+        "--dcdc-margin-us",
+        type=int,
+        default=None,
+        help=(
+            "microseconds added to the acquisition period for dcdc_turnon "
+            f"(default: {DEFAULT_DCDC_AFTER_PERIOD_MARGIN_US})"
+        ),
+    )
+    parser.add_argument(
+        "--dcdc-turnon-us",
+        type=int,
+        default=None,
+        help=(
+            "absolute dcdc_turnon time in microseconds; when set, overrides "
+            "--dcdc-margin-us"
+        ),
+    )
     parser.add_argument(
         "--tx-mask",
         type=lambda value: int(value, 0),
-        default=0,
-        help="TX channel bit mask; default 0 disables pulsing",
+        default=None,
+        help="override TX channel bit mask",
     )
     parser.add_argument(
         "--rx-mask",
         type=lambda value: int(value, 0),
-        default=0,
-        help="RX channel bit mask (default: 0)",
+        default=None,
+        help="override RX channel bit mask",
     )
     return parser.parse_args()
 
@@ -55,18 +95,63 @@ def sequence_gap_count(numbers: List[int]) -> int:
     )
 
 
+def load_saved_config(filename: str) -> dict:
+    with open(filename, "r", encoding="utf-8") as config_file:
+        data = json.load(config_file)
+    if not isinstance(data, dict):
+        raise ValueError("saved configuration must contain a JSON object")
+    valid_fields = {
+        "num_acqs", "dcdc_turnon", "meas_period", "trans_freq",
+        "pulse_freq", "num_pulses", "sampling_freq", "num_samples",
+        "rx_gain", "num_txrx_configs", "tx_configs", "rx_configs",
+        "start_hvmuxrx", "start_ppg", "turnon_adc", "start_pgainbias",
+        "start_adcsampl", "restart_capt", "capt_timeout",
+        "vga_rc_prech_cyc", "vga_slope_code", "enable_env_det",
+    }
+    return {key: value for key, value in data.items() if key in valid_fields}
+
+
+def make_config(args: argparse.Namespace, period_us: int) -> WulpusProUssConfig:
+    values = dict(args.saved_config)
+    values["num_acqs"] = args.frames + args.warmup
+    values["meas_period"] = period_us
+
+    if args.samples is not None:
+        values["num_samples"] = args.samples
+    if args.dcdc_turnon_us is not None:
+        values["dcdc_turnon"] = args.dcdc_turnon_us
+    elif args.dcdc_margin_us is not None:
+        values["dcdc_turnon"] = period_us + args.dcdc_margin_us
+
+    if args.tx_mask is not None or args.rx_mask is not None:
+        tx_mask = 0 if args.tx_mask is None else args.tx_mask
+        rx_mask = 0 if args.rx_mask is None else args.rx_mask
+        values["num_txrx_configs"] = 1
+        values["tx_configs"] = [tx_mask]
+        values["rx_configs"] = [rx_mask]
+
+    count = int(values.get("num_txrx_configs", 1))
+    tx_configs = values.get("tx_configs")
+    rx_configs = values.get("rx_configs")
+    if tx_configs is None or rx_configs is None:
+        if count != 1:
+            raise ValueError(
+                "saved configuration has multiple TX/RX configurations but "
+                "does not contain tx_configs and rx_configs"
+            )
+        values.setdefault("tx_configs", [0])
+        values.setdefault("rx_configs", [0])
+    elif len(tx_configs) != count or len(rx_configs) != count:
+        raise ValueError(
+            "tx_configs and rx_configs lengths must match num_txrx_configs"
+        )
+
+    return WulpusProUssConfig(**values)
+
+
 def profile_period(link: WulpusProUsbCdcLink, args: argparse.Namespace, period_us: int) -> bool:
-    dcdc_turnon_us = period_us + DCDC_AFTER_PERIOD_MARGIN_US
-    config = WulpusProUssConfig(
-        num_acqs=args.frames + args.warmup,
-        dcdc_turnon=dcdc_turnon_us,
-        meas_period=period_us,
-        num_samples=args.samples,
-        num_txrx_configs=1,
-        tx_configs=[args.tx_mask],
-        rx_configs=[args.rx_mask],
-    )
-    link.acq_length = args.samples
+    config = make_config(args, period_us)
+    link.acq_length = config.num_samples
     timestamps: List[float] = []
     acquisition_numbers: List[int] = []
     timed_out = False
@@ -119,18 +204,67 @@ def profile_period(link: WulpusProUsbCdcLink, args: argparse.Namespace, period_u
 
 def main() -> int:
     args = parse_args()
-    if args.frames < 2 or args.warmup < 0 or args.samples <= 0:
+    if args.mode == "simplified":
+        args.tx_mask = 0x0000
+        args.rx_mask = 0x0000
+        args.dcdc_turnon_us = None
+        args.dcdc_margin_us = DEFAULT_DCDC_AFTER_PERIOD_MARGIN_US
+    elif args.mode == "active-all":
+        args.tx_mask = 0xFFFF
+        args.rx_mask = 0xFFFF
+        args.dcdc_turnon_us = 100
+
+    try:
+        args.saved_config = load_saved_config(args.config) if args.config else {}
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        raise SystemExit(f"could not load acquisition configuration: {exc}") from exc
+
+    if args.period_us is None:
+        if "meas_period" not in args.saved_config:
+            raise SystemExit("--period-us is required unless --config contains meas_period")
+        args.period_us = [int(args.saved_config["meas_period"])]
+
+    if args.mode == "custom" and not args.config:
+        if args.tx_mask is None:
+            args.tx_mask = 0
+        if args.rx_mask is None:
+            args.rx_mask = 0
+        if args.dcdc_turnon_us is None and args.dcdc_margin_us is None:
+            args.dcdc_margin_us = DEFAULT_DCDC_AFTER_PERIOD_MARGIN_US
+
+    effective_samples = args.samples
+    if effective_samples is None:
+        effective_samples = int(args.saved_config.get("num_samples", 400))
+
+    if args.frames < 2 or args.warmup < 0 or effective_samples <= 0:
         raise SystemExit("frames must be >= 2, warmup >= 0, and samples > 0")
     if any(period <= 0 for period in args.period_us):
         raise SystemExit("all acquisition periods must be greater than zero")
-    if any(
-        period + DCDC_AFTER_PERIOD_MARGIN_US > MAX_SLOW_TIMER_PERIOD_US
+    if args.dcdc_margin_us is not None and args.dcdc_margin_us <= 0:
+        raise SystemExit("dcdc-margin-us must be greater than zero")
+    if args.dcdc_turnon_us is not None and args.dcdc_turnon_us <= 0:
+        raise SystemExit("dcdc-turnon-us must be greater than zero")
+    if (
+        args.dcdc_turnon_us is not None
+        and args.dcdc_turnon_us > MAX_SLOW_TIMER_PERIOD_US
+    ):
+        raise SystemExit(
+            f"dcdc-turnon-us must not exceed {MAX_SLOW_TIMER_PERIOD_US}"
+        )
+    if (
+        args.tx_mask is not None and not 0 <= args.tx_mask <= 0xFFFF
+    ) or (
+        args.rx_mask is not None and not 0 <= args.rx_mask <= 0xFFFF
+    ):
+        raise SystemExit("TX and RX masks must fit in 16 bits (0x0000..0xFFFF)")
+    if args.dcdc_margin_us is not None and any(
+        period + args.dcdc_margin_us > MAX_SLOW_TIMER_PERIOD_US
         for period in args.period_us
     ):
         raise SystemExit(
             "each acquisition period must leave room for dcdc_turnon to be "
-            f"{DCDC_AFTER_PERIOD_MARGIN_US} us later (maximum period: "
-            f"{MAX_SLOW_TIMER_PERIOD_US - DCDC_AFTER_PERIOD_MARGIN_US} us)"
+            f"{args.dcdc_margin_us} us later (maximum period: "
+            f"{MAX_SLOW_TIMER_PERIOD_US - args.dcdc_margin_us} us)"
         )
 
     link = WulpusProUsbCdcLink(port=args.port, timeout=args.timeout)
@@ -142,10 +276,12 @@ def main() -> int:
     try:
         pong = link.ping(args.timeout)
         print(f"Connected to {args.port}; handshake payload={pong[1]!r}")
+        preview = make_config(args, args.period_us[0])
+        tx_masks = ", ".join(f"0x{int(mask):04X}" for mask in preview.tx_configs)
+        rx_masks = ", ".join(f"0x{int(mask):04X}" for mask in preview.rx_configs)
         print(
-            "Safety: TX mask is "
-            f"0x{args.tx_mask:04X}; dcdc_turnon is always acquisition period + "
-            f"{DCDC_AFTER_PERIOD_MARGIN_US} us"
+            f"Configuration: mode={args.mode}; TX=[{tx_masks}]; "
+            f"RX=[{rx_masks}]; first dcdc_turnon={preview.dcdc_turnon} us"
         )
         print(
             "   period             requested             measured"

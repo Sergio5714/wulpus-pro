@@ -1,0 +1,35 @@
+/*
+Copyright (C) 2026 Sergei Vostrikov
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#include "wulpus_pro_commands.h"
+const char *wulpus_pro_command_name(wulpus_pro_command_t command)
+{
+    switch (command) {
+    case WULPUS_PRO_SET_CONFIG: return "SET_CONFIG";
+    case WULPUS_PRO_GET_DATA: return "GET_DATA";
+    case WULPUS_PRO_PING: return "PING";
+    case WULPUS_PRO_PONG: return "PONG";
+    case WULPUS_PRO_RESET: return "RESET";
+    case WULPUS_PRO_CLOSE: return "CLOSE";
+    case WULPUS_PRO_START_RX: return "START_RX";
+    case WULPUS_PRO_STOP_RX: return "STOP_RX";
+    case WULPUS_PRO_BUSY: return "BUSY";
+    case WULPUS_PRO_GET_STATUS: return "GET_STATUS";
+    case WULPUS_PRO_STATUS: return "STATUS";
+    case WULPUS_PRO_CLEAR_STATUS: return "CLEAR_STATUS";
+    default: return "UNKNOWN";
+    }
+}

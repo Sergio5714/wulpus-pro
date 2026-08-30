@@ -45,6 +45,15 @@ class WulpusProCommunicationLink(Protocol):
 
     def toggle_rx(self, state: bool) -> Any: ...
 
+    def get_status(self, timeout: float = 5.0) -> Any: ...
+
+    def clear_status(
+        self,
+        error_mask: int = 0xFFFFFFFF,
+        clear_counters: bool = False,
+        timeout: float = 5.0,
+    ) -> Any: ...
+
 # plt.ioff()
 
 V_TISSUE = 1540  # m/s
@@ -56,6 +65,18 @@ LINE_N_SAMPLES = 400
 FILE_NAME_BASE = "data_"
 
 GAIN_PLOT_LOW_Y_MARGIN_DB = 20
+
+PROGRESS_UPDATE_PERIOD_S = 0.1
+
+STATUS_ERROR_NAMES = {
+    1 << 0: "acquisition buffer overflow",
+    1 << 1: "data-ready overflow",
+    1 << 2: "SPI timeout",
+    1 << 3: "SPI failure",
+    1 << 4: "link timeout",
+    1 << 5: "link disconnected",
+    1 << 6: "protocol error",
+}
 
 box_layout = widgets.Layout(
     display="flex", flex_flow="column", align_items="center", width="50%"
@@ -119,6 +140,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         # Extra variables to control visualization
         self.rx_tx_conf_to_display = 0
+        self.current_bmode_frame = None
 
         # For Signal Processing
         self.f_low_cutoff = self.uss_conf.sampling_freq / 2 * 0.1
@@ -229,6 +251,7 @@ class WulpusGuiSingleCh(widgets.VBox):
         )
 
         self.save_data_label = widgets.Label(value="")
+        self.acquisition_status_label = widgets.Label(value="Status: Idle")
 
         # Setup Visualization
         self.output = widgets.Output()
@@ -258,7 +281,13 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         out_box = widgets.Box([self.output])
 
-        progr_ctl_box_1 = widgets.VBox([self.start_stop_button, self.frame_progr_bar])
+        progr_ctl_box_1 = widgets.VBox(
+            [
+                self.start_stop_button,
+                self.frame_progr_bar,
+                self.acquisition_status_label,
+            ]
+        )
         progr_ctl_box_2 = widgets.VBox([self.save_data_check, self.save_data_label])
         progr_ctl_box = widgets.HBox([progr_ctl_box_1, progr_ctl_box_2])
 
@@ -567,6 +596,8 @@ class WulpusGuiSingleCh(widgets.VBox):
         self.tx_rx_id_arr = np.zeros(number_of_acq, dtype=np.uint8)
         # Acquisition counter
         self.data_cnt = 0
+        next_progress_update = time.monotonic()
+        self.acquisition_status_label.value = "Status: Preparing acquisition"
         self.log.debug("Data buffer cleaned")
 
         # Send TX stop
@@ -599,13 +630,23 @@ class WulpusGuiSingleCh(widgets.VBox):
         self.log.info("Starting visualization thread")
         self.visualize = True
         self.current_data = None
+        self.current_bmode_frame = None
         self.current_amode_data = None
         t2 = Thread(target=self.visualization, args=(number_of_acq,))
         t2.start()
 
+        # Make any status reported below specific to this acquisition. Older
+        # transports do not implement the ESP32 status commands.
+        if hasattr(self.com_link, "clear_status"):
+            try:
+                self.com_link.clear_status(clear_counters=True, timeout=2.0)
+            except Exception as exc:
+                self.log.warning("Could not clear acquisition status: %s", exc)
+
         # Send RX start command
         self.log.info("Sending RX start command")
         self.com_link.toggle_rx(True)
+        self.acquisition_status_label.value = "Status: Acquiring"
         self.log.debug("RX start command sent")
 
         # Readout data in a loop
@@ -615,23 +656,56 @@ class WulpusGuiSingleCh(widgets.VBox):
             packet = self.com_link.receive_data()
             if packet is None:
                 self.log.warning("Timed out waiting for acquisition data")
+                if not self.acquisition_running:
+                    break
+                if hasattr(self.com_link, "get_status"):
+                    try:
+                        status = self.com_link.get_status(timeout=2.0)
+                        errors = [
+                            name
+                            for flag, name in STATUS_ERROR_NAMES.items()
+                            if status.error_flags & flag
+                        ]
+                        error_text = ", ".join(errors) if errors else "none"
+                        self.acquisition_status_label.value = (
+                            f"Status: stalled; errors={error_text}; "
+                            f"overflow={status.buffer_overflow_count}; "
+                            f"SPI={status.completed_spi_count}; "
+                            f"TX={status.transmitted_frame_count}; "
+                            f"discarded={status.discarded_frame_count}; "
+                            f"buffer={status.current_buffer_usage}/"
+                            f"{status.maximum_buffer_usage}"
+                        )
+                        self.log.error(
+                            "Acquisition stalled; firmware status: %s", status
+                        )
+                        if status.error_flags:
+                            break
+                    except Exception as exc:
+                        self.acquisition_status_label.value = (
+                            f"Status: stalled; status query failed: {exc}"
+                        )
+                        self.log.exception("Could not read firmware status")
+                        break
                 continue
             rf_arr, acq_nr, tx_rx_id = packet
             # self.save_data_label.value = (
             #     f"{np.array(rf_arr).shape}, {acq_nr}, {tx_rx_id}"
             # )
-            self.log.debug(
-                f"Received data: {np.array(rf_arr).shape}, {acq_nr}, {tx_rx_id}"
-            )
-
             # For now, we just ignore invalid data
             if (
                 rf_arr is not None
-                and (acq_nr >= 0 and acq_nr < number_of_acq)
+                # The device acquisition number is a wrapping uint16 sequence
+                # counter and does not necessarily restart at zero for each GUI
+                # run.  Frames are stored by data_cnt below, so restricting the
+                # sequence number to number_of_acq rejects valid frames and can
+                # leave the progress bar permanently stalled.
+                and (acq_nr >= 0 and acq_nr <= 0xFFFF)
                 and (tx_rx_id >= 0 and tx_rx_id < self.uss_conf.num_txrx_configs)
             ):
                 # self.log.debug("Data received")
                 self.current_data = rf_arr
+                self.current_bmode_frame = (tx_rx_id, rf_arr)
 
                 if (
                     tx_rx_id == self.rx_tx_conf_to_display
@@ -646,26 +720,40 @@ class WulpusGuiSingleCh(widgets.VBox):
                 self.acq_num_arr[self.data_cnt] = acq_nr
                 self.tx_rx_id_arr[self.data_cnt] = tx_rx_id
 
-                # Save data to specific z
-                self.data_arr_bmode[self.tx_rx_id_arr[self.data_cnt]] = (
-                    self.get_envelope(self.filter_data(rf_arr))
-                )
-
                 self.data_cnt = self.data_cnt + 1
 
-                # Update progress bar
-                self.frame_progr_bar.description = (
-                    "Progress: " + str(self.data_cnt) + "/" + str(number_of_acq)
-                )
-                self.frame_progr_bar.value = self.data_cnt
-
-                self.log.debug(f"Progress: {self.data_cnt}/{number_of_acq}")
+                # Widget trait updates and file logging are expensive in a
+                # Jupyter background thread. Keep the receive path fast and
+                # publish progress at 10 Hz instead of once per RF frame.
+                now = time.monotonic()
+                if now >= next_progress_update or self.data_cnt == number_of_acq:
+                    self.frame_progr_bar.description = (
+                        "Progress: " + str(self.data_cnt) + "/" + str(number_of_acq)
+                    )
+                    self.frame_progr_bar.value = self.data_cnt
+                    self.log.debug(
+                        "Progress: %d/%d; last frame=%d, RX/TX=%d",
+                        self.data_cnt,
+                        number_of_acq,
+                        acq_nr,
+                        tx_rx_id,
+                    )
+                    next_progress_update = now + PROGRESS_UPDATE_PERIOD_S
             else:
                 self.log.warning("No data received")
 
         self.log.info(
             f"Acquisition loop finished. data_cnt = {self.data_cnt}, acq_running = {self.acquisition_running}"
         )
+
+        if self.data_cnt >= number_of_acq:
+            self.acquisition_status_label.value = (
+                f"Status: Complete ({self.data_cnt}/{number_of_acq} frames)"
+            )
+        elif self.acquisition_status_label.value == "Status: Acquiring":
+            self.acquisition_status_label.value = (
+                f"Status: Stopped ({self.data_cnt}/{number_of_acq} frames)"
+            )
 
         self.log.info("Stopping RX")
         self.com_link.toggle_rx(False)
@@ -706,8 +794,18 @@ class WulpusGuiSingleCh(widgets.VBox):
             # B-mode
             if self.bmode_check.value:
                 if self.current_data is None:
+                    time.sleep(self.vis_fps_period)
                     continue
                 try:
+                    # Filtering and envelope extraction used to run for every
+                    # received frame. Do it only at the visualization rate so
+                    # USB reception is never blocked by display processing.
+                    bmode_frame = self.current_bmode_frame
+                    if bmode_frame is not None:
+                        tx_rx_id, rf_data = bmode_frame
+                        self.data_arr_bmode[tx_rx_id] = (
+                            self.get_envelope(self.filter_data(rf_data))
+                        )
                     # self.bmode_image.set_data(np.log10(np.add(self.data_arr_bmode, 0.1)))                                # log scale
                     # self.bmode_image.set_data(self.data_arr_bmode[:,10*LOWER_BOUNDS_MM:])                                # linear scale
                     self.bmode_image.set_data(
@@ -720,6 +818,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             # Check the id of RX TX config
             else:
                 if self.current_amode_data is None:
+                    time.sleep(self.vis_fps_period)
                     continue
                 filt_data = None
 

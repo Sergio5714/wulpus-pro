@@ -156,6 +156,61 @@ menu "WULPUS PRO Configuration"
 
     menu "Data Handling"
 
+    config WP_FRAME_SLOT_COUNT
+        int "DMA acquisition frame slots"
+        default 64
+        range 2 128
+
+    config WP_ACQUISITION_STACK_SIZE
+        int "Acquisition thread stack size [bytes]"
+        default 3072
+        range 2048 16384
+
+    config WP_ACQUISITION_PRIORITY
+        int "Acquisition thread priority"
+        default 8
+        range 1 20
+
+    config WP_PROTOCOL_STACK_SIZE
+        int "Protocol thread stack size [bytes]"
+        default 4096
+        range 2048 16384
+
+    config WP_PROTOCOL_PRIORITY
+        int "Protocol thread priority"
+        default 6
+        range 1 20
+
+    config WP_PACKET_TX_STACK_SIZE
+        int "Packet TX thread stack size [bytes]"
+        default 3072
+        range 2048 16384
+
+    config WP_PACKET_TX_PRIORITY
+        int "Packet TX thread priority"
+        default 4
+        range 1 20
+
+    config WP_LINK_STACK_SIZE
+        int "USB/TCP link thread stack size [bytes]"
+        default 4096
+        range 2048 16384
+
+    config WP_LINK_PRIORITY
+        int "USB/TCP link thread priority"
+        default 5
+        range 1 20
+
+    config WP_PROVISIONING_STACK_SIZE
+        int "Provisioning thread stack size [bytes]"
+        default 4096
+        range 2048 16384
+
+    config WP_PROVISIONING_PRIORITY
+        int "Provisioning thread priority"
+        default 5
+        range 1 20
+
     config WP_HANDLER_STACK_SIZE
         int "Data handler stack size [bytes]"
         default 2048

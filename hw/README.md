@@ -17,12 +17,13 @@ the transmit and receive signal paths, high-voltage switching, power supplies,
 MSP430 control circuitry, and the host interface. The design sources are provided
 in Altium Designer format. This board is required to build a WULPUS PRO system.
 
-### WULPUS PRO Wifi host
+### WULPUS PRO WiFi host PCB
 
 Directory: [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb)
 
 A dedicated wireless host board for WULPUS PRO, based on the Seeed Studio XIAO
-ESP32-C6. It connects to the acquisition board and runs the ESP32 firmware in
+ESP32-C6. It is the primary host board for WULPUS PRO. It connects to the
+acquisition board and runs the ESP32 firmware in
 [`../fw/esp32`](../fw/esp32), providing Wi-Fi control and data transfer. The
 design sources are provided in KiCad format, together with fabrication and
 assembly outputs.
@@ -68,7 +69,7 @@ differ:
 | --- | --- | --- | --- |
 | WULPUS PRO acquisition board | [`wulpus_pro_acq_pcb_dev_board`](wulpus_pro_acq_pcb_dev_board) | [`LICENSE_ETH`](LICENSE_ETH) | Copyright (C) 2025 ETH Zurich. All rights reserved. |
 | WULPUS polyCMUT adapter | [`wulpus_polycmut_adapter`](wulpus_polycmut_adapter) | [`LICENSE_ETH`](LICENSE_ETH) | Copyright (C) 2025 ETH Zurich. All rights reserved. |
-| WULPUS PRO Wifi host | [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb) | [`LICENSE`](LICENSE) | Copyright (C) 2026 Sergei Vostrikov. All rights reserved. |
+| WULPUS PRO WiFi host PCB | [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb) | [`LICENSE`](LICENSE) | Copyright (C) 2026 Sergei Vostrikov. All rights reserved. |
 
 The license terms are otherwise identical. The internal `kicad_us_lib`
 submodule contains third-party material and is not covered by this table; its

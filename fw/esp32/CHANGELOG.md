@@ -9,12 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added an ESP-IDF 6.0.1 toolchain guide covering EIM installation on Windows,
+  Linux, and macOS, VS Code setup, manual installation, environment validation,
+  flashing, and troubleshooting.
+- Added structured ESP32 documentation for firmware threads and data/control
+  paths, USB/TCP session switching, Wi-Fi provisioning, the MSP430 SPI and
+  configuration protocol, and the framed ESP-to-PC command/status protocol.
 - Added native ESP32-C6 USB CDC as a wired WULPUS PRO command and RF-data transport.
 - Added first-valid-command arbitration between concurrent TCP and USB listeners, including a `BUSY` response for the losing transport.
 - Added a transport-neutral byte-stream layer with exact reads, complete writes, header prefetching, and packet-level TX locking.
+- Added a fixed DMA-capable acquisition frame pool, sticky runtime error status,
+  and `GET_STATUS`, `STATUS`, and `CLEAR_STATUS` protocol commands.
 
 ### Changed
 
+- Corrected the documented MSP430 timer ordering: DC-DC turn-on precedes and
+  therefore has a lower timer value than the acquisition period.
+- Identified the WULPUS PRO WiFi host PCB, containing a XIAO ESP32-C6, as the
+  primary firmware target throughout the documentation; standalone XIAO and
+  DevKit boards remain development alternatives.
+- Reduced the ESP32 README to a project introduction, isolated per-board setup
+  instructions, wiring, first connection, and links to the detailed documents.
+- Increased the default DMA acquisition frame pool from 8 to 64 slots, giving
+  128 ms of buffering at 500 FPS, and raised the configurable limit to 128.
 - Moved command handling, MSP430 lifecycle management, and acquisition cleanup into one transport-independent session runner.
 - Routed RF frames through the active session transport instead of the TCP socket directly.
 - Reserved USB CDC for binary protocol data and disabled the conflicting application console by default.
@@ -23,6 +40,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   disconnection.
 - Started the USB listener before waiting for Wi-Fi provisioning or association,
   allowing wired operation when the network is unavailable or unconfigured.
+- Split board access, frame storage, control state, protocol framing, generic
+  links, and application threads into focused components.
+- Made the acquisition thread the sole SPI readout owner and the packet TX
+  thread the sole USB/TCP writer, isolating SPI DMA from link backpressure and
+  prioritizing control responses at packet boundaries.
+- Reduced `app_main()` to component initialization and task startup, and moved
+  every application task implementation under `components/threads`.
 - Expanded the firmware README with communication architecture, arbitration, USB flashing/JTAG coexistence, logging, and power-management behavior.
 
 ## [1.1.0] - 
