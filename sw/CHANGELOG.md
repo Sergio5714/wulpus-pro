@@ -11,10 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Selectable Wi-Fi and BLE communication transports in `WulpusGuiSingleCh`.
 - Native ESP32-C6 USB CDC transport for wired WULPUS PRO communication.
+- Added a GUI acquisition-status field that reports decoded ESP32 error flags,
+  overflow, SPI, transmission, discard, and frame-buffer counters when frame
+  reception stalls.
 - Added a standalone USB frame-rate profiler with acquisition-number gap,
   timeout, latency, and achieved-FPS reporting.
+- Added explicit `simplified` and `active-all` profiler modes; the active mode
+  enables every TX/RX channel and fixes DC-DC turn-on at 100 us, while custom
+  mode exposes absolute or period-relative DC-DC timing.
+- Added profiler loading of GUI-saved acquisition JSON, including complete
+  timing/gain settings and TX/RX masks in newly saved configuration files.
+- Added Python APIs for reading versioned ESP32 runtime status and clearing
+  selected sticky errors and diagnostic counters.
+
 ### Fixed
 
+- Prevented high-frame-rate GUI acquisitions from overflowing the ESP32 frame
+  pool by moving B-mode filtering/envelope processing to the visualization
+  thread and throttling progress-widget and debug-log updates to 10 Hz.
+- Prevented finite GUI acquisitions from stalling when the device's continuous
+  16-bit acquisition counter exceeds the requested frame count; received frames
+  are stored using the GUI's independent sequential frame index.
 - Worked around the Windows pySerial `SetCommState` error 31 affecting the
   ESP32-C6 USB Serial/JTAG CDC port while preserving all other configuration
   errors.

@@ -1,159 +1,184 @@
-# WULPUS PRO source files for ESP32 firmware project
+# WULPUS PRO ESP32 firmware
 
-This firmware connects WULPUS PRO to a host through either Wi-Fi TCP or the
-native USB CDC channel of an ESP32-C6.
+This ESP-IDF firmware connects the WULPUS PRO acquisition board to a PC through
+either Wi-Fi/TCP or the native USB Serial/JTAG CDC interface of an ESP32-C6.
+Both transports use the same framed binary protocol and can remain available
+concurrently, while session arbitration ensures that only one host controls the
+acquisition board at a time.
 
-The firmware includes the following features:
-- **mDNS**: Multicast DNS for local network discovery
-- **Native USB CDC**: Wired binary communication through the same XIAO USB connector used for flashing and JTAG
-- **Full integration with the Python API**: The firmware also comes with an extension to the Python API, which allows you to control the WULPUS PRO over Wi-Fi
-- **Power Management**: The firmware includes power management, which allows the ESP32 to enter light sleep when not in use. This results in ~1.5mA current draw
-- **Easy expandability**: The firmware is designed to be easily extensible, allowing you to add new features and functionality as needed
+The **[WULPUS PRO WiFi host PCB](../../hw/wulpus_wifi_host_pcb)** is the primary
+host board for this firmware. It contains a Seeed Studio XIAO ESP32-C6 and uses
+the XIAO board configuration in this project. A standalone XIAO ESP32-C6 is
+supported as a development alternative, and the ESP32-C6-DEVKITM-1 remains
+supported for firmware bring-up.
 
-## Communication architecture
+The ESP32 receives fixed 804-byte RF frames from the MSP430 over 8 MHz SPI DMA,
+buffers them without payload copies, and forwards them through the active PC
+transport. Board access, acquisition, protocol processing, packet transmission,
+and provisioning have separate components and FreeRTOS threads.
 
-TCP and USB CDC carry the same framed WULPUS binary protocol. Command parsing,
-MSP430 startup/shutdown, SPI configuration, and RF-frame generation are shared;
-transport-specific code is restricted to reading and writing an ordered byte
-stream.
+## Documentation
 
-The transport implementation is organized as follows:
+- [ESP-IDF toolchain setup](docs/toolchain.md) — installation on Windows,
+  Linux, and macOS, VS Code configuration, environment activation, verification,
+  and troubleshooting.
+- [Firmware architecture](docs/architecture.md) — components, threads, data and
+  control paths, DMA frame buffering, session lifecycle, and USB/Wi-Fi switching.
+- [Wi-Fi provisioning](docs/provisioning.md) — first boot, SoftAP parameters,
+  credential storage, reconnection, reprovisioning, and USB availability.
+- [ESP32-to-MSP430 protocol](docs/msp_protocol.md) — SPI electrical settings,
+  DATA_READY handshake, configuration-package fields, timing conversions,
+  restart behavior, and RF frame layout.
+- [ESP32-to-PC protocol](docs/esp_protocol.md) — USB/TCP framing, commands,
+  acknowledgements, acquisition packets, status flags, and diagnostic counters.
+- [Firmware changelog](CHANGELOG.md)
 
-- `components/wulpus_transport/wulpus_transport.*` defines exact reads,
-  complete writes, header prefetching, and packet-level transmit locking.
-- `wulpus_tcp_transport.*` adapts the existing socket component.
-- `wulpus_usb_transport.*` adapts the ESP-IDF USB Serial/JTAG CDC driver.
-- `components/commander` implements the shared binary command codec.
-- `main/app_main.c` owns arbitration, the common session lifecycle, MSP430 SPI
-  access, and RF-frame routing.
+Python GUI and transport examples are in the repository's [`sw`](../../sw)
+directory. The main interactive example is
+[`wulpus_pro_wifi_example.ipynb`](../../sw/wulpus_pro_wifi_example.ipynb).
 
-### Session arbitration
+## Getting started
 
-The firmware supports one controlling host at a time. TCP and USB listener
-tasks wait concurrently, but neither owns WULPUS PRO until it receives a valid
-protocol header. Consequently, an attached USB cable used only for power,
-flashing, or JTAG does not block Wi-Fi.
+### Requirements
 
-The first listener to acquire the session mutex becomes the owner. A competing
-client receives the `BUSY` protocol response. Only the owner can issue commands
-or receive `GET_DATA` frames. Ownership is released after `CLOSE`, transport
-failure, or reset. Common cleanup stops transmission, returns the MSP430 to its
-safe state, asserts MSP430 reset, and then allows either listener to win the
-next session.
+- ESP-IDF 6.0.1
+- A WULPUS PRO WiFi host PCB or another supported ESP32-C6 board listed below
+- A data-capable USB cable
+- The matching WULPUS PRO MSP430 firmware on the acquisition board
+- The ESP-IDF command-line environment or official ESP-IDF VS Code extension
 
-The USB listener starts as soon as provisioning is launched and does not wait
-for Wi-Fi provisioning or association to finish. USB CDC therefore remains
-available when the network is unconfigured, unavailable, or reconnecting.
+The firmware is tested with:
 
-Command acknowledgements and RF data originate from different FreeRTOS tasks.
-The active transport therefore has a TX mutex held across each complete header
-and payload so that packets cannot interleave.
+- **WULPUS PRO WiFi host PCB containing a XIAO ESP32-C6 — primary host board**
+- Standalone Seeed Studio XIAO ESP32-C6 — development alternative
+- Espressif ESP32-C6-DEVKITM-1 — firmware bring-up/development board
 
-### USB CDC, flashing, JTAG, and logs
+Use a separate build directory and generated `sdkconfig` for each board.
+ESP-IDF defaults initialize a new configuration but do not reliably replace
+board-pin values already stored in an existing `sdkconfig`; isolated files avoid
+accidentally building one board with another board's pinout.
 
-ESP32-C6 has a fixed USB Serial/JTAG composite device. Its CDC channel carries
-WULPUS binary data in normal application mode, while its JTAG interface remains
-available to OpenOCD. Close the Python GUI before running `idf.py -p COMx flash`
-so the flashing tool can claim the CDC port. After flashing and reset, reopen
-the same port in the GUI.
+### Install ESP-IDF
 
-Application logs must not share USB CDC with binary data. The default ESP32-C6
-configuration therefore disables the application console. The XIAO pinout uses
-the default UART0 pins for SPI, so a debug build may enable only a custom UART
-console mapped to verified, non-conflicting pins. ROM or bootloader text can
-still appear briefly around reset; host code discards stale input and
-resynchronizes on the six-byte `wulpus` magic value.
+Install **ESP-IDF 6.0.1** and its ESP32-C6 toolchain before configuring the
+firmware. Espressif's Installation Manager is the recommended method:
 
-The firmware acquires an `ESP_PM_NO_LIGHT_SLEEP` power-management lock before
-automatic light sleep can interrupt USB enumeration. The USB listener retains
-that lock whenever host SOF packets are detected and releases it only after USB
-disconnection. This keeps enumeration and the wired byte stream responsive,
-while still allowing light sleep when no USB host is present.
-
-# How to get started?
-
-This firmware is written with [ESP-IDF](https://github.com/espressif/esp-idf). We recommend using at the official [VS Code extension](https://github.com/espressif/vscode-esp-idf-extension/tree/master).
-
-The firmware has been tested on both the [ESP32-C6-DEVKITM-1](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32c6/esp32-c6-devkitm-1/user_guide.html) and the [Seeed Studio XIAO ESP32-C6](https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/) boards. The XIAO ESP32-C6 target is expected to receive longer-term support, while the DevKit remains useful for development and bring-up. The firmware should work on other ESP32-C6 boards with suitable board defaults, and is designed to be portable to other ESP32 boards as well.
-
-### Board Variants
-
-Board-specific pinouts are stored as ESP-IDF defaults files under `boards/`. Keep reusable project settings in `sdkconfig.defaults`, chip-level settings in `sdkconfig.defaults.<target>`, and board pin choices in the board file.
-
-To configure the firmware for the Seeed Studio XIAO ESP32-C6:
-
-```powershell
-idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.esp32c6;boards/xiao-esp32c6.defaults" reconfigure
+```text
+eim install -i v6.0.1
 ```
 
-To configure the firmware for the ESP32-C6-DEVKITM-1:
+Open an activated ESP-IDF terminal and verify:
 
-```powershell
-idf.py -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.esp32c6;boards/esp32c6-devkitm-1.defaults" reconfigure
+```text
+idf.py --version
 ```
 
-After reconfiguring, build and flash as usual:
+See [ESP-IDF toolchain setup](docs/toolchain.md) for Windows, Linux, macOS,
+VS Code, manual installation, and troubleshooting instructions.
+
+### WULPUS PRO WiFi host PCB (primary)
+
+The [WULPUS PRO WiFi host PCB](../../hw/wulpus_wifi_host_pcb) integrates the
+XIAO ESP32-C6 with the WULPUS PRO host connector and is the recommended board
+for normal use. Configure it with the XIAO defaults:
 
 ```powershell
-idf.py build
-idf.py -p COM7 flash monitor
+idf.py -B build-xiao `
+  -D SDKCONFIG=sdkconfig.xiao `
+  -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.esp32c6;boards/xiao-esp32c6.defaults" `
+  reconfigure
 ```
 
-Adapt `COM7` to the serial port assigned to your ESP32 board.
+Build and flash, replacing `COM10` with the port assigned by Windows:
 
-### IMPORTANT: Provision Wi-Fi after flashing
+```powershell
+idf.py -B build-xiao build
+idf.py -B build-xiao -p COM10 flash
+```
 
-After flashing the firmware for the first time, provision the ESP32-C6 with the Wi-Fi network credentials. Provisioning lets the ESP32 store the SSID and password in non-volatile memory, so the firmware can reconnect to the same network after reset or power cycling.
+WULPUS PRO WiFi host PCB routing:
 
-Follow Espressif's provisioning documentation for the first-time setup flow: [ESP-IDF Provisioning API](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/provisioning/index.html).
+| Signal | ESP32-C6 GPIO | XIAO pin | WULPUS PRO connector |
+|---|---:|---|---|
+| `SPI_SS` | 17 | D7 | X3.4 |
+| `SPI_CLK` | 18 | D10 | X3.3 |
+| `SPI_MISO` | 20 | D9 / MISO | X3.1 |
+| `SPI_MOSI` | 19 | D8 / SCK | X3.2 |
+| `DATA_READY` | 1 | D1 | X4.2 |
+| `MSP_RST_N` | 0 | D0 | X1.5 |
 
-### Connection to WULPUS PRO
+The WULPUS PRO WiFi host PCB routing intentionally differs from the standard
+SPI function labels printed for the XIAO header. Follow the GPIO and connector
+assignments above.
 
-Use the following pin mapping for the integrated WULPUS PRO Wi-Fi host PCB.
+### Standalone Seeed Studio XIAO ESP32-C6
 
-Seeed Studio XIAO ESP32-C6:
+A standalone XIAO ESP32-C6 uses the same `xiao-esp32c6.defaults`, build
+commands, GPIO assignments, and WULPUS PRO connector mapping as the primary
+WULPUS PRO WiFi host PCB. It is useful for firmware development or bench
+testing when the integrated host PCB is not required.
 
-| **Signal**         | **ESP32-C6 GPIO** | **XIAO ESP32-C6 Pin** | **WULPUS PRO Connector Pin** |
-|--------------------|-------------------|-----------------------|------------------------------|
-| `SPI_SS`           | 17                | D7                    | X3.4                         |
-| `SPI_CLK`          | 18                | D10                   | X3.3                         |
-| `SPI_MISO`         | 20                | D9 / MISO             | X3.1                         |
-| `SPI_MOSI`         | 19                | D8 / SCK              | X3.2                         |
-| `Data_ready`       | 1                 | D1                    | X4.2                         |
-| `MSP_RST_N`        | 0                 | D0                    | X1.5                         |
+### ESP32-C6-DEVKITM-1
 
-ESP32-C6-DEVKITM-1:
+Configure an isolated DevKit build:
 
-| **Signal**         | **ESP32-C6 GPIO** | **DevKit Header Name** | **WULPUS PRO Connector Pin** |
-|--------------------|-------------------|------------------------|------------------------------|
-| `SPI_SS`           | 18                | 18                     | X3.4                         |
-| `SPI_CLK`          | 6                 | 6                      | X3.3                         |
-| `SPI_MISO`         | 7                 | 7                      | X3.1                         |
-| `SPI_MOSI`         | 2                 | 2                      | X3.2                         |
-| `Data_ready`       | 1                 | 1/N                    | X4.2                         |
-| `MSP_RST_N`        | 3                 | 3                      | X1.5                         |
+```powershell
+idf.py -B build-devkit `
+  -D SDKCONFIG=sdkconfig.devkit `
+  -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.esp32c6;boards/esp32c6-devkitm-1.defaults" `
+  reconfigure
+```
 
-For the ESP32-C6-DEVKITM-1 defaults, GPIO2 is used for `SPI_MOSI`; `MSP_RST_N` is therefore mapped to GPIO3.
+Build and flash:
 
-The WULPUS PRO WiFi host PCB routing intentionally differs from the SPI functions printed on the XIAO headers. Use the GPIO assignments above rather than the header function names.
+```powershell
+idf.py -B build-devkit build
+idf.py -B build-devkit -p COM10 flash
+```
 
-The dedicated `BLE_conn_ready`/host-ready signal used by the earlier wired nRF52 setup is not used. `MSP_RST_N` is configured as an open-drain active-low output without an internal pull-up. It is asserted while no transport owns a session, released after the first valid TCP or USB command claims one, and allowed 100 ms for MSP430 boot before command handling continues. Before normal session closure or reset, the ESP32 sends the MSP430 restart command and waits for the next configuration-request edge, which confirms that the acquisition loop returned and `disableAll()` ran. It then asserts reset. A bounded timeout and hard communication-error path retain immediate reset as an emergency fallback. The matching MSP430 firmware therefore starts configuration and acquisition without polling a link-ready pin.
+DevKit wiring:
 
-For a new board revision, copy one of the files in `boards/`, change only the `CONFIG_WP_*` and board hardware values, then pass that file in `SDKCONFIG_DEFAULTS`.
+| Signal | ESP32-C6 GPIO | DevKit header | WULPUS PRO connector |
+|---|---:|---|---|
+| `SPI_SS` | 18 | 18 | X3.4 |
+| `SPI_CLK` | 6 | 6 | X3.3 |
+| `SPI_MISO` | 7 | 7 | X3.1 |
+| `SPI_MOSI` | 2 | 2 | X3.2 |
+| `DATA_READY` | 1 | 1/N | X4.2 |
+| `MSP_RST_N` | 3 | 3 | X1.5 |
 
-### Python communication example
+GPIO2 is used for `SPI_MOSI`, so the DevKit defaults place `MSP_RST_N` on
+GPIO3.
 
-For Python-side usage, see `../../sw/wulpus_pro_wifi_example.ipynb`. Its GUI
-offers Wi-Fi TCP, native USB CDC, and BLE transports, followed by detailed
-manual Wi-Fi protocol steps.
+### First connection
 
-# Authors
+After flashing, reset the board and close any ESP-IDF monitor or serial terminal
+that owns the COM port. The application console is disabled in the normal
+ESP32-C6 configuration because USB CDC carries binary WULPUS protocol traffic.
 
+For a wired connection to the WULPUS PRO WiFi host PCB or another supported
+board, select **USB CDC** in the Python GUI, scan for devices, and open the
+ESP32-C6 COM port. USB CDC does not use the selected UART baud rate as a
+physical link-speed setting.
+
+For Wi-Fi, an unprovisioned board automatically starts its SoftAP provisioning
+service. Complete [Wi-Fi provisioning](docs/provisioning.md), then select
+**Wi-Fi** in the GUI and scan for the mDNS-advertised device. Close an active USB
+protocol session before attempting to control the board over Wi-Fi; the USB
+cable itself may remain connected.
+
+Do not use `idf.py flash monitor` for normal acquisition. A serial monitor keeps
+the CDC port open and prevents the Python GUI from claiming it. Run a monitor
+only for a deliberately configured debug build and close it before using USB
+CDC protocol communication.
+
+## Authors
+
+- Sergei Vostrikov
 - Cedric Hirschi, ETH Zurich
-- Sergei Vistrikov (Sergio5714 on GitHub)
 
-# License
+## License
 
-ESP-IDF is licensed under the Apache License 2.0. See the [LICENSE](https://github.com/espressif/esp-idf/blob/master/LICENSE) in the ESP-IDF repository for more information.
-
-ESP-IDF uses multiple third-party components, which are licensed under various other open-source licenses. One example is [FreeRTOS](https://github.com/FreeRTOS). Please make sure all of the licenses are compatible with your project.
+Project source files are licensed under the terms stated in their headers and
+the repository license files. ESP-IDF and its third-party components retain
+their respective licenses.

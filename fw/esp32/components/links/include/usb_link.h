@@ -1,7 +1,5 @@
 /*
-Copyright (C) 2025 ETH Zurich. All rights reserved.
-
-Author: Cedric Hirschi, ETH Zurich
+Copyright (C) 2026 Sergei Vostrikov
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,5 +15,5 @@ limitations under the License.
 */
 
 #pragma once
-
-void print_wifi_stats(void);
+#include "link.h"
+esp_err_t usb_link_create(link_t *link);

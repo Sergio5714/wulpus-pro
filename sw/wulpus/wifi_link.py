@@ -38,7 +38,7 @@ MAX_PAYLOAD_LENGTH = 65535
 
 
 class WulpusProWiFiCommand(IntEnum):
-    """Commands used by the WULPUS PRO TCP protocol."""
+    """Commands used by the WULPUS PRO TCP and USB CDC protocol."""
 
     SET_CONFIG = 0x57
     GET_DATA = 0x58
@@ -49,6 +49,9 @@ class WulpusProWiFiCommand(IntEnum):
     START_RX = 0x5D
     STOP_RX = 0x5E
     BUSY = 0x5F
+    GET_STATUS = 0x60
+    STATUS = 0x61
+    CLEAR_STATUS = 0x62
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}.{self.name}"
@@ -89,6 +92,21 @@ class WulpusProFrame:
     samples: np.ndarray
     acquisition_number: int
     tx_rx_id: int
+
+
+@dataclass(frozen=True)
+class WulpusProStatus:
+    version: int
+    error_flags: int
+    buffer_overflow_count: int
+    data_ready_count: int
+    completed_spi_count: int
+    transmitted_frame_count: int
+    discarded_frame_count: int
+    spi_error_count: int
+    link_error_count: int
+    current_buffer_usage: int
+    maximum_buffer_usage: int
 
 
 class WulpusProWiFiLink:
@@ -459,6 +477,45 @@ class WulpusProWiFiLink:
                 f"Expected {WulpusProWiFiCommand.PONG}, received {header.command}"
             )
         return header, payload
+
+    def get_status(self, timeout: float = 5.0) -> WulpusProStatus:
+        """Return the ESP32 runtime status and sticky acquisition errors."""
+        self.send_command(WulpusProWiFiCommand.GET_STATUS, timeout=timeout)
+        deadline = time.monotonic() + timeout
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise WulpusProWiFiTimeout("Timed out waiting for STATUS")
+            header, payload = self.receive_command(remaining)
+            if header.command == WulpusProWiFiCommand.GET_DATA:
+                continue
+            if header.command != WulpusProWiFiCommand.STATUS:
+                raise WulpusProWiFiProtocolError(
+                    f"Expected {WulpusProWiFiCommand.STATUS}, received {header.command}"
+                )
+            if len(payload) != struct.calcsize("<BBHIIIIIIIIHH"):
+                raise WulpusProWiFiProtocolError(
+                    f"Invalid STATUS payload length {len(payload)}"
+                )
+            values = struct.unpack("<BBHIIIIIIIIHH", payload)
+            version, size, _, *fields = values
+            if size != len(payload):
+                raise WulpusProWiFiProtocolError(
+                    f"STATUS reports size {size}, received {len(payload)}"
+                )
+            return WulpusProStatus(version, *fields)
+
+    def clear_status(
+        self,
+        error_mask: int = 0xFFFFFFFF,
+        clear_counters: bool = False,
+        timeout: float = 5.0,
+    ) -> None:
+        """Clear selected sticky errors and optionally diagnostic counters."""
+        payload = struct.pack("<IB", error_mask & 0xFFFFFFFF, clear_counters)
+        self.send_command(
+            WulpusProWiFiCommand.CLEAR_STATUS, payload, timeout=timeout
+        )
 
     def toggle_rx(self, state: bool) -> None:
         command = (

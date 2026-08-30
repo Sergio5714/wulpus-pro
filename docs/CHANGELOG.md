@@ -24,3 +24,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated ESP32 and Python usage documentation for transport selection, USB
   connection ownership, and power-management behavior while a USB host is
   connected.
+- Documented the task-based SPI DMA and packet-transmission architecture and
+  runtime status commands.

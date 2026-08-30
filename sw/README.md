@@ -43,11 +43,43 @@ uv run python profile_usb_fps.py --port COM9 --period-us 10000 5000 2000 --frame
 
 The profiler reports target and measured FPS, 95th-percentile frame latency,
 timeouts, and acquisition-number gaps. The fastest passing period is the
-maximum stable rate among the values tested. As an additional profiling safety
-invariant, `dcdc_turnon` is always configured 1 ms later than the acquisition
-period, after timer quantization, and the default TX mask is zero. Enabling TX
-with `--tx-mask` requires an independently verified safe pulse-repetition rate
-for the connected hardware and transducer.
+maximum stable rate among the values tested. The `simplified` preset disables
+TX/RX masks and uses a +1 ms DC-DC margin. The `active-all` preset selects all
+channels and fixes DC-DC turn-on at 100 us. Custom and saved configurations use
+their explicitly selected timing and masks. Enabling TX requires an
+independently verified safe pulse-repetition rate for the connected hardware
+and transducer.
+
+To reproduce a configuration saved by the acquisition GUI, pass its JSON file.
+The saved measurement period is used when `--period-us` is omitted:
+
+```powershell
+uv run python profile_usb_fps.py --port COM10 --config uss_config_pro.json --frames 2000
+```
+
+Specify `--period-us` to override only the saved period for a rate sweep. New
+GUI configuration files include TX/RX mask arrays. Legacy files without masks
+remain compatible and use one zero-mask TX/RX configuration unless masks or a
+profiler mode are supplied explicitly.
+
+### Runtime status
+
+The TCP and USB CDC links expose the same ESP32 diagnostic API:
+
+```python
+status = link.get_status()
+print(hex(status.error_flags), status.current_buffer_usage)
+
+# Clear all sticky errors while preserving lifetime counters.
+link.clear_status()
+
+# Clear sticky errors and reset diagnostic counters.
+link.clear_status(clear_counters=True)
+```
+
+The status snapshot includes acquisition-buffer overflow, SPI and link errors,
+DATA_READY/SPI/transmitted-frame counters, discarded frames, and current and
+maximum DMA-buffer occupancy.
 
 # How to get started?
 

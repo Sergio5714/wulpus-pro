@@ -41,7 +41,6 @@ const int PROVISIONER_DONE_EVENT = BIT0;
 const int PROVISIONER_CONNECTED_EVENT = BIT1;
 
 static EventGroupHandle_t provisioner_event_group = NULL;
-static TaskHandle_t provisioner_task_handle = NULL;
 static bool started = false;
 
 /**
@@ -428,10 +427,8 @@ static void get_device_provisioning_name(char *service_name, size_t max)
  * @note This function is static and should not be used outside of this file
  *
  */
-static void provisioner_task(void *pvParameter)
+static esp_err_t provisioner_process(void)
 {
-    (void)pvParameter;
-
     // Check if device is provisioned
     bool provisioned = false;
     ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned));
@@ -472,13 +469,14 @@ static void provisioner_task(void *pvParameter)
         wifi_init_sta();
     }
 
-    vTaskDelete(NULL);
+    return ESP_OK;
 }
 
 esp_err_t provisioner_start(bool reset)
 {
-    // Check if provisioner is already started
-    if (provisioner_task_handle != NULL)
+    // The caller owns the provisioning thread. This component performs the
+    // provisioning workflow synchronously and never creates a hidden task.
+    if (started)
     {
         ESP_LOGE(TAG, "Provisioner already started");
         return ESP_ERR_INVALID_STATE;
@@ -529,28 +527,16 @@ esp_err_t provisioner_start(bool reset)
         }
     }
 
-    // Start provisioning task
-    xTaskCreate(provisioner_task, "provisioner_task", 4096, NULL, 5, &provisioner_task_handle);
-
-    return status;
+    return provisioner_process();
 }
 
 esp_err_t provisioner_stop(void)
 {
     esp_err_t status = ESP_OK;
 
-    // Check if task is initialized and running
-    if (provisioner_task_handle != NULL)
-    {
-        if (eTaskGetState(provisioner_task_handle) == eRunning)
-            // Delete provisioning task
-            vTaskDelete(provisioner_task_handle);
-
-        provisioner_task_handle = NULL;
-    }
-
     // Deinit provisioning manager
     network_prov_mgr_deinit();
+    started = false;
 
     ESP_LOGD(TAG, "Provisioner stopped");
 
@@ -560,7 +546,7 @@ esp_err_t provisioner_stop(void)
 esp_err_t provisioner_wait(void)
 {
     // Check if provisioner is started
-    if (provisioner_task_handle == NULL)
+    if (!started)
     {
         ESP_LOGE(TAG, "Provisioner not started");
         return ESP_ERR_INVALID_STATE;
