@@ -10,9 +10,38 @@ The supported configuration implementation is the WULPUS PRO stack:
 - `wulpus/wifi_link.py`: robust TCP transport and acquisition lifecycle
 - `wulpus/wifi_discovery.py`: mDNS discovery
 - `wulpus/usb_cdc_link.py`: native ESP32-C6 USB CDC transport
+- `wulpus/npz_viewer.py`: interactive acquisition-file inspection and signal processing
 
 The generic `gui.py` module and the `ble_dongle.py` transport are retained because WULPUS PRO notebooks use them for acquisition display and BLE-dongle serial-host compatibility.
 `WulpusGuiSingleCh` depends on the `WulpusProCommunicationLink` protocol rather than a concrete transport, so it can operate with `WulpusBleDongle`, `WulpusProWiFiLink`, or `WulpusProUsbCdcLink`.
+
+## Interactive NPZ viewer
+
+Use `WulpusProNpzViewer` in Jupyter to inspect files saved by either the GUI or
+the USB profiler. Select a local `.npz` using the upload control, filter frames
+by TX/RX configuration, and move through matching acquisitions with the slider.
+Raw, GUI-equivalent band-pass-filtered, and Hilbert-envelope traces can be
+shown independently. Set the sampling-frequency control to the value used for
+the acquisition because the legacy NPZ format does not store it. Set the
+acquisition slider to any filtered frame and press **Replay** to advance from
+that position at the selected FPS; replay ends at the final matching frame or
+when **Stop** is pressed. The Y-axis range is locked when replay starts so
+amplitude changes do not rescale the plot during playback:
+
+```python
+%matplotlib widget
+from wulpus.npz_viewer import WulpusProNpzViewer
+
+viewer = WulpusProNpzViewer()
+viewer
+```
+
+Files on the Jupyter server can also be opened directly:
+
+```python
+viewer = WulpusProNpzViewer("data_0.npz")
+viewer
+```
 
 ## USB CDC operation
 
@@ -56,6 +85,11 @@ The saved measurement period is used when `--period-us` is omitted:
 ```powershell
 uv run python profile_usb_fps.py --port COM10 --config uss_config_pro.json --frames 2000
 ```
+
+Add `--output acquisition.npz` to save the measured frames in the same format
+as the GUI, with the `data_arr`, `acq_num_arr`, and `tx_rx_id_arr` arrays. Warmup
+frames are not saved. When profiling multiple periods, the profiler appends the
+period to each filename, for example `acquisition_2000us.npz`.
 
 Specify `--period-us` to override only the saved period for a rate sweep. New
 GUI configuration files include TX/RX mask arrays. Legacy files without masks

@@ -10,8 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added an interactive viewer for GUI- and profiler-generated NPZ acquisitions,
+  including TX/RX configuration filtering, acquisition navigation, band-pass
+  filtering, Hilbert-envelope extraction, and controllable acquisition replay
+  with stable Y-axis limits.
 - Added exact GUI-saved acquisition configuration loading to the USB profiler,
-  including persisted TX/RX mask arrays for reproducible headless tests.
+  including persisted TX/RX mask arrays for reproducible headless tests and
+  optional GUI-compatible NPZ acquisition output.
 - Added ESP-IDF 6.0.1 installation and validation documentation for the ESP32
   firmware toolchain across Windows, Linux, macOS, and VS Code.
 - Added structured ESP32 documentation covering runtime architecture,
@@ -29,9 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Embedded the NPZ viewer's live ipympl canvas directly so replay and slider
+  updates use one visible plot instead of creating duplicate figure windows.
 - Prevented high-frame-rate GUI processing from stalling USB acquisitions by
   keeping filtering, plotting, widget updates, and per-frame logging out of the
   continuous receive path.
+- Prevented optional profiler data saving from adding per-frame NumPy copies to
+  the high-rate USB receive loop.
 - Fixed GUI acquisitions stalling partway through a run when the device's
   continuous acquisition sequence number exceeded the requested frame count.
 - Kept the ESP32-C6 out of automatic light sleep whenever a USB host is

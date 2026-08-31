@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Documented GUI-compatible profiler NPZ output and the interactive NPZ
+  viewer's file selection, configuration filtering, signal processing, and  replay controls.
 - Moved the full specifications table from the root README to `docs/full_specifications.md`.
 - Updated ESP32 and Python usage documentation for transport selection, USB
   connection ownership, and power-management behavior while a USB host is

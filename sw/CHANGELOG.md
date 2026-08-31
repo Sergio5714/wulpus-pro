@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added an interactive Jupyter NPZ viewer with browser upload, direct path
+  loading, TX/RX configuration filtering, acquisition navigation, metadata,
+  raw ADC plotting, GUI-equivalent band-pass filtering, and Hilbert-envelope
+  extraction, plus asynchronous replay from the current slider position at a
+  configurable frame rate and a fixed Y-axis range during playback.
 - Selectable Wi-Fi and BLE communication transports in `WulpusGuiSingleCh`.
 - Native ESP32-C6 USB CDC transport for wired WULPUS PRO communication.
 - Added a GUI acquisition-status field that reports decoded ESP32 error flags,
@@ -21,14 +26,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   mode exposes absolute or period-relative DC-DC timing.
 - Added profiler loading of GUI-saved acquisition JSON, including complete
   timing/gain settings and TX/RX masks in newly saved configuration files.
+- Added optional profiler output in the GUI-compatible NPZ format, with
+  period-specific filenames for multi-rate sweeps.
 - Added Python APIs for reading versioned ESP32 runtime status and clearing
   selected sticky errors and diagnostic counters.
 
 ### Fixed
 
+- Prevented duplicate NPZ-viewer figure windows by embedding the live ipympl
+  canvas directly while preserving interactive slider and replay updates.
 - Prevented high-frame-rate GUI acquisitions from overflowing the ESP32 frame
   pool by moving B-mode filtering/envelope processing to the visualization
   thread and throttling progress-widget and debug-log updates to 10 Hz.
+- Kept GUI-compatible profiler saving out of the acquisition hot path by
+  retaining received frame views and assembling the NPZ arrays after RX stops.
 - Prevented finite GUI acquisitions from stalling when the device's continuous
   16-bit acquisition counter exceeds the requested frame count; received frames
   are stored using the GUI's independent sequential frame index.

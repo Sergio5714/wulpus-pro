@@ -5,7 +5,10 @@ import json
 import statistics
 import sys
 import time
-from typing import List
+from pathlib import Path
+from typing import List, Optional
+
+import numpy as np
 
 from wulpus.usb_cdc_link import WulpusProUsbCdcLink
 from wulpus.uss_conf_pro import WulpusProUssConfig
@@ -48,6 +51,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--frames", type=int, default=500, help="Measured frames per period")
     parser.add_argument("--warmup", type=int, default=10, help="Frames discarded before timing")
+    parser.add_argument(
+        "--output",
+        help=(
+            "optionally save measured frames as a GUI-compatible .npz file; "
+            "rate sweeps append _<period>us to the filename"
+        ),
+    )
     parser.add_argument(
         "--samples",
         type=int,
@@ -149,13 +159,30 @@ def make_config(args: argparse.Namespace, period_us: int) -> WulpusProUssConfig:
     return WulpusProUssConfig(**values)
 
 
-def profile_period(link: WulpusProUsbCdcLink, args: argparse.Namespace, period_us: int) -> bool:
+def output_path(filename: str, period_us: int, multiple_periods: bool) -> Path:
+    path = Path(filename)
+    if path.suffix.lower() != ".npz":
+        path = path.with_suffix(".npz")
+    if multiple_periods:
+        path = path.with_name(f"{path.stem}_{period_us}us{path.suffix}")
+    return path
+
+
+def profile_period(
+    link: WulpusProUsbCdcLink,
+    args: argparse.Namespace,
+    period_us: int,
+    save_path: Optional[Path] = None,
+) -> bool:
     config = make_config(args, period_us)
     link.acq_length = config.num_samples
     timestamps: List[float] = []
     acquisition_numbers: List[int] = []
     timed_out = False
     total_received = 0
+    saved_samples = []
+    saved_acq_numbers = []
+    saved_tx_rx_ids = []
 
     link.toggle_rx(False)
     link.send_config(config.get_restart_package())
@@ -172,9 +199,31 @@ def profile_period(link: WulpusProUsbCdcLink, args: argparse.Namespace, period_u
             if index >= args.warmup:
                 timestamps.append(time.perf_counter())
                 acquisition_numbers.append(frame.acquisition_number)
+                if save_path is not None:
+                    # frame.samples is already a view of the received immutable
+                    # packet bytes. Retain that view and defer all bulk copying
+                    # and file I/O until acquisition has stopped.
+                    saved_samples.append(frame.samples)
+                    saved_acq_numbers.append(frame.acquisition_number)
+                    saved_tx_rx_ids.append(frame.tx_rx_id)
     finally:
         link.toggle_rx(False)
         link.send_config(config.get_restart_package())
+
+    if save_path is not None:
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        data_arr = (
+            np.column_stack(saved_samples).astype("<i2", copy=False)
+            if saved_samples
+            else np.empty((config.num_samples, 0), dtype="<i2")
+        )
+        np.savez(
+            save_path,
+            data_arr=data_arr,
+            acq_num_arr=np.asarray(saved_acq_numbers, dtype="<u2"),
+            tx_rx_id_arr=np.asarray(saved_tx_rx_ids, dtype=np.uint8),
+        )
+        print(f"Saved {len(saved_samples)} measured frames to {save_path}")
 
     target_fps = 1_000_000 / period_us
     if len(timestamps) < 2:
@@ -287,8 +336,14 @@ def main() -> int:
             "   period             requested             measured"
             "                         integrity"
         )
+        multiple_periods = len(args.period_us) > 1
         for period_us in args.period_us:
-            results.append(profile_period(link, args, period_us))
+            save_path = (
+                output_path(args.output, period_us, multiple_periods)
+                if args.output
+                else None
+            )
+            results.append(profile_period(link, args, period_us, save_path))
     except WulpusProWiFiError as exc:
         print(f"Profiling failed: {exc}", file=sys.stderr)
         return 3
