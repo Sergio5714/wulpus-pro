@@ -28,7 +28,7 @@ void wulpus_pro_protocol_make_header(wulpus_pro_header_t *header, wulpus_pro_com
 bool wulpus_pro_protocol_header_valid(const wulpus_pro_header_t *header)
 {
     return memcmp(header->magic, WULPUS_PRO_MAGIC, 6) == 0 &&
-           header->command >= WULPUS_PRO_SET_CONFIG && header->command <= WULPUS_PRO_CLEAR_STATUS;
+           header->command >= WULPUS_PRO_SET_CONFIG && header->command <= WULPUS_PRO_RESET_MSP;
 }
 
 esp_err_t wulpus_pro_protocol_wait_for_header(link_t *link)

@@ -31,6 +31,7 @@ limitations under the License.
 #define COMMAND_TIMEOUT pdMS_TO_TICKS(5000)
 #define DATA_READY_TIMEOUT pdMS_TO_TICKS(1000)
 #define MSP_BOOT_DELAY_MS 100
+#define MSP_RESET_PULSE_MS 10
 
 static QueueHandle_t session_queue;
 
@@ -44,6 +45,18 @@ static void stop_acquisition(wulpus_pro_session_ref_t session)
 {
     acquisition_thread_set_enabled(false);
     packet_tx_discard_session(session);
+}
+
+static esp_err_t reset_msp(void)
+{
+    esp_err_t result = board_msp_reset(true);
+    if (result != ESP_OK) return result;
+    vTaskDelay(pdMS_TO_TICKS(MSP_RESET_PULSE_MS));
+    acquisition_thread_clear_edges();
+    result = board_msp_reset(false);
+    if (result != ESP_OK) return result;
+    vTaskDelay(pdMS_TO_TICKS(MSP_BOOT_DELAY_MS));
+    return ESP_OK;
 }
 
 static esp_err_t read_payload(link_t *link, const wulpus_pro_header_t *header,
@@ -74,6 +87,7 @@ static void run_session(wulpus_pro_session_ref_t session)
         bool acknowledge_after_action =
             header.command == WULPUS_PRO_STOP_RX ||
             header.command == WULPUS_PRO_CLEAR_STATUS ||
+            header.command == WULPUS_PRO_RESET_MSP ||
             header.command == WULPUS_PRO_CLOSE;
         if (!acknowledge_after_action &&
             send_control(session, header.command, NULL, 0) != ESP_OK) break;
@@ -138,6 +152,18 @@ static void run_session(wulpus_pro_session_ref_t session)
             acquisition_thread_graceful_shutdown();
             board_msp_reset(true);
             esp_restart();
+            break;
+        case WULPUS_PRO_RESET_MSP:
+            if (wulpus_pro_state_is_acquiring()) {
+                if (send_control(session, WULPUS_PRO_BUSY, NULL, 0) != ESP_OK) running = false;
+                break;
+            }
+            if (reset_msp() != ESP_OK) {
+                wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_FAILURE);
+                running = false;
+                break;
+            }
+            if (send_control(session, WULPUS_PRO_RESET_MSP, NULL, 0) != ESP_OK) running = false;
             break;
         case WULPUS_PRO_GET_DATA:
         case WULPUS_PRO_PONG:

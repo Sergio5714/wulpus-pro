@@ -129,7 +129,7 @@ For more details, see `sw/how_to_install_dependencies.md`.
 ## Wi-Fi example on Windows
 
 The `wulpus_pro_wifi_example.ipynb` notebook discovers the ESP32 through the
-`_wulpus._tcp.local.` mDNS service and communicates with it over TCP port 2121.
+`_wulpus_pro._tcp.local.` mDNS service and communicates with it over TCP port 2121.
 The computer and WULPUS PRO must be connected to the same local network.
 
 Windows may block mDNS or the TCP connection when the network profile is
@@ -171,7 +171,7 @@ print(sys.executable)
 
 After changing the network profile or firewall rules, restart the notebook
 kernel and reset the ESP32. If multicast service discovery remains unavailable,
-`WulpusProWiFiLink.get_available()` also attempts to resolve `wulpus.local`.
+`WulpusProWiFiLink.get_available()` also attempts to resolve `wulpus_pro.local`.
 The ESP32 IP address can additionally be supplied manually using
 `WulpusProWiFiDevice` as shown in the example notebook.
 

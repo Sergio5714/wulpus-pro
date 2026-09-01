@@ -45,6 +45,7 @@ class WulpusProWiFiCommand(IntEnum):
     PING = 0x59
     PONG = 0x5A
     RESET = 0x5B
+    RESET_MSP = 0x63
     CLOSE = 0x5C
     START_RX = 0x5D
     STOP_RX = 0x5E
@@ -74,6 +75,10 @@ class WulpusProWiFiDisconnected(WulpusProWiFiError):
 
 class WulpusProWiFiProtocolError(WulpusProWiFiError):
     """Raised when a malformed or unexpected protocol packet is received."""
+
+
+class WulpusProWiFiBusy(WulpusProWiFiProtocolError):
+    """Raised when the device cannot accept a command in its current state."""
 
 
 @dataclass(frozen=True)
@@ -114,7 +119,7 @@ class WulpusProWiFiLink:
 
     def __init__(
         self,
-        service_name: str = "wulpus",
+        service_name: str = "wulpus_pro",
         service_type: str = "tcp",
         port: int = 2121,
     ) -> None:
@@ -358,8 +363,8 @@ class WulpusProWiFiLink:
                 )
                 continue
             if header.command == WulpusProWiFiCommand.BUSY:
-                raise WulpusProWiFiProtocolError(
-                    "WULPUS PRO is controlled through another transport"
+                raise WulpusProWiFiBusy(
+                    "WULPUS PRO is busy or controlled through another transport"
                 )
             raise WulpusProWiFiProtocolError(
                 f"Expected {expected_response}, received {header.command}"
@@ -564,6 +569,10 @@ class WulpusProWiFiLink:
 
     def reset(self) -> None:
         self.send_command(WulpusProWiFiCommand.RESET)
+
+    def reset_msp(self) -> None:
+        """Reset the MSP430 while keeping the current transport session open."""
+        self.send_command(WulpusProWiFiCommand.RESET_MSP)
 
     def _discard_socket(self) -> None:
         sock, self.sock = self.sock, None

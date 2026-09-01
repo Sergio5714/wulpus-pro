@@ -23,6 +23,7 @@ const char *wulpus_pro_command_name(wulpus_pro_command_t command)
     case WULPUS_PRO_PING: return "PING";
     case WULPUS_PRO_PONG: return "PONG";
     case WULPUS_PRO_RESET: return "RESET";
+    case WULPUS_PRO_RESET_MSP: return "RESET_MSP";
     case WULPUS_PRO_CLOSE: return "CLOSE";
     case WULPUS_PRO_START_RX: return "START_RX";
     case WULPUS_PRO_STOP_RX: return "STOP_RX";

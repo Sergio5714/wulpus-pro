@@ -12,7 +12,7 @@ ESP32-C6-DEVKITM-1 boards use the same protocol for development.
 
 | Transport | Endpoint | Notes |
 |---|---|---|
-| Wi-Fi TCP | TCP port 2121 by default | Discovered through the `_wulpus._tcp` mDNS service after Wi-Fi obtains an IP address. |
+| Wi-Fi TCP | TCP port 2121 by default | Discovered through the `_wulpus_pro._tcp` mDNS service after Wi-Fi obtains an IP address. |
 | USB CDC | ESP32-C6 USB Serial/JTAG COM port | Baud-rate settings do not control USB line speed. The port must not be open in another GUI, terminal, or monitor. |
 
 Only one transport owns a protocol session at a time. See
@@ -56,15 +56,16 @@ packet.
 | `0x59` | `PING` | PC -> ESP | Empty | Empty `PING` acknowledgement, followed by `PONG` containing ASCII `pong`. |
 | `0x5A` | `PONG` | ESP -> PC | ASCII `pong` | Second response to `PING`. |
 | `0x5B` | `RESET` | PC -> ESP | Empty | Empty `RESET` acknowledgement is queued first; acquisition is stopped, MSP430 is shut down/reset, and the ESP32 restarts. |
+| `0x63` | `RESET_MSP` | PC -> ESP | Empty | If acquisition is inactive, the MSP430 reset pin is pulsed and an empty `RESET_MSP` acknowledgement is sent after its boot delay. Otherwise, `BUSY` is returned. The protocol session remains open. |
 | `0x5C` | `CLOSE` | PC -> ESP | Empty | Acquisition is stopped, then an empty `CLOSE` acknowledgement is sent. The session proceeds through common cleanup and releases ownership. |
 | `0x5D` | `START_RX` | PC -> ESP | Empty | Empty `START_RX` acknowledgement is sent before acquisition forwarding is enabled. |
 | `0x5E` | `STOP_RX` | PC -> ESP | Empty | Acquisition and queued session frames are stopped/discarded before the empty `STOP_RX` acknowledgement is sent. The protocol session remains open. |
-| `0x5F` | `BUSY` | ESP -> PC | Empty | Returned when another transport already owns the session. |
+| `0x5F` | `BUSY` | ESP -> PC | Empty | Returned when another transport already owns the session or `RESET_MSP` is requested during acquisition. |
 | `0x60` | `GET_STATUS` | PC -> ESP | Empty | Empty `GET_STATUS` acknowledgement followed by one `STATUS` packet. |
 | `0x61` | `STATUS` | ESP -> PC | 40-byte versioned status payload | Runtime errors, counters, and frame-pool occupancy. |
 | `0x62` | `CLEAR_STATUS` | PC -> ESP | Empty or five-byte clear request | Requested flags/counters are cleared before the empty `CLEAR_STATUS` acknowledgement is sent. |
 
-Command values outside `0x57`–`0x62` are invalid in the current protocol.
+Command values outside `0x57`–`0x63` are invalid in the current protocol.
 Commands documented as ESP-to-PC should not be sent by a host.
 
 ## Acknowledgement model
@@ -88,6 +89,7 @@ Special response sequences are:
 PING        -> PING acknowledgement -> PONG("pong")
 GET_STATUS  -> GET_STATUS acknowledgement -> STATUS(payload)
 CLEAR_STATUS -> CLEAR_STATUS acknowledgement after clearing
+RESET_MSP   -> RESET_MSP acknowledgement after MSP430 restart, or BUSY
 CLOSE       -> CLOSE acknowledgement after stopping RX
 ```
 

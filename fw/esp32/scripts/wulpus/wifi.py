@@ -30,9 +30,10 @@ class WulpusCommand(IntEnum):
     PONG = 0x5A
     RESET = 0x5B
     CLOSE = 0x5C
+    RESET_MSP = 0x63
 
 class WulpusWiFi():
-    def __init__(self, service_name: str = "wulpus", service_type: str = "tcp", port:int = 2121):
+    def __init__(self, service_name: str = "wulpus_pro", service_type: str = "tcp", port:int = 2121):
         """
         Constructor.
 
