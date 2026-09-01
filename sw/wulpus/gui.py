@@ -27,6 +27,8 @@ import logging
 from collections.abc import Mapping
 from typing import Any, Optional, Protocol, Sequence, Union
 
+from .wifi_link import WulpusProWiFiBusy, WulpusProWiFiError
+
 
 class WulpusProCommunicationLink(Protocol):
     """Communication operations required by :class:`WulpusGuiSingleCh`."""
@@ -44,6 +46,8 @@ class WulpusProCommunicationLink(Protocol):
     def receive_data(self) -> Any: ...
 
     def toggle_rx(self, state: bool) -> Any: ...
+
+    def reset_msp(self) -> Any: ...
 
     def get_status(self, timeout: float = 5.0) -> Any: ...
 
@@ -246,6 +250,10 @@ class WulpusGuiSingleCh(widgets.VBox):
             description="Start measurement", disabled=True
         )
 
+        self.reset_msp_button = widgets.Button(
+            description="Reset MSP", disabled=True
+        )
+
         self.save_data_check = widgets.Checkbox(
             value=True, description="Save Data as .npz", disabled=True
         )
@@ -284,6 +292,7 @@ class WulpusGuiSingleCh(widgets.VBox):
         progr_ctl_box_1 = widgets.VBox(
             [
                 self.start_stop_button,
+                self.reset_msp_button,
                 self.frame_progr_bar,
                 self.acquisition_status_label,
             ]
@@ -314,6 +323,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         # To start stop acqusition button
         self.start_stop_button.on_click(self.click_start_stop_acq)
+        self.reset_msp_button.on_click(self.click_reset_msp)
 
         # add to children
         self.children = [main_box]
@@ -436,6 +446,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.port_opened = False
             self.ser_open_button.description = "Open device"
             self.start_stop_button.disabled = True
+            self.reset_msp_button.disabled = True
 
         self.com_link = self.com_links[change.new]
         self.com_link.acq_length = self.uss_conf.num_samples
@@ -479,12 +490,14 @@ class WulpusGuiSingleCh(widgets.VBox):
                 b.description = "Open device"
                 self.port_opened = False
                 self.start_stop_button.disabled = True
+                self.reset_msp_button.disabled = True
                 self.log.error("Port not opened")
                 return
 
             b.description = "Close device"
             self.port_opened = True
             self.start_stop_button.disabled = False
+            self.reset_msp_button.disabled = not hasattr(self.com_link, "reset_msp")
             self.transport_dd.disabled = True
 
             self.log.debug("Port opened")
@@ -496,6 +509,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             b.description = "Open device"
             self.port_opened = False
             self.start_stop_button.disabled = True
+            self.reset_msp_button.disabled = True
             self.transport_dd.disabled = len(self.com_links) == 1
 
             self.log.debug("Port closed")
@@ -528,6 +542,30 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.uss_conf.sampling_freq, change.new[0] * 10**6, change.new[1] * 10**6
         )
 
+    def click_reset_msp(self, _button):
+        """Reset the MSP430, stopping stale firmware acquisition if necessary."""
+        self.log.info("Resetting MSP430")
+        self.reset_msp_button.disabled = True
+        self.acquisition_status_label.value = "Status: Resetting MSP430"
+        try:
+            try:
+                self.com_link.reset_msp()
+            except WulpusProWiFiBusy:
+                self.log.info("MSP430 reset was busy; sending STOP_RX and retrying")
+                self.com_link.toggle_rx(False)
+                self.com_link.reset_msp()
+            self.acquisition_status_label.value = "Status: MSP430 reset"
+            self.log.info("MSP430 reset complete")
+        except Exception as exc:
+            self.acquisition_status_label.value = "Status: MSP430 reset failed"
+            self.log.exception("Could not reset MSP430: %s", exc)
+        finally:
+            self.reset_msp_button.disabled = (
+                not self.port_opened
+                or self.acquisition_running
+                or not hasattr(self.com_link, "reset_msp")
+            )
+
     def click_start_stop_acq(self, b):
         self.log.info("Start/Stop acquisition")
 
@@ -544,6 +582,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
             # Disable serial port related widgets
             self.ser_open_button.disabled = True
+            self.reset_msp_button.disabled = True
 
             # Clean Save data label
             self.save_data_label.value = ""
@@ -579,8 +618,9 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.band_pass_frs.disabled = True
             self.save_data_check.disabled = True
 
-            # Enable serial port related widgets again
-            self.ser_open_button.disabled = False
+            # The acquisition thread still owns the transport while it sends
+            # STOP_RX and performs cleanup. It re-enables these controls when
+            # that work has actually finished.
 
             self.log.debug("Acquisition stopped")
 
@@ -756,8 +796,11 @@ class WulpusGuiSingleCh(widgets.VBox):
             )
 
         self.log.info("Stopping RX")
-        self.com_link.toggle_rx(False)
-        self.log.debug("RX stopped")
+        try:
+            self.com_link.toggle_rx(False)
+            self.log.debug("RX stopped")
+        except WulpusProWiFiError as exc:
+            self.log.warning("Could not stop RX during acquisition cleanup: %s", exc)
 
         self.log.debug("Stopping visualization thread")
         self.visualize = False
@@ -766,7 +809,7 @@ class WulpusGuiSingleCh(widgets.VBox):
         self.log.info("Sending restart command")
         try:
             self.com_link.send_config(self.uss_conf.get_restart_package())
-        except ValueError as e:
+        except (ValueError, WulpusProWiFiError) as e:
             self.log.error(f"Error sending restart command: {e}")
             self.save_data_label.value = str(e)
         self.log.debug("Restart command sent")
@@ -778,6 +821,13 @@ class WulpusGuiSingleCh(widgets.VBox):
         # Stop acquisition
         if self.ser_open_button.disabled:
             self.click_start_stop_acq(self.start_stop_button)
+
+        # All background communication has stopped, so GUI callbacks can now
+        # safely use or close the transport without racing its packet reader.
+        self.ser_open_button.disabled = False
+        self.reset_msp_button.disabled = (
+            not self.port_opened or not hasattr(self.com_link, "reset_msp")
+        )
 
         # self.click_open_port(self.ser_open_button) # if you want to close the port after acquisition
 

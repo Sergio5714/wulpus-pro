@@ -84,7 +84,7 @@ class _WulpusProServiceListener(ServiceListener):
 class WulpusProWiFiDiscovery:
     """Discover WULPUS PRO TCP services advertised over mDNS."""
 
-    def __init__(self, service_name: str = "wulpus", service_type: str = "tcp"):
+    def __init__(self, service_name: str = "wulpus_pro", service_type: str = "tcp"):
         self.service_name = service_name
         self.service_type = service_type
         self.service = f"_{service_name}._{service_type}.local."

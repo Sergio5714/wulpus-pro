@@ -413,7 +413,7 @@ esp_err_t provisioner_reset(void)
 static void get_device_provisioning_name(char *service_name, size_t max)
 {
     uint8_t eth_mac[6];
-    const char *ssid_prefix = "PROV_WULPUS_";
+    const char *ssid_prefix = "PROV_WULPUS_PRO_";
     esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
     snprintf(service_name, max, "%s%02X%02X%02X",
              ssid_prefix, eth_mac[3], eth_mac[4], eth_mac[5]);
@@ -439,7 +439,7 @@ static esp_err_t provisioner_process(void)
         ESP_LOGI(TAG, "Starting provisioning");
 
         // Get device name
-        char service_name[19];
+        char service_name[23];
         get_device_provisioning_name(service_name, sizeof(service_name));
 
         // Set provisioning parameters

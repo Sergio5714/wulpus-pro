@@ -31,14 +31,14 @@ listener starts independently during normal firmware startup.
 | Setting | Current value |
 |---|---|
 | Scheme | SoftAP |
-| SoftAP name | `PROV_WULPUS_XXXXXX` |
+| SoftAP name | `PROV_WULPUS_PRO_XXXXXX` |
 | Name suffix | Last three bytes of the station MAC address, uppercase hexadecimal |
 | Provisioning security | ESP-IDF Security 1 |
 | Proof of possession | `CONFIG_PROVISIONER_POP`; default `abcd1234` |
 | SoftAP service key | None |
 
 Use an ESP-IDF-compatible provisioning client, select the
-`PROV_WULPUS_XXXXXX` device, enter the proof-of-possession value, and provide
+`PROV_WULPUS_PRO_XXXXXX` device, enter the proof-of-possession value, and provide
 the target Wi-Fi SSID and password. The provisioning service validates the
 credentials by connecting to the requested access point.
 
@@ -50,7 +50,7 @@ value through `CONFIG_PROVISIONER_POP` for deployed devices.
 ```mermaid
 flowchart TD
     BOOT[Boot] --> CHECK{Stored Wi-Fi credentials?}
-    CHECK -->|No| AP[Start PROV_WULPUS_XXXXXX SoftAP]
+    CHECK -->|No| AP[Start PROV_WULPUS_PRO_XXXXXX SoftAP]
     AP --> CREDS[Receive SSID and password]
     CREDS --> TEST{Association succeeds?}
     TEST -->|No| AP
@@ -58,7 +58,7 @@ flowchart TD
     CHECK -->|Yes| STA[Start Wi-Fi station]
     STORE --> STA
     STA --> IP[Obtain IP address]
-    IP --> MDNS[Advertise wulpus TCP service with mDNS]
+    IP --> MDNS[Advertise wulpus_pro TCP service with mDNS]
     IP --> TCP[Start TCP listener on port 2121]
 ```
 
