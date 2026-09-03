@@ -18,7 +18,7 @@ limitations under the License.
 const char *wulpus_pro_command_name(wulpus_pro_command_t command)
 {
     switch (command) {
-    case WULPUS_PRO_SET_CONFIG: return "SET_CONFIG";
+    case WULPUS_PRO_SET_ACQ_CONFIG: return "SET_ACQ_CONFIG";
     case WULPUS_PRO_GET_DATA: return "GET_DATA";
     case WULPUS_PRO_PING: return "PING";
     case WULPUS_PRO_PONG: return "PONG";
@@ -31,6 +31,14 @@ const char *wulpus_pro_command_name(wulpus_pro_command_t command)
     case WULPUS_PRO_GET_STATUS: return "GET_STATUS";
     case WULPUS_PRO_STATUS: return "STATUS";
     case WULPUS_PRO_CLEAR_STATUS: return "CLEAR_STATUS";
+    case WULPUS_PRO_GET_DEVICE_CONFIG: return "GET_DEVICE_CONFIG";
+    case WULPUS_PRO_DEVICE_CONFIG: return "DEVICE_CONFIG";
+    case WULPUS_PRO_SET_DEVICE_CONFIG: return "SET_DEVICE_CONFIG";
+    case WULPUS_PRO_GET_WIFI_STATUS: return "GET_WIFI_STATUS";
+    case WULPUS_PRO_WIFI_STATUS: return "WIFI_STATUS";
+    case WULPUS_PRO_SET_WIFI_CREDENTIALS: return "SET_WIFI_CREDENTIALS";
+    case WULPUS_PRO_CLEAR_WIFI_CREDENTIALS: return "CLEAR_WIFI_CREDENTIALS";
+    case WULPUS_PRO_ERROR: return "ERROR";
     default: return "UNKNOWN";
     }
 }

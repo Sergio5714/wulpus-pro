@@ -1,4 +1,22 @@
-"""Profile WULPUS PRO frame rate over ESP32-C6 native USB CDC."""
+"""
+Copyright (C) 2026 Sergei Vostrikov
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+SPDX-License-Identifier: Apache-2.0
+
+Profile WULPUS PRO frame rate over ESP32-C6 native USB CDC.
+"""
 
 import argparse
 import json
@@ -185,9 +203,9 @@ def profile_period(
     saved_tx_rx_ids = []
 
     link.toggle_rx(False)
-    link.send_config(config.get_restart_package())
+    link.send_acq_config(config.get_restart_package())
     time.sleep(2.5)
-    link.send_config(config.get_conf_package())
+    link.send_acq_config(config.get_conf_package())
     link.toggle_rx(True)
     try:
         for index in range(args.frames + args.warmup):
@@ -208,7 +226,7 @@ def profile_period(
                     saved_tx_rx_ids.append(frame.tx_rx_id)
     finally:
         link.toggle_rx(False)
-        link.send_config(config.get_restart_package())
+        link.send_acq_config(config.get_restart_package())
 
     if save_path is not None:
         save_path.parent.mkdir(parents=True, exist_ok=True)

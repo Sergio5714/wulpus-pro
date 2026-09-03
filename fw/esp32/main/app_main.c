@@ -17,7 +17,6 @@ limitations under the License.
 #include "board.h"
 #include "double_reset.h"
 #include "esp_log.h"
-#include "mdns_manager.h"
 #include "provisioner.h"
 #include "threads.h"
 #include "wulpus_pro_frame_pool.h"
@@ -39,9 +38,6 @@ void app_main(void)
     }
 #endif
     ESP_ERROR_CHECK(provisioner_init());
-    ESP_ERROR_CHECK(mdns_manager_init("wulpus_pro"));
-    ESP_ERROR_CHECK(mdns_manager_add("wulpus_pro", MDNS_PROTO_TCP,
-                                     CONFIG_WP_SOCKET_PORT));
     ESP_ERROR_CHECK(wulpus_pro_frame_pool_init(CONFIG_WP_DATA_RX_LENGTH));
     ESP_ERROR_CHECK(wulpus_pro_status_init());
     ESP_ERROR_CHECK(wulpus_pro_state_init());

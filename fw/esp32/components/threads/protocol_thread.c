@@ -27,6 +27,7 @@ limitations under the License.
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_state.h"
 #include "wulpus_pro_status.h"
+#include "wulpus_pro_persistent_config.h"
 
 #define COMMAND_TIMEOUT pdMS_TO_TICKS(5000)
 #define DATA_READY_TIMEOUT pdMS_TO_TICKS(1000)
@@ -39,6 +40,13 @@ static esp_err_t send_control(wulpus_pro_session_ref_t session, uint8_t command,
                               const void *payload, uint16_t length)
 {
     return packet_tx_submit_control(session, command, payload, length, COMMAND_TIMEOUT);
+}
+
+static esp_err_t send_command_error(wulpus_pro_session_ref_t session, uint8_t command,
+                                    esp_err_t error)
+{
+    wulpus_pro_error_response_t response = {.command = command, .error = error};
+    return send_control(session, WULPUS_PRO_ERROR, &response, sizeof(response));
 }
 
 static void stop_acquisition(wulpus_pro_session_ref_t session)
@@ -88,13 +96,16 @@ static void run_session(wulpus_pro_session_ref_t session)
             header.command == WULPUS_PRO_STOP_RX ||
             header.command == WULPUS_PRO_CLEAR_STATUS ||
             header.command == WULPUS_PRO_RESET_MSP ||
+            header.command == WULPUS_PRO_SET_DEVICE_CONFIG ||
+            header.command == WULPUS_PRO_SET_WIFI_CREDENTIALS ||
+            header.command == WULPUS_PRO_CLEAR_WIFI_CREDENTIALS ||
             header.command == WULPUS_PRO_CLOSE;
         if (!acknowledge_after_action &&
             send_control(session, header.command, NULL, 0) != ESP_OK) break;
         if (read_payload(session.link, &header, payload, sizeof(payload)) != ESP_OK) break;
 
         switch ((wulpus_pro_command_t)header.command) {
-        case WULPUS_PRO_SET_CONFIG: {
+        case WULPUS_PRO_SET_ACQ_CONFIG: {
             if (acquisition_thread_wait_for_edge(DATA_READY_TIMEOUT) != ESP_OK) {
                 wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_TIMEOUT);
                 break;
@@ -105,6 +116,58 @@ static void run_session(wulpus_pro_session_ref_t session)
                 wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_FAILURE);
                 wulpus_pro_status_increment_spi_error();
             }
+            break;
+        }
+        case WULPUS_PRO_GET_DEVICE_CONFIG: {
+            wulpus_pro_device_config_t config;
+            esp_err_t result = wulpus_pro_device_config_load(&config);
+            if (result != ESP_OK || send_control(session, WULPUS_PRO_DEVICE_CONFIG,
+                                                 &config, sizeof(config)) != ESP_OK) running = false;
+            break;
+        }
+        case WULPUS_PRO_SET_DEVICE_CONFIG: {
+            esp_err_t result = ESP_ERR_INVALID_SIZE;
+            if (header.data_length == sizeof(wulpus_pro_device_config_t)) {
+                wulpus_pro_device_config_t config;
+                memcpy(&config, payload, sizeof(config));
+                result = wulpus_pro_device_config_save(&config);
+            }
+            if (result == ESP_OK) result = send_control(session, header.command, NULL, 0);
+            else result = send_command_error(session, header.command, result);
+            if (result != ESP_OK) running = false;
+            break;
+        }
+        case WULPUS_PRO_GET_WIFI_STATUS: {
+            wulpus_pro_wifi_status_t status;
+            esp_err_t result = provisioner_get_status(&status);
+            if (result != ESP_OK || send_control(session, WULPUS_PRO_WIFI_STATUS,
+                                                 &status, sizeof(status)) != ESP_OK) running = false;
+            break;
+        }
+        case WULPUS_PRO_SET_WIFI_CREDENTIALS: {
+            esp_err_t result = ESP_ERR_INVALID_SIZE;
+            if (header.data_length >= sizeof(wulpus_pro_wifi_credentials_header_t)) {
+                wulpus_pro_wifi_credentials_header_t request;
+                memcpy(&request, payload, sizeof(request));
+                size_t expected = sizeof(request) + request.ssid_length + request.password_length;
+                if (request.version == 1 && request.reserved == 0 && expected == header.data_length) {
+                    const uint8_t *ssid = payload + sizeof(request);
+                    const uint8_t *password = ssid + request.ssid_length;
+                    result = provisioner_set_credentials(ssid, request.ssid_length,
+                                                         password, request.password_length);
+                } else result = ESP_ERR_INVALID_ARG;
+            }
+            if (result == ESP_OK) result = send_control(session, header.command, NULL, 0);
+            else result = send_command_error(session, header.command, result);
+            if (result != ESP_OK) running = false;
+            break;
+        }
+        case WULPUS_PRO_CLEAR_WIFI_CREDENTIALS: {
+            esp_err_t result = header.data_length == 0 ? provisioner_clear_credentials()
+                                                       : ESP_ERR_INVALID_SIZE;
+            if (result == ESP_OK) result = send_control(session, header.command, NULL, 0);
+            else result = send_command_error(session, header.command, result);
+            if (result != ESP_OK) running = false;
             break;
         }
         case WULPUS_PRO_PING:
@@ -169,6 +232,9 @@ static void run_session(wulpus_pro_session_ref_t session)
         case WULPUS_PRO_PONG:
         case WULPUS_PRO_BUSY:
         case WULPUS_PRO_STATUS:
+        case WULPUS_PRO_DEVICE_CONFIG:
+        case WULPUS_PRO_WIFI_STATUS:
+        case WULPUS_PRO_ERROR:
             break;
         }
     }

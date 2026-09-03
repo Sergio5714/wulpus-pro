@@ -17,7 +17,7 @@ limitations under the License.
 #pragma once
 #include <stdint.h>
 typedef enum {
-    WULPUS_PRO_SET_CONFIG = 0x57,
+    WULPUS_PRO_SET_ACQ_CONFIG = 0x57,
     WULPUS_PRO_GET_DATA = 0x58,
     WULPUS_PRO_PING = 0x59,
     WULPUS_PRO_PONG = 0x5A,
@@ -30,5 +30,25 @@ typedef enum {
     WULPUS_PRO_GET_STATUS = 0x60,
     WULPUS_PRO_STATUS = 0x61,
     WULPUS_PRO_CLEAR_STATUS = 0x62,
+    WULPUS_PRO_GET_DEVICE_CONFIG = 0x64,
+    WULPUS_PRO_DEVICE_CONFIG = 0x65,
+    WULPUS_PRO_SET_DEVICE_CONFIG = 0x66,
+    WULPUS_PRO_GET_WIFI_STATUS = 0x67,
+    WULPUS_PRO_WIFI_STATUS = 0x68,
+    WULPUS_PRO_SET_WIFI_CREDENTIALS = 0x69,
+    WULPUS_PRO_CLEAR_WIFI_CREDENTIALS = 0x6A,
+    WULPUS_PRO_ERROR = 0x6B,
 } wulpus_pro_command_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t version;
+    uint8_t ssid_length;
+    uint8_t password_length;
+    uint8_t reserved;
+} wulpus_pro_wifi_credentials_header_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t command;
+    int32_t error;
+} wulpus_pro_error_response_t;
 const char *wulpus_pro_command_name(wulpus_pro_command_t command);

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Documented persistent device configuration, reboot-only Wi-Fi policy,
+  write-only credential commands, Wi-Fi runtime status, and the persistent
+  Wi-Fi/TCP task model.
 - Added WULPUS PRO full specifications as a dedicated documentation page.
 - Added project-level documentation changelog.
 - Added image documentation README with authorship and CC BY-ND 4.0 license information.
@@ -20,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated setup documentation to use `wulpus_pro_example.ipynb` as the main
+  USB CDC, Wi-Fi, and BLE workflow and documented archived notebooks under
+  `sw/legacy`.
 - Documented GUI-compatible profiler NPZ output and the interactive NPZ
   viewer's file selection, configuration filtering, signal processing, and  replay controls.
 - Moved the full specifications table from the root README to `docs/full_specifications.md`.

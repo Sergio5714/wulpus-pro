@@ -40,7 +40,7 @@ MAX_PAYLOAD_LENGTH = 65535
 class WulpusProWiFiCommand(IntEnum):
     """Commands used by the WULPUS PRO TCP and USB CDC protocol."""
 
-    SET_CONFIG = 0x57
+    SET_ACQ_CONFIG = 0x57
     GET_DATA = 0x58
     PING = 0x59
     PONG = 0x5A
@@ -53,6 +53,14 @@ class WulpusProWiFiCommand(IntEnum):
     GET_STATUS = 0x60
     STATUS = 0x61
     CLEAR_STATUS = 0x62
+    GET_DEVICE_CONFIG = 0x64
+    DEVICE_CONFIG = 0x65
+    SET_DEVICE_CONFIG = 0x66
+    GET_WIFI_STATUS = 0x67
+    WIFI_STATUS = 0x68
+    SET_WIFI_CREDENTIALS = 0x69
+    CLEAR_WIFI_CREDENTIALS = 0x6A
+    ERROR = 0x6B
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}.{self.name}"
@@ -79,6 +87,30 @@ class WulpusProWiFiProtocolError(WulpusProWiFiError):
 
 class WulpusProWiFiBusy(WulpusProWiFiProtocolError):
     """Raised when the device cannot accept a command in its current state."""
+
+
+class WulpusProCommandError(WulpusProWiFiProtocolError):
+    """Raised when firmware rejects a valid command."""
+
+    def __init__(self, command: WulpusProWiFiCommand, error: int) -> None:
+        self.command = command
+        self.error = error
+        super().__init__(f"{command.name} failed with ESP error 0x{error & 0xffffffff:08x}")
+
+
+class WulpusProWiFiPowerSave(IntEnum):
+    NONE = 0
+    MIN_MODEM = 1
+    MAX_MODEM = 2
+
+
+class WulpusProWiFiState(IntEnum):
+    DISABLED = 0
+    PROVISIONING = 1
+    CONNECTING = 2
+    CONNECTED = 3
+    DISCONNECTED = 4
+    ERROR = 5
 
 
 @dataclass(frozen=True)
@@ -112,6 +144,24 @@ class WulpusProStatus:
     link_error_count: int
     current_buffer_usage: int
     maximum_buffer_usage: int
+
+
+@dataclass(frozen=True)
+class WulpusProDeviceConfig:
+    wifi_enabled_at_boot: bool = True
+    auto_provision: bool = True
+    wifi_power_save_mode: WulpusProWiFiPowerSave = WulpusProWiFiPowerSave.MAX_MODEM
+    twt_enabled: bool = False
+    version: int = 1
+
+
+@dataclass(frozen=True)
+class WulpusProWiFiStatus:
+    state: WulpusProWiFiState
+    credentials_present: bool
+    rssi: int
+    ipv4: str
+    version: int = 1
 
 
 class WulpusProWiFiLink:
@@ -366,6 +416,15 @@ class WulpusProWiFiLink:
                 raise WulpusProWiFiBusy(
                     "WULPUS PRO is busy or controlled through another transport"
                 )
+            if header.command == WulpusProWiFiCommand.ERROR:
+                if len(payload) != 5:
+                    raise WulpusProWiFiProtocolError("Invalid ERROR payload")
+                failed_command, error = struct.unpack("<Bi", payload)
+                try:
+                    failed = WulpusProWiFiCommand(failed_command)
+                except ValueError as exc:
+                    raise WulpusProWiFiProtocolError("Unknown command in ERROR payload") from exc
+                raise WulpusProCommandError(failed, error)
             raise WulpusProWiFiProtocolError(
                 f"Expected {expected_response}, received {header.command}"
             )
@@ -395,8 +454,46 @@ class WulpusProWiFiLink:
                 sock.settimeout(original_timeout)
         self.backlog = b""
 
-    def send_config(self, conf_bytes_pack: bytes) -> None:
-        self.send_command(WulpusProWiFiCommand.SET_CONFIG, conf_bytes_pack)
+    def send_acq_config(self, conf_bytes_pack: bytes) -> None:
+        self.send_command(WulpusProWiFiCommand.SET_ACQ_CONFIG, conf_bytes_pack)
+
+    def get_device_config(self, timeout: float = 5.0) -> WulpusProDeviceConfig:
+        self.send_command(WulpusProWiFiCommand.GET_DEVICE_CONFIG, timeout=timeout)
+        header, payload = self.receive_command(timeout)
+        if header.command != WulpusProWiFiCommand.DEVICE_CONFIG or len(payload) != 16:
+            raise WulpusProWiFiProtocolError("Invalid DEVICE_CONFIG response")
+        version, size, enabled, auto, power_save, twt, reserved = struct.unpack("<BBBBBB10s", payload)
+        if version != 1 or size != len(payload) or any(reserved):
+            raise WulpusProWiFiProtocolError("Unsupported DEVICE_CONFIG payload")
+        return WulpusProDeviceConfig(bool(enabled), bool(auto), WulpusProWiFiPowerSave(power_save), bool(twt), version)
+
+    def set_device_config(self, config: WulpusProDeviceConfig, timeout: float = 5.0) -> None:
+        payload = struct.pack("<BBBBBB10s", config.version, 16,
+                              int(config.wifi_enabled_at_boot), int(config.auto_provision),
+                              int(config.wifi_power_save_mode), int(config.twt_enabled), b"\0" * 10)
+        self.send_command(WulpusProWiFiCommand.SET_DEVICE_CONFIG, payload, timeout=timeout)
+
+    def get_wifi_status(self, timeout: float = 5.0) -> WulpusProWiFiStatus:
+        self.send_command(WulpusProWiFiCommand.GET_WIFI_STATUS, timeout=timeout)
+        header, payload = self.receive_command(timeout)
+        if header.command != WulpusProWiFiCommand.WIFI_STATUS or len(payload) != 12:
+            raise WulpusProWiFiProtocolError("Invalid WIFI_STATUS response")
+        version, size, state, present, rssi, reserved, address = struct.unpack("<BBBBb3s4s", payload)
+        if version != 1 or size != len(payload) or any(reserved):
+            raise WulpusProWiFiProtocolError("Unsupported WIFI_STATUS payload")
+        return WulpusProWiFiStatus(WulpusProWiFiState(state), bool(present), rssi,
+                                   ".".join(str(byte) for byte in address), version)
+
+    def set_wifi_credentials(self, ssid: str, password: str, timeout: float = 5.0) -> None:
+        ssid_bytes = ssid.encode("utf-8")
+        password_bytes = password.encode("utf-8")
+        if not 1 <= len(ssid_bytes) <= 32 or len(password_bytes) > 64:
+            raise ValueError("SSID must be 1-32 bytes and password at most 64 bytes")
+        payload = struct.pack("<BBBB", 1, len(ssid_bytes), len(password_bytes), 0) + ssid_bytes + password_bytes
+        self.send_command(WulpusProWiFiCommand.SET_WIFI_CREDENTIALS, payload, timeout=timeout)
+
+    def clear_wifi_credentials(self, timeout: float = 5.0) -> None:
+        self.send_command(WulpusProWiFiCommand.CLEAR_WIFI_CREDENTIALS, timeout=timeout)
 
     @staticmethod
     def _decode_rf_frame(payload: bytes) -> WulpusProFrame:
@@ -546,9 +643,9 @@ class WulpusProWiFiLink:
         acquisition_started = False
         try:
             self.toggle_rx(False)
-            self.send_config(config.get_restart_package())
+            self.send_acq_config(config.get_restart_package())
             time.sleep(restart_delay)
-            self.send_config(config.get_conf_package())
+            self.send_acq_config(config.get_conf_package())
             self.toggle_rx(True)
             acquisition_started = True
 
@@ -563,7 +660,7 @@ class WulpusProWiFiLink:
                 try:
                     if acquisition_started or self.rx_enabled:
                         self.toggle_rx(False)
-                    self.send_config(config.get_restart_package())
+                    self.send_acq_config(config.get_restart_package())
                 except WulpusProWiFiError:
                     logger.exception("Could not return MSP430 to its safe state")
 

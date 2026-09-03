@@ -179,7 +179,7 @@ This option is convenient for outsourced PCB production and assembly, with an es
    uv run jupyter notebook
    ```
 
-5. Open `wulpus_pro_wifi_example.ipynb` in the browser and follow the notebook instructions for discovery, connection setup, configuration transfer, and acquisition.
+5. Open `wulpus_pro_example.ipynb` in the browser and follow the notebook instructions for discovery, connection setup, configuration transfer, and acquisition.
 
 ## BLE setup: WULPUS PRO + nRF52 DK (legacy)
 
@@ -193,7 +193,7 @@ This option is convenient for outsourced PCB production and assembly, with an es
    uv run jupyter notebook
    ```
 
-6. Open `wulpus_pro_gui.ipynb` in the browser and follow the notebook instructions to begin acquisition.
+6. Open `wulpus_pro_example.ipynb` in the browser, select **BLE**, and follow the notebook instructions to begin acquisition. Older notebook variants are archived under `sw/legacy`.
 
 # Citation
 

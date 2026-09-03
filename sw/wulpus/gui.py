@@ -41,7 +41,7 @@ class WulpusProCommunicationLink(Protocol):
 
     def close(self) -> bool: ...
 
-    def send_config(self, conf_bytes_pack: bytes) -> Any: ...
+    def send_acq_config(self, conf_bytes_pack: bytes) -> Any: ...
 
     def receive_data(self) -> Any: ...
 
@@ -172,6 +172,7 @@ class WulpusGuiSingleCh(widgets.VBox):
         self.ser_open_button = widgets.Button(description="Open device", disabled=True)
 
         self.port_opened = False
+        self.opened_link = None
         self.acquisition_running = False
 
         devices = self.com_link.get_available()
@@ -444,6 +445,7 @@ class WulpusGuiSingleCh(widgets.VBox):
         if self.port_opened:
             self.com_link.close()
             self.port_opened = False
+            self.opened_link = None
             self.ser_open_button.description = "Open device"
             self.start_stop_button.disabled = True
             self.reset_msp_button.disabled = True
@@ -489,6 +491,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             if not self.com_link.open(device):
                 b.description = "Open device"
                 self.port_opened = False
+                self.opened_link = None
                 self.start_stop_button.disabled = True
                 self.reset_msp_button.disabled = True
                 self.log.error("Port not opened")
@@ -496,6 +499,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
             b.description = "Close device"
             self.port_opened = True
+            self.opened_link = self.com_link
             self.start_stop_button.disabled = False
             self.reset_msp_button.disabled = not hasattr(self.com_link, "reset_msp")
             self.transport_dd.disabled = True
@@ -508,6 +512,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.com_link.close()
             b.description = "Open device"
             self.port_opened = False
+            self.opened_link = None
             self.start_stop_button.disabled = True
             self.reset_msp_button.disabled = True
             self.transport_dd.disabled = len(self.com_links) == 1
@@ -625,6 +630,29 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.log.debug("Acquisition stopped")
 
     def run_acquisition_loop(self):
+        """Run acquisition and keep transport failures inside the GUI thread."""
+        try:
+            self._run_acquisition_loop()
+        except Exception as exc:
+            self.log.exception("Acquisition failed on the selected transport")
+            self.acquisition_running = False
+            self.visualize = False
+            self.acquisition_status_label.value = f"Status: Acquisition failed: {exc}"
+            self.save_data_label.value = str(exc)
+            self.start_stop_button.description = "Start measurement"
+            self.ser_open_button.disabled = not self.port_opened
+            self.reset_msp_button.disabled = (
+                not self.port_opened
+                or self.opened_link is None
+                or not hasattr(self.opened_link, "reset_msp")
+            )
+
+    def _run_acquisition_loop(self):
+        if not self.port_opened or self.opened_link is None:
+            raise RuntimeError("No communication device is open")
+        # Use the exact link that was opened. The visible transport selector
+        # cannot redirect a running acquisition to another link instance.
+        self.com_link = self.opened_link
         #         self.fig.show()
         self.log.info("Acquisition thread started")
 
@@ -647,7 +675,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         # Send a restart command (if system is already running)
         self.log.info("Sending restart command")
-        self.com_link.send_config(self.uss_conf.get_restart_package())
+        self.com_link.send_acq_config(self.uss_conf.get_restart_package())
         self.log.debug("Restart command sent")
 
         # Wait 2.5 seconds (much larger than max measurement period = 2s)
@@ -657,7 +685,7 @@ class WulpusGuiSingleCh(widgets.VBox):
         # Generate and send a configuration package
         try:
             self.log.info("Sending configuration package")
-            self.com_link.send_config(self.uss_conf.get_conf_package())
+            self.com_link.send_acq_config(self.uss_conf.get_conf_package())
             self.log.debug("Configuration package sent")
         except ValueError as e:
             self.log.error(f"Error sending configuration package: {e}")
@@ -808,7 +836,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         self.log.info("Sending restart command")
         try:
-            self.com_link.send_config(self.uss_conf.get_restart_package())
+            self.com_link.send_acq_config(self.uss_conf.get_restart_package())
         except (ValueError, WulpusProWiFiError) as e:
             self.log.error(f"Error sending restart command: {e}")
             self.save_data_label.value = str(e)

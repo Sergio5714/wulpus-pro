@@ -21,6 +21,7 @@ XIAO firmware defaults as a standalone development module.
 | `components/links` | Common ordered byte-stream interface plus USB and TCP adapters. |
 | `components/threads` | Every application-owned FreeRTOS thread. |
 | `components/provisioner` | Wi-Fi station setup and SoftAP provisioning workflow. |
+| `components/persistent_config` | Versioned device-wide boot policy stored in NVS. |
 | `components/mdns_manager` | Network discovery for the TCP service. |
 
 Board-specific operations stay in `components/board`; application threads do
@@ -33,8 +34,8 @@ not manipulate GPIO or SPI peripherals directly.
 | `acquisition` | 8 | Sole SPI acquisition owner. Responds to DATA_READY and receives one 804-byte DMA transfer into a frame slot. |
 | `protocol` | 6 | Sole reader of the active link. Parses PC commands and orchestrates the MSP430 lifecycle. |
 | `usb_link` | 5 | Detects a USB host, finds a valid protocol header, and attempts to claim the session. |
-| `tcp_link` | 5 | Accepts TCP clients, finds a valid protocol header, and attempts to claim the session. Starts only after Wi-Fi is connected. |
-| `provisioning` | 5 | Provisions or reconnects Wi-Fi, sets up optional TWT, starts the TCP listener, and then exits. |
+| `tcp_link` | 5 | Starts once, waits for a Wi-Fi connection, then accepts TCP clients and attempts to claim the session. |
+| `provisioning` (`wifi_manager`) | 5 | Persistent Wi-Fi owner. Applies boot policy, provisions or reconnects, publishes connectivity, and configures power save/TWT. |
 | `packet_tx` | 4 | Sole writer to USB or TCP. Serializes control responses and acquisition packets. |
 
 `app_main()` performs initialization and starts these threads. It does not move

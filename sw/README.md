@@ -1,19 +1,30 @@
 # WULPUS PRO software
 This directory contains the WULPUS PRO Python API, graphical user interface components, Wi-Fi and serial transports, and example Jupyter notebooks.
 
+`wulpus_pro_example.ipynb` is the supported main notebook for USB CDC, Wi-Fi,
+and BLE operation. Older specialized notebooks are retained for reference in
+`legacy/` and are not part of the current workflow.
+
 The supported configuration implementation is the WULPUS PRO stack:
 
 - `wulpus/rx_tx_conf_pro.py`: 16-channel TX/RX mask generation
 - `wulpus/uss_conf_pro.py`: acquisition configuration and packet encoding
 - `wulpus/config_package_pro.py`: configuration field definitions
 - `wulpus/uss_conf_gui_pro.py`: configuration widgets
+- `wulpus/gui.py`: transport-independent acquisition and visualization GUI
 - `wulpus/wifi_link.py`: robust TCP transport and acquisition lifecycle
 - `wulpus/wifi_discovery.py`: mDNS discovery
 - `wulpus/usb_cdc_link.py`: native ESP32-C6 USB CDC transport
+- `wulpus/ble_dongle.py`: legacy BLE-dongle serial transport
+- `wulpus/device_config_gui.py`: persistent ESP32 configuration over USB CDC
 - `wulpus/npz_viewer.py`: interactive acquisition-file inspection and signal processing
 
-The generic `gui.py` module and the `ble_dongle.py` transport are retained because WULPUS PRO notebooks use them for acquisition display and BLE-dongle serial-host compatibility.
 `WulpusGuiSingleCh` depends on the `WulpusProCommunicationLink` protocol rather than a concrete transport, so it can operate with `WulpusBleDongle`, `WulpusProWiFiLink`, or `WulpusProUsbCdcLink`.
+
+The ESP32 device-configuration section in `wulpus_pro_example.ipynb` uses
+`WulpusProDeviceConfigGUI` to load and replace non-secret configuration over
+USB CDC, set or clear write-only Wi-Fi credentials, and reboot to apply changes.
+The GUI never reads stored SSIDs or passwords.
 
 ## Interactive NPZ viewer
 
@@ -124,11 +135,14 @@ uv sync
 uv run jupyter notebook
 ```
 
+In the Jupyter browser, open `wulpus_pro_example.ipynb`. It is the main
+supported workflow for USB CDC, Wi-Fi, and BLE operation.
+
 For more details, see `sw/how_to_install_dependencies.md`.
 
 ## Wi-Fi example on Windows
 
-The `wulpus_pro_wifi_example.ipynb` notebook discovers the ESP32 through the
+The `wulpus_pro_example.ipynb` notebook discovers the ESP32 through the
 `_wulpus_pro._tcp.local.` mDNS service and communicates with it over TCP port 2121.
 The computer and WULPUS PRO must be connected to the same local network.
 
