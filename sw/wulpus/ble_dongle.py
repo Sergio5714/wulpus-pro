@@ -110,7 +110,7 @@ class WulpusBleDongle:
 
         return True
 
-    def send_config(self, conf_bytes_pack: bytes):
+    def send_acq_config(self, conf_bytes_pack: bytes):
         """
         Send a configuration package to the device.
         """

@@ -15,10 +15,12 @@ waiting for credentials or network association.
 
 ## When provisioning starts
 
-At boot, the provisioning thread asks the ESP-IDF provisioning manager whether
-station credentials are stored:
+At boot, the persistent Wi-Fi manager loads `wulpus_pro/device_cfg` and checks
+ESP-IDF's separate credential storage:
 
-- If no credentials exist, the board starts the SoftAP provisioning service.
+- If Wi-Fi is disabled at boot, the radio remains stopped and USB stays available.
+- If no credentials exist and `auto_provision` is enabled, the board starts the SoftAP provisioning service.
+- If no credentials exist and `auto_provision` is disabled, the board remains USB-only.
 - If credentials exist, the provisioning manager is deinitialized and the
   board immediately attempts to join the stored network.
 - If association is lost later, the station reconnects automatically.
@@ -62,9 +64,14 @@ flowchart TD
     IP --> TCP[Start TCP listener on port 2121]
 ```
 
-The firmware uses maximum-modem Wi-Fi power saving after association. Optional
-TWT support is controlled by `CONFIG_PROVISIONER_TWT_ENABLED` and is suspended
-while a WULPUS PRO protocol session is active.
+The persistent device configuration selects no, minimum-modem, or maximum-modem
+Wi-Fi power saving. It also selects TWT; the firmware build must include
+`CONFIG_PROVISIONER_TWT_ENABLED` for TWT to be available. TWT is suspended while
+a WULPUS PRO protocol session is active.
+
+`auto_provision` is a persistent policy and is not cleared after successful
+provisioning. It is consulted only when Wi-Fi is enabled at boot and no saved
+credentials exist. Saved credentials always take priority.
 
 ## Reprovisioning
 
@@ -81,11 +88,9 @@ Check the generated `sdkconfig` for the firmware being flashed. If it contains:
 
 the double-reset trigger is unavailable in that build.
 
-There is currently no ESP-to-PC command that erases saved Wi-Fi credentials.
-If double reset is disabled, reprovisioning requires rebuilding with it enabled
-or erasing the device's stored NVS/flash through the ESP-IDF tooling. Erasing
-flash also removes other persistent data and should be treated as a maintenance
-operation.
+The PC protocol can replace or clear credentials. These operations only update
+persistent storage; `RESET` applies the change. SSIDs and passwords cannot be
+read through the protocol and are never written to firmware logs.
 
 ## USB operation during provisioning
 

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added USB CDC APIs and a Jupyter GUI for persistent device configuration and
+  write-only Wi-Fi credential management.
 - Added an interactive Jupyter NPZ viewer with browser upload, direct path
   loading, TX/RX configuration filtering, acquisition navigation, metadata,
   raw ADC plotting, GUI-equivalent band-pass filtering, and Hilbert-envelope
@@ -33,6 +35,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bound acquisition to the communication link that was successfully opened,
+  preventing a stale default Wi-Fi link from being used after transport
+  selection.
+- Caught acquisition-thread transport failures and reported them through the
+  GUI instead of emitting uncaught background-thread tracebacks.
 - Prevented duplicate NPZ-viewer figure windows by embedding the live ipympl
   canvas directly while preserving interactive slider and replay updates.
 - Prevented high-frame-rate GUI acquisitions from overflowing the ESP32 frame
@@ -55,10 +62,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed acquisition configuration APIs to `send_acq_config` without keeping
+  the old method name.
+- Renamed the main notebook to `wulpus_pro_example.ipynb`, made USB CDC its
+  default transport, and moved older specialized notebooks to `legacy/`.
+- Moved the ESP32 configuration widgets into `wulpus/device_config_gui.py`,
+  arranged credential controls in a right-hand panel, and added explicit USB
+  disconnect support.
 - Renamed the BLE serial transport from `dongle.py` / `WulpusDongle` to `ble_dongle.py` / `WulpusBleDongle`.
 - Decoupled `WulpusGuiSingleCh` from the BLE transport and made its device controls transport-neutral.
 - Renamed the Wi-Fi transport and discovery APIs for WULPUS PRO and hardened TCP framing, command handling, connection cleanup, and acquisition lifecycle management.
-- Reorganized `wulpus_pro_wifi_example.ipynb` to launch the GUI after explicit TX/RX and interactive ultrasound configuration, followed by the detailed manual Wi-Fi workflow.
+- Reorganized `wulpus_pro_example.ipynb` to launch the GUI after explicit TX/RX and interactive ultrasound configuration, followed by the detailed manual Wi-Fi workflow.
 - Added single-owner TCP/USB session arbitration to the ESP32 firmware while preserving the existing WULPUS wire protocol.
 - Made the common framed-packet backlog and parser serve both command responses
   and acquisition data so packet boundaries remain synchronized.

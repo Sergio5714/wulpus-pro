@@ -17,6 +17,7 @@ limitations under the License.
 #include "thread_internal.h"
 
 #include "freertos/task.h"
+#include "provisioner.h"
 #include "tcp_link.h"
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_session.h"
@@ -25,8 +26,13 @@ static void tcp_task(void *argument)
 {
     (void)argument;
     tcp_link_server_t server;
-    ESP_ERROR_CHECK(tcp_link_server_init(&server, CONFIG_WP_SOCKET_PORT));
+    bool initialized = false;
     while (true) {
+        ESP_ERROR_CHECK(provisioner_wait_connected());
+        if (!initialized) {
+            ESP_ERROR_CHECK(tcp_link_server_init(&server, CONFIG_WP_SOCKET_PORT));
+            initialized = true;
+        }
         link_t link;
         if (tcp_link_accept(&server, &link) != ESP_OK) continue;
         if (wulpus_pro_protocol_wait_for_header(&link) != ESP_OK) {

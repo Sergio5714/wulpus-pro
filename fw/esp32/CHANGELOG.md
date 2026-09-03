@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added versioned persistent device configuration, reboot-only Wi-Fi policy and
+  credential commands, a persistent Wi-Fi manager, and connection-gated TCP.
 - Added an ESP-IDF 6.0.1 toolchain guide covering EIM installation on Windows,
   Linux, and macOS, VS Code setup, manual installation, environment validation,
   flashing, and troubleshooting.
@@ -23,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the ESP acquisition command from `SET_CONFIG` to `SET_ACQ_CONFIG`
+  while retaining wire ID `0x57` and without retaining the old command name.
+- Made the TCP listener a persistent task gated by Wi-Fi connectivity and moved
+  mDNS startup under the persistent Wi-Fi workflow.
 - Corrected the documented MSP430 timer ordering: DC-DC turn-on precedes and
   therefore has a lower timer value than the acquisition period.
 - Identified the WULPUS PRO WiFi host PCB, containing a XIAO ESP32-C6, as the
@@ -76,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added MSP430 reset control from the ESP32 host firmware.
 - Added power-management support for light-sleep operation when idle.
 - Added WULPUS PRO connector pin mapping documentation for supported ESP32-C6 boards.
-- Added Python-side Wi-Fi usage documentation through `../../sw/wulpus_pro_wifi_example.ipynb`.
+- Added Python-side Wi-Fi usage documentation through `../../sw/wulpus_pro_example.ipynb`.
 
 ### Fixed
 

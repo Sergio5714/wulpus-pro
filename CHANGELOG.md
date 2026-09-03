@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added versioned ESP32 device configuration in NVS with reboot-only Wi-Fi
+  boot, automatic provisioning, modem power-save, and TWT policies.
+- Added protocol and Python APIs for complete device-configuration replacement,
+  Wi-Fi status, and write-only credential replacement or clearing.
+- Added a USB CDC device-configuration GUI to the main WULPUS PRO example
+  notebook.
 - Added an interactive viewer for GUI- and profiler-generated NPZ acquisitions,
   including TX/RX configuration filtering, acquisition navigation, band-pass
   filtering, Hilbert-envelope extraction, and controllable acquisition replay
@@ -34,6 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Bound GUI acquisition to the transport that was actually opened and contained
+  background transport failures in GUI status reporting.
 - Embedded the NPZ viewer's live ipympl canvas directly so replay and slider
   updates use one visible plot instead of creating duplicate figure windows.
 - Prevented high-frame-rate GUI processing from stalling USB acquisitions by
@@ -51,6 +59,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed `SET_CONFIG` to `SET_ACQ_CONFIG` while retaining wire ID `0x57`.
+- Consolidated the supported USB CDC, Wi-Fi, and BLE workflow in
+  `sw/wulpus_pro_example.ipynb` and moved older notebooks to `sw/legacy`.
+- Reworked Wi-Fi provisioning as a persistent manager and made the persistent
+  TCP thread wait for Wi-Fi connectivity.
 - Added receive-only and all-channel USB profiler presets with explicit DC-DC
   timing, and corrected the MSP430 documentation to place DC-DC turn-on before
   the acquisition-period event.

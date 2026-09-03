@@ -35,7 +35,7 @@ and provisioning have separate components and FreeRTOS threads.
 
 Python GUI and transport examples are in the repository's [`sw`](../../sw)
 directory. The main interactive example is
-[`wulpus_pro_wifi_example.ipynb`](../../sw/wulpus_pro_wifi_example.ipynb).
+[`wulpus_pro_example.ipynb`](../../sw/wulpus_pro_example.ipynb).
 
 ## Getting started
 

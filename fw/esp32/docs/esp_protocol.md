@@ -51,7 +51,7 @@ packet.
 
 | ID | Name | Direction | Request payload | Responses and effect |
 |---:|---|---|---|---|
-| `0x57` | `SET_CONFIG` | PC -> ESP | MSP430 configuration package, at most 804 bytes | Empty `SET_CONFIG` acknowledgement is sent before the ESP waits for DATA_READY and transfers the zero-padded 804-byte block to MSP430. |
+| `0x57` | `SET_ACQ_CONFIG` | PC -> ESP | MSP430 acquisition configuration package, at most 804 bytes | Empty `SET_ACQ_CONFIG` acknowledgement is sent before the ESP waits for DATA_READY and transfers the zero-padded 804-byte block to MSP430. |
 | `0x58` | `GET_DATA` | ESP -> PC | 804-byte RF payload | Asynchronous acquisition frame emitted while RX is enabled. It is not a host polling request. |
 | `0x59` | `PING` | PC -> ESP | Empty | Empty `PING` acknowledgement, followed by `PONG` containing ASCII `pong`. |
 | `0x5A` | `PONG` | ESP -> PC | ASCII `pong` | Second response to `PING`. |
@@ -64,9 +64,33 @@ packet.
 | `0x60` | `GET_STATUS` | PC -> ESP | Empty | Empty `GET_STATUS` acknowledgement followed by one `STATUS` packet. |
 | `0x61` | `STATUS` | ESP -> PC | 40-byte versioned status payload | Runtime errors, counters, and frame-pool occupancy. |
 | `0x62` | `CLEAR_STATUS` | PC -> ESP | Empty or five-byte clear request | Requested flags/counters are cleared before the empty `CLEAR_STATUS` acknowledgement is sent. |
+| `0x64` | `GET_DEVICE_CONFIG` | PC -> ESP | Empty | Acknowledgement followed by `DEVICE_CONFIG`. |
+| `0x65` | `DEVICE_CONFIG` | ESP -> PC | 16-byte versioned configuration | Complete non-secret persistent boot configuration. |
+| `0x66` | `SET_DEVICE_CONFIG` | PC -> ESP | Complete 16-byte configuration | Atomically replaces the configuration; takes effect after reboot. |
+| `0x67` | `GET_WIFI_STATUS` | PC -> ESP | Empty | Acknowledgement followed by `WIFI_STATUS`. |
+| `0x68` | `WIFI_STATUS` | ESP -> PC | 12-byte versioned status | State, credential presence, RSSI, and IP; never SSID/password. |
+| `0x69` | `SET_WIFI_CREDENTIALS` | PC -> ESP | Header followed by SSID/password | Replaces credentials; takes effect after reboot. |
+| `0x6A` | `CLEAR_WIFI_CREDENTIALS` | PC -> ESP | Empty | Clears credentials; takes effect after reboot. |
+| `0x6B` | `ERROR` | ESP -> PC | Failed command and ESP error | A setter was rejected or could not be committed. |
 
-Command values outside `0x57`–`0x63` are invalid in the current protocol.
+Command values not explicitly listed above are invalid in the current protocol.
 Commands documented as ESP-to-PC should not be sent by a host.
+
+## Persistent device configuration
+
+`DEVICE_CONFIG` is a packed 16-byte structure containing `version`, `size`,
+`wifi_enabled_at_boot`, `auto_provision`, `wifi_power_save_mode`, `twt_enabled`,
+and ten zero reserved bytes. Power-save values are 0 (none), 1 (minimum modem),
+and 2 (maximum modem). `SET_DEVICE_CONFIG` replaces the complete structure;
+clients read it, modify fields locally, write it, and issue `RESET`.
+
+`auto_provision` is consulted only when Wi-Fi is enabled at boot and no saved
+credentials exist. It remains persistent after provisioning, and saved
+credentials take priority.
+
+The credential payload starts with version, SSID byte length, password byte
+length, and a zero reserved byte, followed by the SSID and password bytes.
+Credentials can be replaced or cleared but never read through this protocol.
 
 ## Acknowledgement model
 
@@ -177,8 +201,8 @@ connect/open CDC
 PING ---------------------------------> claim session, release MSP430 reset
      <------------------------------- PING acknowledgement
      <------------------------------- PONG "pong"
-SET_CONFIG(package) ------------------> transfer configuration to MSP430
-     <------------------------------- SET_CONFIG acknowledgement
+SET_ACQ_CONFIG(package) --------------> transfer configuration to MSP430
+     <------------------------------- SET_ACQ_CONFIG acknowledgement
 CLEAR_STATUS(mask, counters=1) -------> clear diagnostics
      <------------------------------- CLEAR_STATUS acknowledgement
 START_RX -----------------------------> enable forwarding

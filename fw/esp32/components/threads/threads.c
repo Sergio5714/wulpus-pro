@@ -24,6 +24,7 @@ esp_err_t threads_start(bool reset_provisioning)
     ESP_RETURN_ON_ERROR(acquisition_thread_start(), "threads", "acquisition thread failed");
     ESP_RETURN_ON_ERROR(protocol_thread_start(), "threads", "protocol thread failed");
     ESP_RETURN_ON_ERROR(usb_thread_start(), "threads", "USB thread failed");
+    ESP_RETURN_ON_ERROR(tcp_thread_start(), "threads", "TCP thread failed");
     ESP_RETURN_ON_ERROR(provisioning_thread_start(reset_provisioning), "threads", "provisioning thread failed");
     return ESP_OK;
 }
