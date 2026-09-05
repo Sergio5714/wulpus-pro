@@ -8,13 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Dropped ESP32-C6-DEVKITM-1 evaluation kit support, including its board defaults
+  and development setup instructions.
+
 ### Added
 
 - Added MSP430FR5043 firmware updating through the ESP32 over USB CDC or Wi-Fi,
   with staged images, boot-time JTAG programming/verification, and saved status
   and diagnostics. Added the dedicated update notebook.
 - Documented updater wiring, partition requirements, protocol, and recovery,
-  plus CCS command-line builds and TI-TXT export. CCS Debug now exports TI-TXT.
+  plus TI-TXT export. CCS Debug now exports TI-TXT.
 - Added versioned ESP32 device configuration in NVS with reboot-only Wi-Fi
   boot, automatic provisioning, modem power-save, and TWT policies.
 - Added protocol and Python APIs for complete device-configuration replacement,

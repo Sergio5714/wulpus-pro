@@ -11,8 +11,7 @@ acquisition board at a time.
 The **[WULPUS PRO WiFi host PCB](../../hw/wulpus_wifi_host_pcb)** is the primary
 host board for this firmware. It contains a Seeed Studio XIAO ESP32-C6 and uses
 the XIAO board configuration in this project. A standalone XIAO ESP32-C6 is
-supported as a development alternative, and the ESP32-C6-DEVKITM-1 remains
-supported for firmware bring-up.
+supported as a development alternative.
 
 ## Main functions
 
