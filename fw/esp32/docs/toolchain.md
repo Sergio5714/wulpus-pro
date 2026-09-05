@@ -177,8 +177,8 @@ From an activated ESP-IDF shell, change to this directory:
 cd path/to/wulpus-pro/fw/esp32
 ```
 
-Then follow the board-specific commands in the main
-[firmware README](../README.md#getting-started). The WULPUS PRO WiFi host PCB is
+Then follow the board-specific commands in the
+[development guide](development.md). The WULPUS PRO WiFi host PCB is
 the primary host board and uses the XIAO ESP32-C6 configuration.
 
 The first configure/build may download managed ESP-IDF components declared by
@@ -187,13 +187,23 @@ toolchain is installed, unless the component cache has already been populated.
 
 ## Flashing and USB ownership
 
-Build and flash with the board-specific build directory described in the main
-README. For example:
+Build and flash with the board-specific build directory described in the
+[development guide](development.md). For example:
 
 ```powershell
 idf.py -B build-xiao build
 idf.py -B build-xiao -p COM10 flash
 ```
+
+For distribution as one complete ESP32 image, run
+`idf.py -B build-xiao merge-bin` and flash `build-xiao/merged-binary.bin` at
+`0x0`. An application-only `.bin` is insufficient for a fresh board. The current
+partition table also adds the required 256 KiB MSP430 image staging partition;
+flash the updated table when upgrading an older installation.
+
+MSP430 firmware is built separately with CCS and uploaded through the
+[MSP430 update workflow](msp430_update.md). Its TI-TXT file is not an ESP32
+image and must not be passed to the ESP32 flasher.
 
 Replace `COM10` with the actual ESP32-C6 port. Close the Python GUI, Tera Term,
 ESP-IDF monitor, and any other serial application before flashing; only one
@@ -217,5 +227,5 @@ and disables the application console.
 - **JTAG flash says OpenOCD is not running:** start an ESP-IDF JTAG debug/flash
   configuration, or use serial flashing with `idf.py -p COMx flash`.
 - **Board pinout appears wrong after switching boards:** use the isolated build
-  and `sdkconfig` files from the main README rather than reusing a configuration
+  and `sdkconfig` files from the development guide rather than reusing a configuration
   generated for another board.

@@ -28,6 +28,8 @@ limitations under the License.
 #include "wulpus_pro_state.h"
 #include "wulpus_pro_status.h"
 #include "wulpus_pro_persistent_config.h"
+#include "msp430_programmer.h"
+#include "msp430_image.h"
 
 #define COMMAND_TIMEOUT pdMS_TO_TICKS(5000)
 #define DATA_READY_TIMEOUT pdMS_TO_TICKS(1000)
@@ -93,12 +95,20 @@ static void run_session(wulpus_pro_session_ref_t session)
         }
 
         bool acknowledge_after_action =
+            header.command == WULPUS_PRO_SET_ACQ_CONFIG ||
+            header.command == WULPUS_PRO_START_RX ||
+            header.command == WULPUS_PRO_RESET ||
             header.command == WULPUS_PRO_STOP_RX ||
             header.command == WULPUS_PRO_CLEAR_STATUS ||
             header.command == WULPUS_PRO_RESET_MSP ||
             header.command == WULPUS_PRO_SET_DEVICE_CONFIG ||
             header.command == WULPUS_PRO_SET_WIFI_CREDENTIALS ||
             header.command == WULPUS_PRO_CLEAR_WIFI_CREDENTIALS ||
+            header.command == WULPUS_PRO_MSP_UPDATE_BEGIN ||
+            header.command == WULPUS_PRO_MSP_UPDATE_DATA ||
+            header.command == WULPUS_PRO_MSP_UPDATE_COMMIT ||
+            header.command == WULPUS_PRO_MSP_UPDATE_ABORT ||
+            header.command == WULPUS_PRO_MSP_UPDATE_GET_DIAGNOSTICS ||
             header.command == WULPUS_PRO_CLOSE;
         if (!acknowledge_after_action &&
             send_control(session, header.command, NULL, 0) != ESP_OK) break;
@@ -106,8 +116,14 @@ static void run_session(wulpus_pro_session_ref_t session)
 
         switch ((wulpus_pro_command_t)header.command) {
         case WULPUS_PRO_SET_ACQ_CONFIG: {
+            if (wulpus_pro_state_is_updating()) {
+                if (send_control(session, WULPUS_PRO_BUSY, NULL, 0) != ESP_OK) running = false;
+                break;
+            }
             if (acquisition_thread_wait_for_edge(DATA_READY_TIMEOUT) != ESP_OK) {
                 wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_TIMEOUT);
+                if (send_command_error(session, WULPUS_PRO_SET_ACQ_CONFIG,
+                                       ESP_ERR_TIMEOUT) != ESP_OK) running = false;
                 break;
             }
             uint8_t config[CONFIG_WP_DATA_RX_LENGTH] = {0};
@@ -115,7 +131,10 @@ static void run_session(wulpus_pro_session_ref_t session)
             if (acquisition_thread_send_block(config, sizeof(config)) != ESP_OK) {
                 wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_FAILURE);
                 wulpus_pro_status_increment_spi_error();
-            }
+                if (send_command_error(session, WULPUS_PRO_SET_ACQ_CONFIG,
+                                       ESP_FAIL) != ESP_OK) running = false;
+            } else if (send_control(session, WULPUS_PRO_SET_ACQ_CONFIG,
+                                    NULL, 0) != ESP_OK) running = false;
             break;
         }
         case WULPUS_PRO_GET_DEVICE_CONFIG: {
@@ -174,7 +193,13 @@ static void run_session(wulpus_pro_session_ref_t session)
             if (send_control(session, WULPUS_PRO_PONG, "pong", 4) != ESP_OK) running = false;
             break;
         case WULPUS_PRO_START_RX:
+            if (wulpus_pro_state_is_updating()) {
+                if (send_control(session, WULPUS_PRO_BUSY, NULL, 0) != ESP_OK) running = false;
+                break;
+            }
             acquisition_thread_set_enabled(true);
+            if (send_control(session, WULPUS_PRO_START_RX, NULL, 0) != ESP_OK)
+                running = false;
             break;
         case WULPUS_PRO_STOP_RX:
             stop_acquisition(session);
@@ -211,13 +236,18 @@ static void run_session(wulpus_pro_session_ref_t session)
             running = false;
             break;
         case WULPUS_PRO_RESET:
+            if (wulpus_pro_state_is_updating()) {
+                if (send_control(session, WULPUS_PRO_BUSY, NULL, 0) != ESP_OK) running = false;
+                break;
+            }
             stop_acquisition(session);
             acquisition_thread_graceful_shutdown();
             board_msp_reset(true);
+            send_control(session, WULPUS_PRO_RESET, NULL, 0);
             esp_restart();
             break;
         case WULPUS_PRO_RESET_MSP:
-            if (wulpus_pro_state_is_acquiring()) {
+            if (wulpus_pro_state_is_acquiring() || wulpus_pro_state_is_updating()) {
                 if (send_control(session, WULPUS_PRO_BUSY, NULL, 0) != ESP_OK) running = false;
                 break;
             }
@@ -228,6 +258,82 @@ static void run_session(wulpus_pro_session_ref_t session)
             }
             if (send_control(session, WULPUS_PRO_RESET_MSP, NULL, 0) != ESP_OK) running = false;
             break;
+        case WULPUS_PRO_MSP_UPDATE_BEGIN: {
+            esp_err_t result = ESP_ERR_INVALID_SIZE;
+            if (header.data_length == sizeof(wulpus_pro_msp_update_begin_t)) {
+                wulpus_pro_msp_update_begin_t request;
+                memcpy(&request, payload, sizeof(request));
+                if (request.version == 1 && request.reserved == 0)
+                    result = msp430_programmer_begin(request.image_size, request.image_crc32);
+                else result = ESP_ERR_INVALID_ARG;
+            }
+            if (result == ESP_OK) result = send_control(session, header.command, NULL, 0);
+            else result = send_command_error(session, header.command, result);
+            if (result != ESP_OK) running = false;
+            break;
+        }
+        case WULPUS_PRO_MSP_UPDATE_DATA: {
+            esp_err_t result = ESP_ERR_INVALID_SIZE;
+            if (header.data_length >= sizeof(wulpus_pro_msp_update_data_t)) {
+                wulpus_pro_msp_update_data_t request;
+                memcpy(&request, payload, sizeof(request));
+                const uint8_t *data = payload + sizeof(request);
+                if (request.data_length == header.data_length - sizeof(request) &&
+                    msp430_crc32(0, data, request.data_length) == request.data_crc32) {
+                    result = msp430_programmer_write(request.offset, data, request.data_length);
+                    if (result == ESP_OK) {
+                        wulpus_pro_msp_update_data_response_t response = {
+                            .next_offset = request.offset + request.data_length,
+                            .accepted_sequence = request.sequence,
+                        };
+                        result = send_control(session, header.command, &response, sizeof(response));
+                    }
+                } else result = ESP_ERR_INVALID_CRC;
+            }
+            if (result != ESP_OK && send_command_error(session, header.command, result) != ESP_OK)
+                running = false;
+            break;
+        }
+        case WULPUS_PRO_MSP_UPDATE_COMMIT: {
+            esp_err_t result = header.data_length ? ESP_ERR_INVALID_SIZE :
+                               msp430_programmer_commit();
+            if (result == ESP_OK) result = send_control(session, header.command, NULL, 0);
+            else result = send_command_error(session, header.command, result);
+            if (result != ESP_OK) running = false;
+            break;
+        }
+        case WULPUS_PRO_MSP_UPDATE_ABORT: {
+            esp_err_t result = header.data_length ? ESP_ERR_INVALID_SIZE :
+                               msp430_programmer_abort();
+            if (result == ESP_OK) result = send_control(session, header.command, NULL, 0);
+            else result = send_command_error(session, header.command, result);
+            if (result != ESP_OK) running = false;
+            break;
+        }
+        case WULPUS_PRO_MSP_UPDATE_GET_STATUS: {
+            if (header.data_length) {
+                if (send_command_error(session, header.command, ESP_ERR_INVALID_SIZE) != ESP_OK)
+                    running = false;
+                break;
+            }
+            msp430_update_status_t update_status;
+            msp430_programmer_get_status(&update_status);
+            if (send_control(session, WULPUS_PRO_MSP_UPDATE_STATUS, &update_status,
+                             sizeof(update_status)) != ESP_OK) running = false;
+            break;
+        }
+        case WULPUS_PRO_MSP_UPDATE_GET_DIAGNOSTICS: {
+            if (header.data_length) {
+                if (send_command_error(session, header.command, ESP_ERR_INVALID_SIZE) != ESP_OK)
+                    running = false;
+                break;
+            }
+            msp430_diagnostics_t diagnostics;
+            msp430_programmer_get_diagnostics(&diagnostics);
+            if (send_control(session, WULPUS_PRO_MSP_UPDATE_DIAGNOSTICS,
+                             &diagnostics, sizeof(diagnostics)) != ESP_OK) running = false;
+            break;
+        }
         case WULPUS_PRO_GET_DATA:
         case WULPUS_PRO_PONG:
         case WULPUS_PRO_BUSY:
@@ -235,6 +341,8 @@ static void run_session(wulpus_pro_session_ref_t session)
         case WULPUS_PRO_DEVICE_CONFIG:
         case WULPUS_PRO_WIFI_STATUS:
         case WULPUS_PRO_ERROR:
+        case WULPUS_PRO_MSP_UPDATE_STATUS:
+        case WULPUS_PRO_MSP_UPDATE_DIAGNOSTICS:
             break;
         }
     }

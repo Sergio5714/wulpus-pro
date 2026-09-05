@@ -20,3 +20,5 @@ limitations under the License.
 esp_err_t wulpus_pro_state_init(void);
 void wulpus_pro_state_set_acquiring(bool enabled);
 bool wulpus_pro_state_is_acquiring(void);
+void wulpus_pro_state_set_updating(bool enabled);
+bool wulpus_pro_state_is_updating(void);

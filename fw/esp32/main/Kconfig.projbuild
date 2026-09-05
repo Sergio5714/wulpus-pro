@@ -146,11 +146,36 @@ menu "WULPUS PRO Configuration"
 
     config WP_GPIO_MSP_RST_N
         int "MSP430 reset GPIO pin"
-        default 2
+        default 0
         range 0 39
         help
             This sets the active-low open-drain MSP430 reset pin.
-            The default value is 2.
+            The default value is 0 on XIAO ESP32-C6 (D0).
+
+    config WP_GPIO_MSP_TEST
+        int "MSP430 TEST GPIO pin"
+        default 2
+        range 0 39
+
+    config WP_GPIO_MSP_TDO
+        int "MSP430 JTAG TDO GPIO pin"
+        default 21
+        range 0 39
+
+    config WP_GPIO_MSP_TDI
+        int "MSP430 JTAG TDI GPIO pin"
+        default 22
+        range 0 39
+
+    config WP_GPIO_MSP_TMS
+        int "MSP430 JTAG TMS GPIO pin"
+        default 23
+        range 0 39
+
+    config WP_GPIO_MSP_TCK
+        int "MSP430 JTAG TCK GPIO pin"
+        default 16
+        range 0 39
 
     endmenu
 

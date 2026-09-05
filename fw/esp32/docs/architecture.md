@@ -23,9 +23,11 @@ XIAO firmware defaults as a standalone development module.
 | `components/provisioner` | Wi-Fi station setup and SoftAP provisioning workflow. |
 | `components/persistent_config` | Versioned device-wide boot policy stored in NVS. |
 | `components/mdns_manager` | Network discovery for the TCP service. |
+| `components/msp430_programmer` | Image staging, validation, boot-time four-wire JTAG programming, and persisted update results/diagnostics. |
 
-Board-specific operations stay in `components/board`; application threads do
-not manipulate GPIO or SPI peripherals directly.
+Acquisition GPIO/SPI operations stay in `components/board`; application threads
+do not manipulate those peripherals directly. The MSP430 programmer owns its
+configured TEST and JTAG GPIOs while programming.
 
 ## Application threads
 
@@ -40,6 +42,14 @@ not manipulate GPIO or SPI peripherals directly.
 
 `app_main()` performs initialization and starts these threads. It does not move
 acquisition data.
+
+Before normal threads start, `app_main()` checks for a committed MSP430 update
+and runs it synchronously. Uploads arrive through the normal protocol task;
+commit persists the request and creates a short-lived `msp430_reboot` task to
+restart the ESP32 after 250 ms. USB/TCP application commands are unavailable
+during the subsequent boot-time programming. Results and JTAG diagnostics are
+stored in NVS for retrieval after normal startup. See
+[MSP430 updates](msp430_update.md) for the lifecycle and recovery limits.
 
 ## Acquisition data path
 
