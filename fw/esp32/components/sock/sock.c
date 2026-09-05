@@ -187,15 +187,21 @@ esp_err_t sock_send(socket_instance_t *sock, const void *buffer, size_t length)
     SOCK_CHECK_FD(sock);
 
     SOCK_MUTEX_TAKE(sock);
-    ssize_t len = send(sock->fd, buffer, length, 0);
+    const uint8_t *source = buffer;
+    size_t sent = 0;
+    while (sent < length)
+    {
+        ssize_t len = send(sock->fd, source + sent, length - sent, 0);
+        if (len <= 0)
+        {
+            SOCK_MUTEX_GIVE(sock);
+            ESP_LOGE(TAG, "Send failed: %s", strerror(errno));
+            return ESP_FAIL;
+        }
+        sent += (size_t)len;
+    }
     SOCK_MUTEX_GIVE(sock);
 
-    if (len < 0)
-    {
-        ESP_LOGE(TAG, "Send failed: %s", strerror(errno));
-        return ESP_FAIL;
-    }
-
-    ESP_LOGD(TAG, "Sent data (%d bytes)", len);
+    ESP_LOGD(TAG, "Sent data (%u bytes)", (unsigned)sent);
     return ESP_OK;
 }

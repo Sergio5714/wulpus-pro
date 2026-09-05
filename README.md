@@ -20,7 +20,7 @@
 - [Build Instructions](#build-instructions)
   - [PCBWay shared projects for WULPUS PCBs](#pcbway-shared-projects-for-wulpus-pcbs)
 - [Usage](#usage)
-  - [Wi-Fi setup: WULPUS PRO + XIAO ESP32-C6](#wi-fi-setup-wulpus-pro--xiao-esp32-c6)
+  - [Wi-Fi setup: WULPUS PRO WiFi host PCB](#wi-fi-setup-wulpus-pro-wifi-host-pcb)
   - [BLE setup: WULPUS PRO + nRF52 DK (legacy)](#ble-setup-wulpus-pro--nrf52-dk-legacy)
 - [Citation](#citation)
 - [Changelog](#changelog)
@@ -111,11 +111,11 @@ This repository has the following folders:
 
 - `hw`, containing the CAD source files for:
   - WULPUS PRO acquisition PCB, located at `hw/wulpus_pro_acq_pcb_dev_board`
-  - WULPUS PRO Wifi host PCB, located at `hw/wulpus_wifi_host_pcb`
+  - WULPUS PRO WiFi host PCB, the primary host board, located at `hw/wulpus_wifi_host_pcb`
   - optional WULPUS adapter PCB for polyCMUT transducers, located at `hw/wulpus_polycmut_adapter`; this board was developed for research purposes
 - `fw`, containing the firmware source code, namely:
   - MSP430 ultrasound MCU firmware required for the WULPUS PRO module, located at `fw/msp430`
-  - ESP32 Wi-Fi firmware for the Seeed Studio XIAO ESP32-C6, located at `fw/esp32`
+  - ESP32 Wi-Fi/USB firmware for the WULPUS PRO WiFi host PCB and its integrated Seeed Studio XIAO ESP32-C6, located at `fw/esp32`
   - nRF52 firmware, located at `fw/nrf52`:
     - nRF52832 DK board firmware, located at `fw/nrf52/ble_peripheral/US_probe_nRF52_firmware`
     - nRF52840 USB dongle firmware, located at `fw/nrf52/peripheral/US_probe_dongle_firmware`
@@ -131,6 +131,8 @@ For WULPUS PRO-specific documentation, see:
 - [Full specifications](docs/full_specifications.md)
 - [Hardware README](hw/README.md)
 - [MSP430 firmware README](fw/msp430/README.md)
+- [MSP430 updates through ESP32](fw/esp32/docs/msp430_update.md) — JTAG wiring,
+  TI-TXT/Intel HEX upload, reboot-time programming, and recovery
 - [ESP32 Wi-Fi firmware README](fw/esp32/README.md)
 - [nRF52 BLE firmware README](fw/nrf52/README.md)
 - [Software README](sw/README.md)
@@ -143,19 +145,13 @@ To build your own instance of the WULPUS PRO platform, complete the following st
    Use the design files, schematics, and bills of materials under the `hw` folder. The WULPUS PRO acquisition PCB is required. The polyCMUT adapter PCB is optional and intended for research setups using polyCMUT transducers.
 
 2. *Flash the required MSP430 firmware*<br>
-   The MSP430 ultrasound MCU firmware is required for the WULPUS PRO module. Follow the instructions in `fw/msp430` to set up the toolchain, compile the firmware, and flash the MSP430 MCU.
+   The MSP430 ultrasound MCU firmware is required for the WULPUS PRO module. Follow [fw/msp430](fw/msp430/README.md) to compile and export TI-TXT firmware. Program it with an MSP-FET, or first install the ESP32 firmware from step 3 and use the [MSP430 updater](fw/esp32/docs/msp430_update.md) with the additional JTAG wiring.
 
 3. *Prepare a host system*<br>
    Choose one of the supported host interfaces:
 
-   - ESP32-based Wi-Fi host, for example the Seeed Studio XIAO ESP32-C6. Follow the instructions in [fw/esp32/README.md](fw/esp32/README.md) to build and flash the ESP32 firmware. After flashing, complete the provisioning step so WULPUS PRO can connect to your Wi-Fi network.
+   - The [WULPUS PRO WiFi host PCB](hw/wulpus_wifi_host_pcb) is the primary host board. It contains a Seeed Studio XIAO ESP32-C6 and supports Wi-Fi/TCP and USB CDC communication. Follow [fw/esp32/README.md](fw/esp32/README.md) to build and flash its firmware, then complete provisioning for Wi-Fi use. A standalone XIAO ESP32-C6 remains supported as a development alternative.
    - nRF52 BLE host, using the nRF52832 DK board and nRF52840 USB dongle. This is the legacy BLE setup. Follow the instructions in [fw/nrf52/README.md](fw/nrf52/README.md) to compile and flash both firmwares.
-
-   > **Note:** The new [WULPUS PRO WiFi host PCB](hw/wulpus_wifi_host_pcb) is currently undergoing testing
-   > and will be integrated into the platform soon. It will support standard
-   > Adafruit-compatible batteries for operation in WiFi mode, as well as
-   > USB-only power and data streaming for WULPUS PRO. Until its integration is
-   > complete, please use an external Seeed Studio XIAO ESP32-C6 module.
 
 4. *Python dependencies installation on the host PC*<br>
    Follow the instructions in `sw` to install the Python dependencies. With `uv`, the basic setup is:
@@ -174,10 +170,10 @@ This option is convenient for outsourced PCB production and assembly, with an es
 
 # Usage
 
-## Wi-Fi setup: WULPUS PRO + XIAO ESP32-C6
+## Wi-Fi setup: WULPUS PRO WiFi host PCB
 
-1. Connect the ESP32 host module to the WULPUS PRO board using the pin mapping documented in [fw/esp32/README.md](fw/esp32/README.md).
-2. Power the ESP32-based host module, for example the Seeed Studio XIAO ESP32-C6 running the firmware from `fw/esp32`.
+1. Connect the primary [WULPUS PRO WiFi host PCB](hw/wulpus_wifi_host_pcb) to the WULPUS PRO acquisition board. For development, a standalone XIAO ESP32-C6 can use the pin mapping in [fw/esp32/README.md](fw/esp32/README.md).
+2. Power the WULPUS PRO WiFi host PCB and run the firmware from `fw/esp32` on its integrated XIAO ESP32-C6.
 3. Power the WULPUS PRO board through the connector or debug pin headers.
 4. Start Jupyter from the `sw` folder:
 
@@ -185,7 +181,7 @@ This option is convenient for outsourced PCB production and assembly, with an es
    uv run jupyter notebook
    ```
 
-5. Open `wulpus_pro_wifi_example.ipynb` in the browser and follow the notebook instructions for discovery, connection setup, configuration transfer, and acquisition.
+5. Open `wulpus_pro_example.ipynb` in the browser and follow the notebook instructions for discovery, connection setup, configuration transfer, and acquisition.
 
 ## BLE setup: WULPUS PRO + nRF52 DK (legacy)
 
@@ -199,7 +195,7 @@ This option is convenient for outsourced PCB production and assembly, with an es
    uv run jupyter notebook
    ```
 
-6. Open `wulpus_pro_gui.ipynb` in the browser and follow the notebook instructions to begin acquisition.
+6. Open `wulpus_pro_example.ipynb` in the browser, select **BLE**, and follow the notebook instructions to begin acquisition. Older notebook variants are archived under `sw/legacy`.
 
 # Citation
 

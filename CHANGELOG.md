@@ -6,6 +6,89 @@ For the detailed description, please explore nested folders and corresponding CH
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Added MSP430FR5043 firmware updating through the ESP32 over USB CDC or Wi-Fi,
+  with staged images, boot-time JTAG programming/verification, and saved status
+  and diagnostics. Added the dedicated update notebook.
+- Documented updater wiring, partition requirements, protocol, and recovery,
+  plus CCS command-line builds and TI-TXT export. CCS Debug now exports TI-TXT.
+- Added versioned ESP32 device configuration in NVS with reboot-only Wi-Fi
+  boot, automatic provisioning, modem power-save, and TWT policies.
+- Added protocol and Python APIs for complete device-configuration replacement,
+  Wi-Fi status, and write-only credential replacement or clearing.
+- Added a USB CDC device-configuration GUI to the main WULPUS PRO example
+  notebook.
+- Added an interactive viewer for GUI- and profiler-generated NPZ acquisitions,
+  including TX/RX configuration filtering, acquisition navigation, band-pass
+  filtering, Hilbert-envelope extraction, and controllable acquisition replay
+  with stable Y-axis limits.
+- Added exact GUI-saved acquisition configuration loading to the USB profiler,
+  including persisted TX/RX mask arrays for reproducible headless tests and
+  optional GUI-compatible NPZ acquisition output.
+- Added ESP-IDF 6.0.1 installation and validation documentation for the ESP32
+  firmware toolchain across Windows, Linux, macOS, and VS Code.
+- Added structured ESP32 documentation covering runtime architecture,
+  provisioning, the MSP430 SPI/configuration protocol, and the common USB/TCP
+  PC protocol.
+- Added native ESP32-C6 USB CDC communication as a wired alternative to Wi-Fi,
+  using the existing WULPUS command and acquisition-data protocol.
+- Added concurrent TCP/USB session arbitration and an explicit `BUSY` protocol
+  response when another transport owns the device.
+- Added a standalone Python USB frame-rate profiler.
+- Added runtime acquisition diagnostics and host commands for reading and
+  clearing sticky ESP32 errors.
+- Added GUI stall diagnostics showing ESP32 acquisition errors and relevant
+  buffer, SPI, transmission, and discard counters.
+
+### Fixed
+
+- Bound GUI acquisition to the transport that was actually opened and contained
+  background transport failures in GUI status reporting.
+- Embedded the NPZ viewer's live ipympl canvas directly so replay and slider
+  updates use one visible plot instead of creating duplicate figure windows.
+- Prevented high-frame-rate GUI processing from stalling USB acquisitions by
+  keeping filtering, plotting, widget updates, and per-frame logging out of the
+  continuous receive path.
+- Prevented optional profiler data saving from adding per-frame NumPy copies to
+  the high-rate USB receive loop.
+- Fixed GUI acquisitions stalling partway through a run when the device's
+  continuous acquisition sequence number exceeded the requested frame count.
+- Kept the ESP32-C6 out of automatic light sleep whenever a USB host is
+  connected, preventing missed USB CDC commands and enumeration failures.
+- Fixed Windows ESP32-C6 CDC opening, partial writes, receive latency, and
+  asynchronous acquisition frames arriving while command acknowledgements are
+  pending.
+
+### Changed
+
+- Renamed `SET_CONFIG` to `SET_ACQ_CONFIG` while retaining wire ID `0x57`.
+- Consolidated the supported USB CDC, Wi-Fi, and BLE workflow in
+  `sw/wulpus_pro_example.ipynb` and moved older notebooks to `sw/legacy`.
+- Reworked Wi-Fi provisioning as a persistent manager and made the persistent
+  TCP thread wait for Wi-Fi connectivity.
+- Added receive-only and all-channel USB profiler presets with explicit DC-DC
+  timing, and corrected the MSP430 documentation to place DC-DC turn-on before
+  the acquisition-period event.
+- Documented the WULPUS PRO WiFi host PCB and its integrated XIAO ESP32-C6 as
+  the primary ESP32 host, replacing the obsolete recommendation to use an
+  external XIAO while the host PCB was under test.
+- Reworked the ESP32 README as a concise setup and documentation index with
+  isolated configurations for each supported ESP32-C6 board.
+- Increased the ESP32 DMA acquisition frame pool from 8 to 64 slots to tolerate
+  longer host USB/GUI scheduling pauses at high frame rates.
+- Refactored ESP32 command processing and acquisition streaming around a shared,
+  transport-independent session layer used by TCP and USB CDC.
+- Reserved the native USB CDC interface for binary protocol traffic and disabled
+  the conflicting application console in the default ESP32-C6 configuration.
+- Made USB communication available before Wi-Fi provisioning or association
+  completes.
+- Separated ESP32 board access, DMA frame storage, control state, protocol,
+  links, and task implementations; SPI acquisition and packet transmission now
+  have independent owners connected by a zero-copy frame pool.
+
 ## [1.1.0] - 2026-08-22
 
 ### Added
