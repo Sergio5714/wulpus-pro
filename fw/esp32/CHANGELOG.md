@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Dropped ESP32-C6-DEVKITM-1 evaluation kit support, including its board defaults
+  and development setup instructions.
+
 ### Added
 
 - Added MSP430FR5043 updates over USB/TCP with a 256 KiB staging partition,
@@ -42,8 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Corrected the documented MSP430 timer ordering: DC-DC turn-on precedes and
   therefore has a lower timer value than the acquisition period.
 - Identified the WULPUS PRO WiFi host PCB, containing a XIAO ESP32-C6, as the
-  primary firmware target throughout the documentation; standalone XIAO and
-  DevKit boards remain development alternatives.
+  primary firmware target throughout the documentation; standalone XIAO
+  boards remain a development alternative.
 - Reduced the ESP32 README to a project introduction, isolated per-board setup
   instructions, wiring, first connection, and links to the detailed documents.
 - Increased the default DMA acquisition frame pool from 8 to 64 slots, giving
@@ -65,7 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   every application task implementation under `components/threads`.
 - Expanded the firmware README with communication architecture, arbitration, USB flashing/JTAG coexistence, logging, and power-management behavior.
 
-## [1.1.0] - 
+## [1.1.0] - 2026-08-22
 
 ### Fixed
 

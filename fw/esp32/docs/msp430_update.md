@@ -32,15 +32,10 @@ The XIAO defaults assign these additional signals:
 | TMS | 23 | D5 |
 | TCK | 16 | D6 |
 
-Connect all six signals and a common ground, with compatible logic supplies.
-The SPI and DATA_READY connections alone are insufficient. These are firmware
-assignments: verify the actual PCB or bench wiring. Other board configurations
-must explicitly check `CONFIG_WP_GPIO_MSP_*` against their available GPIOs.
-In particular, the ESP32-C6-DEVKITM-1 acquisition defaults inherit
-`CONFIG_WP_GPIO_MSP_TEST=2` from the common C6 defaults, while SPI MOSI also
-uses GPIO2. Select a non-conflicting TEST pin and verify every JTAG signal
-before using the updater on that board; the XIAO mapping cannot be used
-unchanged on the DevKit.
+The WULPUS PRO WiFi host PCB routes all six signals to the Acquisition PCB.
+A standalone XIAO cannot use this updater because the Acquisition PCB does not
+expose the required JTAG signals on its Dupont connectors. The SPI,
+DATA_READY, and reset connections alone are insufficient for programming.
 Disconnect an external MSP-FET before letting the ESP32 drive JTAG. The ESP32
 releases TEST and the four JTAG data/clock pins to inputs after programming;
 MSP430 reset remains under the board component's control.

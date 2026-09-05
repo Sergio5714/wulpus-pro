@@ -5,8 +5,8 @@ ESP32-C6 native USB Serial/JTAG CDC interface. Packets, command IDs, payloads,
 and acknowledgements are transport-independent.
 
 The [WULPUS PRO WiFi host PCB](../../../hw/wulpus_wifi_host_pcb), containing a
-XIAO ESP32-C6, is the primary host board for this protocol. Standalone XIAO and
-ESP32-C6-DEVKITM-1 boards use the same protocol for development.
+XIAO ESP32-C6, is the primary host board for this protocol. Standalone XIAO
+ESP32-C6 boards use the same protocol for development.
 
 ## Transports
 
