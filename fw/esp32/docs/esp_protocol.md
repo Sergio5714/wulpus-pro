@@ -51,16 +51,16 @@ packet.
 
 | ID | Name | Direction | Request payload | Responses and effect |
 |---:|---|---|---|---|
-| `0x57` | `SET_ACQ_CONFIG` | PC -> ESP | MSP430 acquisition configuration package, at most 804 bytes | Empty `SET_ACQ_CONFIG` acknowledgement is sent before the ESP waits for DATA_READY and transfers the zero-padded 804-byte block to MSP430. |
+| `0x57` | `SET_ACQ_CONFIG` | PC -> ESP | MSP430 acquisition configuration package, at most 804 bytes | Empty acknowledgement after DATA_READY and successful SPI transfer; `ERROR` on timeout/transfer failure, `BUSY` while an update is pending. Does not confirm MSP430 application of the configuration. |
 | `0x58` | `GET_DATA` | ESP -> PC | 804-byte RF payload | Asynchronous acquisition frame emitted while RX is enabled. It is not a host polling request. |
 | `0x59` | `PING` | PC -> ESP | Empty | Empty `PING` acknowledgement, followed by `PONG` containing ASCII `pong`. |
 | `0x5A` | `PONG` | ESP -> PC | ASCII `pong` | Second response to `PING`. |
-| `0x5B` | `RESET` | PC -> ESP | Empty | Empty `RESET` acknowledgement is queued first; acquisition is stopped, MSP430 is shut down/reset, and the ESP32 restarts. |
-| `0x63` | `RESET_MSP` | PC -> ESP | Empty | If acquisition is inactive, the MSP430 reset pin is pulsed and an empty `RESET_MSP` acknowledgement is sent after its boot delay. Otherwise, `BUSY` is returned. The protocol session remains open. |
+| `0x5B` | `RESET` | PC -> ESP | Empty | Stops acquisition, shuts down/resets MSP430, queues an empty acknowledgement, then restarts ESP32. `BUSY` while an update is pending. Delivery before restart is not guaranteed. |
+| `0x63` | `RESET_MSP` | PC -> ESP | Empty | If acquisition and update are inactive, pulses MSP430 reset and acknowledges after its boot delay; otherwise `BUSY`. Keeps the session open. |
 | `0x5C` | `CLOSE` | PC -> ESP | Empty | Acquisition is stopped, then an empty `CLOSE` acknowledgement is sent. The session proceeds through common cleanup and releases ownership. |
-| `0x5D` | `START_RX` | PC -> ESP | Empty | Empty `START_RX` acknowledgement is sent before acquisition forwarding is enabled. |
+| `0x5D` | `START_RX` | PC -> ESP | Empty | Empty acknowledgement after enabling acquisition forwarding; `BUSY` while an update is pending. |
 | `0x5E` | `STOP_RX` | PC -> ESP | Empty | Acquisition and queued session frames are stopped/discarded before the empty `STOP_RX` acknowledgement is sent. The protocol session remains open. |
-| `0x5F` | `BUSY` | ESP -> PC | Empty | Returned when another transport already owns the session or `RESET_MSP` is requested during acquisition. |
+| `0x5F` | `BUSY` | ESP -> PC | Empty | Another transport owns the session, `RESET_MSP` is requested during acquisition, or acquisition configuration/start/reset conflicts with a pending update. |
 | `0x60` | `GET_STATUS` | PC -> ESP | Empty | Empty `GET_STATUS` acknowledgement followed by one `STATUS` packet. |
 | `0x61` | `STATUS` | ESP -> PC | 40-byte versioned status payload | Runtime errors, counters, and frame-pool occupancy. |
 | `0x62` | `CLEAR_STATUS` | PC -> ESP | Empty or five-byte clear request | Requested flags/counters are cleared before the empty `CLEAR_STATUS` acknowledgement is sent. |
@@ -71,7 +71,15 @@ packet.
 | `0x68` | `WIFI_STATUS` | ESP -> PC | 12-byte versioned status | State, credential presence, RSSI, and IP; never SSID/password. |
 | `0x69` | `SET_WIFI_CREDENTIALS` | PC -> ESP | Header followed by SSID/password | Replaces credentials; takes effect after reboot. |
 | `0x6A` | `CLEAR_WIFI_CREDENTIALS` | PC -> ESP | Empty | Clears credentials; takes effect after reboot. |
-| `0x6B` | `ERROR` | ESP -> PC | Failed command and ESP error | A setter was rejected or could not be committed. |
+| `0x6B` | `ERROR` | ESP -> PC | Failed command and ESP error | Command validation, configuration transfer, persistent setter, or update operation failed. |
+| `0x6C` | `MSP_UPDATE_BEGIN` | PC -> ESP | 12-byte upload descriptor | Empty acknowledgement after staging setup; `ERROR` on rejection. |
+| `0x6D` | `MSP_UPDATE_DATA` | PC -> ESP | 12-byte chunk header + data | 8-byte offset/sequence acknowledgement, or `ERROR`. |
+| `0x6E` | `MSP_UPDATE_COMMIT` | PC -> ESP | Empty | Acknowledges persisted update scheduling; ESP32 reboots to program MSP430. |
+| `0x6F` | `MSP_UPDATE_ABORT` | PC -> ESP | Empty | Acknowledges abort request; use before commit. |
+| `0x70` | `MSP_UPDATE_GET_STATUS` | PC -> ESP | Empty | Empty acknowledgement followed by `MSP_UPDATE_STATUS`. |
+| `0x71` | `MSP_UPDATE_STATUS` | ESP -> PC | 28-byte update status | Separate from acquisition `STATUS`. |
+| `0x72` | `MSP_UPDATE_GET_DIAGNOSTICS` | PC -> ESP | Empty | Direct `MSP_UPDATE_DIAGNOSTICS` response, without a separate empty acknowledgement. |
+| `0x73` | `MSP_UPDATE_DIAGNOSTICS` | ESP -> PC | 16-byte diagnostics | Last JTAG identification diagnostics. |
 
 Command values not explicitly listed above are invalid in the current protocol.
 Commands documented as ESP-to-PC should not be sent by a host.
@@ -96,9 +104,12 @@ Credentials can be replaced or cleared but never read through this protocol.
 
 Most PC commands receive an empty packet with the same command ID as their
 acknowledgement. The acknowledgement indicates that the command was accepted by
-the protocol task; for commands acknowledged before their action, it does not
-prove that a later SPI operation succeeded. Use `GET_STATUS` for asynchronous
-SPI and buffer errors.
+the protocol task. `SET_ACQ_CONFIG` now acknowledges after SPI transfer success,
+but there is no separate MSP430 application-level acceptance response.
+`MSP_UPDATE_COMMIT` acknowledges scheduling, not programming completion.
+Use `GET_STATUS` for acquisition SPI/buffer errors and `MSP_UPDATE_GET_STATUS`
+for the separate persisted update result. `PING` establishes ESP32 protocol
+responsiveness, not MSP430 health.
 
 Acknowledgements are ordered with acquisition data by the sole packet-TX
 thread. Because RF frames are asynchronous, a `GET_DATA` packet may already be
@@ -192,7 +203,65 @@ Example Python payload:
 payload = struct.pack("<IB", 0xFFFFFFFF, 1)
 ```
 
-## Typical session
+## MSP430 update protocol
+
+All update fields are packed and little-endian. Requests still use the normal
+nine-byte packet header; the maximum request payload is 804 bytes.
+
+| Request/response | Field order (byte widths) |
+|---|---|
+| BEGIN | version (1, value 1), flags (1, send 0), reserved (2, zero), image_size (4), image_crc32 (4) |
+| DATA request | offset (4), sequence (2), data_length (2), data_crc32 (4), data (1–792) |
+| DATA response | next_offset (4), accepted_sequence (2), reserved (2, zero) |
+
+BEGIN's CRC covers the complete staged container, including header and table;
+DATA's CRC covers only that chunk. Offsets must equal the number of bytes
+already accepted. Sequence values are echoed; firmware enforces ordering by
+offset. BEGIN requires inactive acquisition and an available staging partition.
+The update-pending acquisition guard is set at COMMIT, not BEGIN: clients must
+keep acquisition stopped throughout upload. COMMIT requires all bytes received;
+full image validation happens after reboot. See the
+[update guide](msp430_update.md) for image layout and recovery limits.
+
+The 28-byte update status has this layout:
+
+| Offset | Bytes | Field |
+|---:|---:|---|
+| 0 | 1 | version (1) |
+| 1 | 1 | state |
+| 2 | 2 | flags; bit 0 = boot update pending |
+| 4 | 4 | received_bytes |
+| 8 | 4 | total_bytes (container size) |
+| 12 | 4 | processed_bytes (section data in current write/verify pass) |
+| 16 | 4 | current_address |
+| 20 | 4 | target_device_id (expected descriptor value `0x8317`) |
+| 24 | 4 | error (signed ESP error code) |
+
+State values are `IDLE=0`, `RECEIVING=1`, `READY=2`, `VALIDATING=3`,
+`PROGRAMMING=4`, `VERIFYING=5`, `RESETTING=6`, `WAITING_FOR_BOOT=7`,
+`COMPLETE=8`, `FAILED=9`, and `ABORTED=10`. Values 6 and 7 are currently unused.
+Processed bytes restart from zero for verification and exclude container
+metadata; they are not directly comparable to total upload bytes. The current
+Python status dataclass does not expose the wire flags field.
+
+The 16-byte diagnostics response is `(version:u8, stage:u8, jtag_id:u16,
+core_id:u16, control_signal:u16, descriptor_pointer:u32, quick_device_id:u16,
+direct_device_id:u16)`. Version is 1. Stage values are not-started (0), JTAG entry
+(1), core ID (2), descriptor pointer (3), synchronization (4), device-memory
+read (5), and device validated (6); the current implementation updates stages
+0, 1, 5, and 6. This query reads stored diagnostics and does not initiate JTAG.
+
+```text
+MSP_UPDATE_BEGIN -> empty acknowledgement
+MSP_UPDATE_DATA  -> next offset / accepted sequence (repeat per chunk)
+MSP_UPDATE_COMMIT -> empty acknowledgement -> ESP32 reboot
+                   validation / JTAG write / verification / normal startup
+reconnect
+MSP_UPDATE_GET_STATUS -> empty acknowledgement -> MSP_UPDATE_STATUS
+MSP_UPDATE_GET_DIAGNOSTICS -> MSP_UPDATE_DIAGNOSTICS
+```
+
+## Typical acquisition session
 
 ```text
 PC                                      ESP32 / MSP430

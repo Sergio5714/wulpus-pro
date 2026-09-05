@@ -7,7 +7,7 @@ contains an acquisition frame when one is available.
 
 The [WULPUS PRO WiFi host PCB](../../../hw/wulpus_wifi_host_pcb) is the primary
 ESP32 host implementation of this interface. Its integrated XIAO ESP32-C6 uses
-the PCB routing documented in the main [firmware README](../README.md).
+the PCB routing documented in the [development guide](development.md).
 
 ## Electrical and SPI settings
 
@@ -150,6 +150,11 @@ detecting missing frames.
 
 ## Current constraints
 
+- Firmware programming uses a separate four-wire JTAG path, not SPI. See
+  [MSP430 updates](msp430_update.md) for wiring and reboot-time programming.
+- Host `PING` is answered by the ESP32; it is not an MSP430 health check.
+  `SET_ACQ_CONFIG` is acknowledged after SPI transfer success, without a
+  separate MSP430 response confirming that the configuration was applied.
 - ESP frame storage and the PC decoder are configured for a fixed 804-byte RF
   payload, corresponding to 400 samples. Although the configuration model
   exposes other sample counts, they require coordinated changes to the MSP430,

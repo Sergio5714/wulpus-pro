@@ -17,6 +17,8 @@ The supported configuration implementation is the WULPUS PRO stack:
 - `wulpus/usb_cdc_link.py`: native ESP32-C6 USB CDC transport
 - `wulpus/ble_dongle.py`: legacy BLE-dongle serial transport
 - `wulpus/device_config_gui.py`: persistent ESP32 configuration over USB CDC
+- `wulpus/msp430_update.py`: TI-TXT/Intel HEX packaging, MSP430 upload, status,
+  diagnostics, and update widgets over USB CDC or Wi-Fi
 - `wulpus/npz_viewer.py`: interactive acquisition-file inspection and signal processing
 
 `WulpusGuiSingleCh` depends on the `WulpusProCommunicationLink` protocol rather than a concrete transport, so it can operate with `WulpusBleDongle`, `WulpusProWiFiLink`, or `WulpusProUsbCdcLink`.
@@ -25,6 +27,17 @@ The ESP32 device-configuration section in `wulpus_pro_example.ipynb` uses
 `WulpusProDeviceConfigGUI` to load and replace non-secret configuration over
 USB CDC, set or clear write-only Wi-Fi credentials, and reboot to apply changes.
 The GUI never reads stored SSIDs or passwords.
+
+## MSP430 firmware updates
+
+See also [`msp430_update.ipynb`](msp430_update.ipynb) for the dedicated USB
+MSP430 firmware updater. Stop acquisition and close other clients before
+opening its COM port. Select a TI-TXT, Intel HEX, or `.mspfw` image and click
+**Upload and program**. Commit reboots the ESP32; programming happens before
+normal connectivity returns. **Check status** retrieves the persisted result.
+`COMPLETE` confirms programming/verification, not application health. Wiring,
+partition requirements, Wi-Fi API usage, and recovery are documented in the
+[MSP430 update guide](../fw/esp32/docs/msp430_update.md).
 
 ## Interactive NPZ viewer
 

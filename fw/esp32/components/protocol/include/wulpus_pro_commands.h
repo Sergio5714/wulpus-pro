@@ -38,7 +38,36 @@ typedef enum {
     WULPUS_PRO_SET_WIFI_CREDENTIALS = 0x69,
     WULPUS_PRO_CLEAR_WIFI_CREDENTIALS = 0x6A,
     WULPUS_PRO_ERROR = 0x6B,
+    WULPUS_PRO_MSP_UPDATE_BEGIN = 0x6C,
+    WULPUS_PRO_MSP_UPDATE_DATA = 0x6D,
+    WULPUS_PRO_MSP_UPDATE_COMMIT = 0x6E,
+    WULPUS_PRO_MSP_UPDATE_ABORT = 0x6F,
+    WULPUS_PRO_MSP_UPDATE_GET_STATUS = 0x70,
+    WULPUS_PRO_MSP_UPDATE_STATUS = 0x71,
+    WULPUS_PRO_MSP_UPDATE_GET_DIAGNOSTICS = 0x72,
+    WULPUS_PRO_MSP_UPDATE_DIAGNOSTICS = 0x73,
 } wulpus_pro_command_t;
+
+typedef struct __attribute__((packed)) {
+    uint8_t version;
+    uint8_t flags;
+    uint16_t reserved;
+    uint32_t image_size;
+    uint32_t image_crc32;
+} wulpus_pro_msp_update_begin_t;
+
+typedef struct __attribute__((packed)) {
+    uint32_t offset;
+    uint16_t sequence;
+    uint16_t data_length;
+    uint32_t data_crc32;
+} wulpus_pro_msp_update_data_t;
+
+typedef struct __attribute__((packed)) {
+    uint32_t next_offset;
+    uint16_t accepted_sequence;
+    uint16_t reserved;
+} wulpus_pro_msp_update_data_response_t;
 
 typedef struct __attribute__((packed)) {
     uint8_t version;

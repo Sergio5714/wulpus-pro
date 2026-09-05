@@ -4,4 +4,5 @@ idf_component_register(
          "provisioning_thread.c"
     INCLUDE_DIRS "include"
     PRIV_INCLUDE_DIRS "."
-    REQUIRES board frames control protocol links provisioner persistent_config mdns_manager esp_system)
+    REQUIRES board frames control protocol links provisioner persistent_config mdns_manager
+             msp430_programmer esp_system)

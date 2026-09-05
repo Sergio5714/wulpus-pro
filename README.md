@@ -131,6 +131,8 @@ For WULPUS PRO-specific documentation, see:
 - [Full specifications](docs/full_specifications.md)
 - [Hardware README](hw/README.md)
 - [MSP430 firmware README](fw/msp430/README.md)
+- [MSP430 updates through ESP32](fw/esp32/docs/msp430_update.md) — JTAG wiring,
+  TI-TXT/Intel HEX upload, reboot-time programming, and recovery
 - [ESP32 Wi-Fi firmware README](fw/esp32/README.md)
 - [nRF52 BLE firmware README](fw/nrf52/README.md)
 - [Software README](sw/README.md)
@@ -143,7 +145,7 @@ To build your own instance of the WULPUS PRO platform, complete the following st
    Use the design files, schematics, and bills of materials under the `hw` folder. The WULPUS PRO acquisition PCB is required. The polyCMUT adapter PCB is optional and intended for research setups using polyCMUT transducers.
 
 2. *Flash the required MSP430 firmware*<br>
-   The MSP430 ultrasound MCU firmware is required for the WULPUS PRO module. Follow the instructions in `fw/msp430` to set up the toolchain, compile the firmware, and flash the MSP430 MCU.
+   The MSP430 ultrasound MCU firmware is required for the WULPUS PRO module. Follow [fw/msp430](fw/msp430/README.md) to compile and export TI-TXT firmware. Program it with an MSP-FET, or first install the ESP32 firmware from step 3 and use the [MSP430 updater](fw/esp32/docs/msp430_update.md) with the additional JTAG wiring.
 
 3. *Prepare a host system*<br>
    Choose one of the supported host interfaces:

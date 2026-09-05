@@ -19,6 +19,9 @@ limitations under the License.
 #include "freertos/semphr.h"
 static SemaphoreHandle_t mutex;
 static bool acquiring;
+static bool updating;
 esp_err_t wulpus_pro_state_init(void) { mutex = xSemaphoreCreateMutex(); return mutex ? ESP_OK : ESP_ERR_NO_MEM; }
 void wulpus_pro_state_set_acquiring(bool value) { xSemaphoreTake(mutex, portMAX_DELAY); acquiring = value; xSemaphoreGive(mutex); }
 bool wulpus_pro_state_is_acquiring(void) { xSemaphoreTake(mutex, portMAX_DELAY); bool value = acquiring; xSemaphoreGive(mutex); return value; }
+void wulpus_pro_state_set_updating(bool value) { xSemaphoreTake(mutex, portMAX_DELAY); updating = value; xSemaphoreGive(mutex); }
+bool wulpus_pro_state_is_updating(void) { xSemaphoreTake(mutex, portMAX_DELAY); bool value = updating; xSemaphoreGive(mutex); return value; }

@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added MSP430FR5043 updates over USB/TCP with a 256 KiB staging partition,
+  CRC-checked section images, boot-time four-wire JTAG programming/verification,
+  persisted results and diagnostics, and XIAO JTAG GPIO defaults.
+- Added the Python MSP430 updater, TI-TXT/Intel HEX import, `.mspfw` packaging,
+  and a dedicated USB update notebook.
 - Added versioned persistent device configuration, reboot-only Wi-Fi policy and
   credential commands, a persistent Wi-Fi manager, and connection-gated TCP.
 - Added an ESP-IDF 6.0.1 toolchain guide covering EIM installation on Windows,
@@ -25,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Acquisition configuration now acknowledges after SPI success and reports
+  transfer failures through `ERROR`; start/reset commands acknowledge after
+  their actions. Acquisition configuration, start, and resets reject requests
+  while the committed update is pending.
+- Enabled TI-TXT export in the MSP430 CCS Debug configuration.
 - Renamed the ESP acquisition command from `SET_CONFIG` to `SET_ACQ_CONFIG`
   while retaining wire ID `0x57` and without retaining the old command name.
 - Made the TCP listener a persistent task gated by Wi-Fi connectivity and moved

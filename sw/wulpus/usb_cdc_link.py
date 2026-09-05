@@ -170,6 +170,7 @@ class WulpusProUsbCdcLink(WulpusProWiFiLink):
             return False
 
         self.sock = _SerialByteStream(serial_port)  # type: ignore[assignment]
+        self.port = selected_port
         self.device = device or WulpusProUsbCdcDevice(
             device=selected_port,
             description="WULPUS PRO USB CDC",

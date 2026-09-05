@@ -61,6 +61,14 @@ class WulpusProWiFiCommand(IntEnum):
     SET_WIFI_CREDENTIALS = 0x69
     CLEAR_WIFI_CREDENTIALS = 0x6A
     ERROR = 0x6B
+    MSP_UPDATE_BEGIN = 0x6C
+    MSP_UPDATE_DATA = 0x6D
+    MSP_UPDATE_COMMIT = 0x6E
+    MSP_UPDATE_ABORT = 0x6F
+    MSP_UPDATE_GET_STATUS = 0x70
+    MSP_UPDATE_STATUS = 0x71
+    MSP_UPDATE_GET_DIAGNOSTICS = 0x72
+    MSP_UPDATE_DIAGNOSTICS = 0x73
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}.{self.name}"
