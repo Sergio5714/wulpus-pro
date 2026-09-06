@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Added the `images/v1_2` hardware photos, updated the root README gallery,
+  captions and alt text, and extended image authorship coverage.
 - Updated setup documentation to use `wulpus_pro_example.ipynb` as the main
   USB CDC, Wi-Fi, and BLE workflow and documented archived notebooks under
   `sw/legacy`.

@@ -44,21 +44,21 @@ This repository contains work in progress on the WULPUS PRO ultrasound platform,
 <table>
   <tr>
     <td colspan="2" align="center">
-      <img src="docs/images/v1_0/eval_board.jpg" alt="WULPUS PRO evaluation board" width="80%"/>
+      <img src="docs/images/v1_2/full_system.jpg" alt="WULPUS PRO Acquisition PCB connected to the WiFi host PCB" width="80%"/>
       <br/>
-      WULPUS PRO evaluation board
+      WULPUS PRO Acquisition PCB connected to the WiFi host PCB
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <img src="docs/images/v1_0/eval_board_top.jpg" alt="Top view of the WULPUS PRO evaluation board" width="100%"/>
+      <img src="docs/images/v1_0/eval_board_main.jpg" alt="Top view of the WULPUS PRO Acquisition PCB" width="100%"/>
       <br/>
-      Top view
+      Top view of the WULPUS PRO Acquisition PCB
     </td>
     <td width="50%" align="center">
-      <img src="docs/images/v1_0/eval_board_bottom.jpg" alt="Bottom view of the WULPUS PRO evaluation board" width="100%"/>
+      <img src="docs/images/v1_2/wifi_board_top.jpg" alt="Top view of the WULPUS PRO WiFi host PCB" width="100%"/>
       <br/>
-      Bottom view
+      Top view of the WULPUS PRO WiFi host PCB
     </td>
   </tr>
 </table>

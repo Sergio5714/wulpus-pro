@@ -71,6 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Added the `docs/images/v1_2` hardware photos, updated the README gallery,
+  captions and alt text, and extended image authorship coverage.
 - Updated the project description and clarified attribution.
 - Renamed `SET_CONFIG` to `SET_ACQ_CONFIG` while retaining wire ID `0x57`.
 - Consolidated the supported USB CDC, Wi-Fi, and BLE workflow in
