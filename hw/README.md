@@ -25,7 +25,7 @@ A dedicated wireless host board for WULPUS PRO, based on the [Seeed Studio XIAO
 ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html). It is the primary host board for WULPUS PRO. It connects to the
 acquisition board and runs the ESP32 firmware in
 [`../fw/esp32`](../fw/esp32). It provides control and acquisition-data transfer
-over both Wi-Fi/TCP and native USB CDC, and can [flash the MSP430 firmware](../fw/esp32/docs/msp430_update.md)
+over both Wi-Fi/TCP and native USB CDC, and can [flash the MSP430 firmware](../fw/esp32/docs/msp430_update_guide.md)
 on the acquisition PCB through its JTAG connection. The board also includes
 battery-charging functionality, although this feature has not yet been tested.
 The design sources are provided in KiCad format, together with fabrication and

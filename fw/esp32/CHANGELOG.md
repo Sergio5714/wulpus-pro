@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   flashing, and troubleshooting.
 - Added structured ESP32 documentation for firmware threads and data/control
   paths, USB/TCP session switching, Wi-Fi provisioning, the MSP430 SPI and
-  configuration protocol, and the framed ESP-to-PC command/status protocol.
+  configuration protocol, and the framed ESP32-to-PC command/status protocol.
 - Added native ESP32-C6 USB CDC as a wired WULPUS PRO command and RF-data transport.
 - Added first-valid-command arbitration between concurrent TCP and USB listeners, including a `BUSY` response for the losing transport.
 - Added a transport-neutral byte-stream layer with exact reads, complete writes, header prefetching, and packet-level TX locking.
@@ -49,8 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Identified the WULPUS PRO WiFi host PCB, containing a XIAO ESP32-C6, as the
   primary firmware target throughout the documentation; standalone XIAO
   boards remain a development alternative.
-- Reduced the ESP32 README to a project introduction, isolated per-board setup
-  instructions, wiring, first connection, and links to the detailed documents.
 - Increased the default DMA acquisition frame pool from 8 to 64 slots, giving
   128 ms of buffering at 500 FPS, and raised the configurable limit to 128.
 - Moved command handling, MSP430 lifecycle management, and acquisition cleanup into one transport-independent session runner.

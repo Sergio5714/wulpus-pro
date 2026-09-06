@@ -1,13 +1,17 @@
-# Wi-Fi provisioning
+# Wi-Fi provisioning guide
 
 The firmware uses ESP-IDF network provisioning over a temporary SoftAP. Wi-Fi
 credentials are stored in non-volatile storage and reused after reset or power
 cycling.
 
-This is the provisioning flow used by the
-[WULPUS PRO WiFi host PCB](../../../hw/wulpus_wifi_host_pcb), the primary host
-board. Its integrated XIAO ESP32-C6 behaves identically to a standalone XIAO
-running this firmware.
+## Contents
+
+- [When provisioning starts](#when-provisioning-starts)
+- [Provisioning parameters](#provisioning-parameters)
+- [Boot sequence](#boot-sequence)
+- [Reprovisioning](#reprovisioning)
+- [USB operation during provisioning](#usb-operation-during-provisioning)
+- [Troubleshooting](#troubleshooting)
 
 Provisioning controls only Wi-Fi setup. It does not own the WULPUS PRO PC
 protocol session, and native USB CDC remains available while the board is
@@ -60,7 +64,7 @@ flowchart TD
     CHECK -->|Yes| STA[Start Wi-Fi station]
     STORE --> STA
     STA --> IP[Obtain IP address]
-    IP --> MDNS[Advertise wulpus_pro TCP service with mDNS]
+    IP --> MDNS[Advertise wulpus_pro TCP service (mDNS)]
     IP --> TCP[Start TCP listener on port 2121]
 ```
 
@@ -88,9 +92,11 @@ Check the generated `sdkconfig` for the firmware being flashed. If it contains:
 
 the double-reset trigger is unavailable in that build.
 
-The PC protocol can replace or clear credentials. These operations only update
-persistent storage; `RESET` applies the change. SSIDs and passwords cannot be
-read through the protocol and are never written to firmware logs.
+Wi-Fi credentials can also be set or cleared over USB CDC using the PC protocol
+commands. See the [host software documentation](../../../sw/README.md) for the
+configuration interface. These operations update persistent storage, and
+`RESET` applies the change. SSIDs and passwords cannot be read through the
+protocol and are never written to firmware logs.
 
 ## USB operation during provisioning
 
@@ -103,7 +109,7 @@ USB CDC can be used even when:
 
 A physical USB connection does not prevent later TCP use. Close the active USB
 protocol session before connecting over TCP; see
-[Firmware architecture](architecture.md#usb-and-wi-fi-session-switching).
+[Firmware architecture](firmware_architecture.md#usb-and-wi-fi-session-switching).
 
 ## Troubleshooting
 

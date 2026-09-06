@@ -1,19 +1,21 @@
 # WULPUS PRO ESP32 firmware
 
-This ESP-IDF firmware connects the WULPUS PRO acquisition board to a PC through
+This ESP-IDF firmware connects the WULPUS PRO Acquisition PCB to a PC through
 either Wi-Fi/TCP or the native USB Serial/JTAG CDC interface of an ESP32-C6.
 Both transports use the same framed binary protocol and can remain available
 concurrently, while session arbitration ensures that only one host controls the
-acquisition board at a time.
+Acquisition PCB at a time.
 
-## Host board
+## Overview
+
+### Host board
 
 The **[WULPUS PRO WiFi host PCB](../../hw/wulpus_wifi_host_pcb)** is the primary
 host board for this firmware. It contains a Seeed Studio XIAO ESP32-C6 and uses
 the XIAO board configuration in this project. A standalone XIAO ESP32-C6 is
 supported as a development alternative.
 
-## Main functions
+### Main functions
 
 - **Runtime MSP430 configuration and ultrasound data acquisition:** sends
   acquisition settings and receives ultrasound frames through SPI with DMA.
@@ -29,59 +31,41 @@ supported as a development alternative.
 - **Buffering and diagnostics:** buffers acquisition frames and reports SPI,
   transport, and buffer errors, frame counters, and MSP430 update results.
 
-## Getting started
+> MSP430 firmware flashing is available only with the WULPUS PRO WiFi host PCB;
+> it is not available with a standalone XIAO ESP32-C6.
 
-### How to use (quick start)
+## Reference documentation
 
-Use a host board with this ESP32 firmware installed and an acquisition board
-running the matching MSP430 firmware. For an unprogrammed ESP32, follow
-[Development setup](docs/development.md). MSP430 installation is covered
-in the separate [update guide](docs/msp430_update.md).
+### Build and installation
 
-1. Connect the host board to the acquisition board and to the PC with a USB
-   data cable. Close serial monitors and other applications using its COM port.
-2. Follow the [Python software setup](../../sw/README.md) and open
-   [`wulpus_pro_example.ipynb`](../../sw/wulpus_pro_example.ipynb).
-3. Select **USB CDC** in the acquisition GUI, scan for devices, and open the
-   ESP32-C6 port. For **Wi-Fi**, first complete
-   [provisioning](docs/provisioning.md), then select Wi-Fi and discover the
-   device in the GUI.
-4. Set and apply the acquisition configuration in the notebook, then start
-   acquisition in the GUI. Stop acquisition and close the active connection
-   before switching between USB and Wi-Fi; the USB cable can remain connected.
-
-The notebook also provides persistent ESP32 device configuration over USB,
-including Wi-Fi boot policy and credentials. These changes take effect after
-reboot. With the default policy, an unprovisioned board starts SoftAP
-provisioning automatically; saved settings can disable it.
-
-USB CDC carries the binary acquisition protocol, so the selected serial baud
-rate does not set its physical transfer speed. Keep serial monitors closed
-while using the GUI.
-
-## Documentation
-
-- [Development setup](docs/development.md) ? requirements, board configuration,
-  building, flashing, and creating a merged firmware image.
-- [MSP430 firmware updates](docs/msp430_update.md) — JTAG wiring, image upload,
-  reboot-time programming, recovery, and firmware container format.
-- [ESP-IDF toolchain setup](docs/toolchain.md) — installation on Windows,
+- [ESP-IDF toolchain setup](docs/esp_idf_toolchain_guide.md) — installation on Windows,
   Linux, and macOS, VS Code configuration, environment activation, verification,
   and troubleshooting.
-- [Firmware architecture](docs/architecture.md) — components, threads, data and
-  control paths, DMA frame buffering, session lifecycle, and USB/Wi-Fi switching.
-- [Wi-Fi provisioning](docs/provisioning.md) — first boot, SoftAP parameters,
+- [Development guide](docs/development_guide.md) — requirements, board configuration,
+  building, flashing, and creating a merged firmware image.
+
+### Operation and configuration
+
+- [MSP430 firmware updates](docs/msp430_update_guide.md) — TI-TXT upload over USB,
+  programming, verification, and recovery.
+- [Wi-Fi provisioning](docs/wifi_provisioning_guide.md) — first boot, SoftAP parameters,
   credential storage, reconnection, reprovisioning, and USB availability.
-- [ESP32-to-MSP430 protocol](docs/msp_protocol.md) — SPI electrical settings,
+
+### Architecture and protocols
+
+- [Firmware architecture](docs/firmware_architecture.md) — components, threads, data and
+  control paths, DMA frame buffering, session lifecycle, and USB/Wi-Fi switching.
+- [ESP32-to-MSP430 acquisition protocol](docs/msp430_acq_protocol.md) — SPI electrical settings,
   DATA_READY handshake, configuration-package fields, timing conversions,
   restart behavior, and RF frame layout.
-- [ESP32-to-PC protocol](docs/esp_protocol.md) — USB/TCP framing, commands,
+- [ESP32-to-PC protocol](docs/esp32_pc_protocol.md) — USB/TCP framing, commands,
   acknowledgements, acquisition packets, status flags, and diagnostic counters.
-- [Firmware changelog](CHANGELOG.md)
+- [MSP430 firmware update protocol](docs/msp430_update_protocol.md) — image
+  upload commands, update states, and JTAG diagnostics.
 
-Python GUI and transport examples are in the repository's [`sw`](../../sw)
-directory. The main interactive example is
-[`wulpus_pro_example.ipynb`](../../sw/wulpus_pro_example.ipynb).
+### Project history
+
+- [Firmware changelog](CHANGELOG.md)
 
 ## Authors
 

@@ -18,9 +18,9 @@
 - [Structure of the repository](#structure-of-the-repository)
 - [Documentation](#documentation)
 - [Build Instructions](#build-instructions)
-- [Usage](#usage)
-  - [WiFi or USB setup: WULPUS PRO WiFi host PCB](#wifi-or-usb-setup-wulpus-pro-wifi-host-pcb)
-  - [BLE setup: WULPUS PRO + nRF52 DK (legacy)](#ble-setup-wulpus-pro--nrf52-dk-legacy)
+- [Host setup and operation](#host-setup-and-operation)
+  - [WULPUS PRO WiFi host PCB (WiFi/USB CDC)](#wulpus-pro-wifi-host-pcb-wifiusb-cdc)
+  - [WULPUS PRO + nRF52 DK + nRF Dongle (BLE)](#wulpus-pro--nrf52-dk--nrf-dongle-ble)
 - [Citation](#citation)
 - [Changelog](#changelog)
 - [Authors](#authors)
@@ -117,6 +117,7 @@ inside them for component-level details.
 # Documentation
 
 - [Full system specifications](docs/full_specifications.md)
+- [Host board options](docs/host_board_options.md)
 - [PCB designs and fabrication](hw/README.md)
 - Firmware:
   - [ESP32 host firmware](fw/esp32/README.md)
@@ -144,20 +145,24 @@ workflow:
 
    Build the two required firmware images using the dedicated instructions:
 
-   - [Install the ESP-IDF toolchain and compile the ESP32 firmware](fw/esp32/docs/development.md).
+   - [Install the ESP-IDF toolchain and compile the ESP32 firmware](fw/esp32/docs/development_guide.md).
    - [Install the MSP430 toolchain and compile the MSP430 firmware](fw/msp430/README.md#build-and-export-firmware).
 
 4. **Connect one USB cable and flash both controllers**
 
    - Connect the WiFi host PCB to the Acquisition PCB, then connect the host PCB to the PC with a single USB-C cable.
-   - First, [flash the ESP32 firmware](fw/esp32/docs/development.md#flash-the-firmware), then reset the board.
-   - Then use the same USB connection and the [MSP430 updater GUI](fw/esp32/docs/msp430_update.md#updating-from-jupyter) to program the MSP430 on the Acquisition PCB.
+   - First, [flash the ESP32 firmware](fw/esp32/docs/development_guide.md#flash-the-firmware), then reset the board.
+   - Then use the same USB connection and the [MSP430 updater GUI](fw/esp32/docs/msp430_update_guide.md#update-the-msp430-over-usb) to program the MSP430 on the Acquisition PCB.
 
    > No external programmer, adapter board, or additional programming cables are required for this workflow.
 
-# Usage
+# Host setup and operation
 
-## WiFi or USB setup: WULPUS PRO WiFi host PCB
+WULPUS PRO supports multiple host-board configurations. See
+[Host board options](docs/host_board_options.md) for a comparison. Instructions
+for getting started with each configuration are provided below.
+
+## WULPUS PRO WiFi host PCB (WiFi/USB CDC)
 
 1. Connect the [WULPUS PRO WiFi host PCB](hw/wulpus_wifi_host_pcb) to the [Acquisition PCB](hw/wulpus_pro_acq_pcb_dev_board).
 2. Connect the host PCB to the PC with a data-capable USB-C cable, then reset the board. This connection powers both PCBs.
@@ -168,12 +173,14 @@ workflow:
    ```
 
 4. Open [`wulpus_pro_example.ipynb`](sw/wulpus_pro_example.ipynb) in the browser.
-5. For a wired connection, select **USB CDC**, scan for devices, and open the ESP32-C6 port. For a wireless connection, first complete [WiFi provisioning](fw/esp32/docs/provisioning.md), then select **WiFi** and discover the device.
+5. For a wired connection, select **USB CDC**, scan for devices, and open the ESP32-C6 port. For a wireless connection, first complete [WiFi provisioning](fw/esp32/docs/wifi_provisioning_guide.md), then select **WiFi** and discover the device.
 6. Apply the acquisition configuration in the notebook and start acquisition.
 
-For development with a standalone XIAO ESP32-C6, follow its [wiring and power requirements](fw/esp32/docs/development.md#supported-boards) and the [pin mapping](fw/esp32/docs/development.md#pin-mapping). This setup requires an Acquisition PCB with the MSP430 firmware already programmed.
+For development with a standalone XIAO ESP32-C6, follow its [wiring and power requirements](fw/esp32/docs/development_guide.md#supported-boards) and the [pin mapping](fw/esp32/docs/development_guide.md#pin-mapping). This setup requires an Acquisition PCB with the MSP430 firmware already programmed.
 
-## BLE setup: WULPUS PRO + nRF52 DK (legacy)
+## WULPUS PRO + nRF52 DK + nRF Dongle (BLE)
+
+> This is a legacy host solution and is not recommended for new setups.
 
 1. Connect the nRF52 DK to the Acquisition PCB using the pin mapping documented in [fw/nrf52/README.md](fw/nrf52/README.md).
 2. Plug in the USB dongle and power the nRF52 DK via USB.
