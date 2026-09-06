@@ -55,17 +55,21 @@ value through `CONFIG_PROVISIONER_POP` for deployed devices.
 
 ```mermaid
 flowchart TD
-    BOOT[Boot] --> CHECK{Stored Wi-Fi credentials?}
-    CHECK -->|No| AP[Start PROV_WULPUS_PRO_XXXXXX SoftAP]
-    AP --> CREDS[Receive SSID and password]
-    CREDS --> TEST{Association succeeds?}
+    BOOT["Boot"] --> ENABLED{"Wi-Fi enabled at boot?"}
+    ENABLED -->|No| USB["Wi-Fi disabled; USB CDC remains available"]
+    ENABLED -->|Yes| CHECK{"Stored Wi-Fi credentials?"}
+    CHECK -->|No| AUTO{"Automatic provisioning enabled?"}
+    AUTO -->|No| USB
+    AUTO -->|Yes| AP["Start PROV_WULPUS_PRO_XXXXXX SoftAP"]
+    AP --> CREDS["Receive SSID and password"]
+    CREDS --> TEST{"Association succeeds?"}
     TEST -->|No| AP
-    TEST -->|Yes| STORE[Keep credentials in NVS]
-    CHECK -->|Yes| STA[Start Wi-Fi station]
+    TEST -->|Yes| STORE["Keep credentials in NVS"]
+    CHECK -->|Yes| STA["Start Wi-Fi station"]
     STORE --> STA
-    STA --> IP[Obtain IP address]
-    IP --> MDNS[Advertise wulpus_pro TCP service (mDNS)]
-    IP --> TCP[Start TCP listener on port 2121]
+    STA --> IP["Obtain IP address"]
+    IP --> MDNS["Advertise wulpus_pro TCP service via mDNS"]
+    IP --> TCP["Start TCP listener on port 2121"]
 ```
 
 The persistent device configuration selects no, minimum-modem, or maximum-modem
