@@ -1,13 +1,17 @@
-# ESP32-to-MSP430 protocol
+# ESP32-to-MSP430 acquisition protocol
 
 The ESP32 is the SPI master and the WULPUS PRO MSP430 acquisition controller is
 the SPI slave. The interface uses fixed-length, full-duplex transactions: data
 from the ESP32 configures or restarts the MSP430 while data from the MSP430
 contains an acquisition frame when one is available.
 
-The [WULPUS PRO WiFi host PCB](../../../hw/wulpus_wifi_host_pcb) is the primary
-ESP32 host implementation of this interface. Its integrated XIAO ESP32-C6 uses
-the PCB routing documented in the [development guide](development.md).
+## Contents
+
+- [Electrical and SPI settings](#electrical-and-spi-settings)
+- [Transaction phases](#transaction-phases)
+- [Configuration package](#configuration-package)
+- [RF acquisition payload](#rf-acquisition-payload)
+- [Current constraints](#current-constraints)
 
 ## Electrical and SPI settings
 
@@ -58,12 +62,12 @@ and then waits for the next configuration request before asserting reset.
 
 ## Configuration package
 
-All multibyte values are little-endian. The Python API constructs a 105-byte
+All multibyte values are little-endian. The host sends a 105-byte configuration
 package, and the ESP32 zero-pads it to the fixed 804-byte SPI transaction.
 
 ### Fixed prefix
 
-| Offset | Size | Field | Meaning |
+| Offset | Size (bytes) | Field | Meaning |
 |---:|---:|---|---|
 | 0 | 1 | `start_byte` | `0xFA` identifies a configuration package. |
 | 1 | 2 | `dcdc_turnon` | Slow-timer count for enabling the HV DC-DC before acquisition. Generated as `floor(microseconds * 65535 / 2000000)`. It must be lower than `meas_period` so the DC-DC event occurs before acquisition in the timer sequence. |
@@ -81,7 +85,7 @@ package, and the ESP32 zero-pads it to the fixed 804-byte SPI transaction.
 
 Starting at offset 21, each configuration occupies four bytes:
 
-| Relative offset | Size | Field | Meaning |
+| Relative offset | Size (bytes) | Field | Meaning |
 |---:|---:|---|---|
 | `4*i + 0` | 2 | `tx_mask[i]` | Little-endian 16-bit transmit-channel mask. |
 | `4*i + 2` | 2 | `rx_mask[i]` | Little-endian 16-bit receive-channel mask. |
@@ -98,7 +102,7 @@ The advanced section starts at:
 advanced_offset = 21 + 4 * tx_rx_config_count
 ```
 
-| Relative offset | Size | Field | Host conversion and meaning |
+| Relative offset | Size (bytes) | Field | Host conversion and meaning |
 |---:|---:|---|---|
 | 0 | 2 | `start_hvmuxrx` | HV-MUX receive timing; `floor(us * 8)`. |
 | 2 | 2 | `start_ppg` | Pulse-generator start timing; `floor(us * 5)`. |
@@ -111,8 +115,8 @@ advanced_offset = 21 + 4 * tx_rx_config_count
 | 16 | 2 | `vga_slope_code` | Digital-potentiometer code for time-gain slope. Values 0–255 select a slope; 256 selects fixed-gain mode. |
 
 The complete meaningful length is `39 + 4 * tx_rx_config_count` bytes. At the
-maximum 16 configurations this is 103 bytes; the Python package is padded to
-105 bytes and the ESP32 SPI block to 804 bytes.
+maximum 16 configurations this is 103 bytes; the host package is padded to 105
+bytes and the ESP32 SPI block to 804 bytes.
 
 ### Oversampling and sampling frequency
 
@@ -128,16 +132,15 @@ The host maps the SDHS oversampling selector to sample rate as follows:
 
 ### RX gain
 
-`rx_gain` is a hardware register code rather than a signed dB number. The
-Python `WulpusProUssConfig` maps supported gain values to register codes 17–63.
-Use the Python API's `PGA_GAIN` table rather than constructing this byte from a
-dB value directly.
+`rx_gain` is a hardware register code rather than a signed dB number. Supported
+gain settings map to register codes 17–63; clients must use the MSP430 PGA gain
+mapping rather than derive this byte directly from a dB value.
 
 ## RF acquisition payload
 
 Every MSP430-to-ESP32 acquisition transfer is 804 bytes:
 
-| Offset | Size | Field | Meaning |
+| Offset | Size (bytes) | Field | Meaning |
 |---:|---:|---|---|
 | 0 | 1 | `frame_marker` | `0xFF` identifies the beginning of an RF frame. |
 | 1 | 1 | `tx_rx_id` | Index of the TX/RX configuration used for this frame. |
@@ -150,8 +153,6 @@ detecting missing frames.
 
 ## Current constraints
 
-- Firmware programming uses a separate four-wire JTAG path, not SPI. See
-  [MSP430 updates](msp430_update.md) for wiring and reboot-time programming.
 - Host `PING` is answered by the ESP32; it is not an MSP430 health check.
   `SET_ACQ_CONFIG` is acknowledged after SPI transfer success, without a
   separate MSP430 response confirming that the configuration was applied.
@@ -159,14 +160,9 @@ detecting missing frames.
   payload, corresponding to 400 samples. Although the configuration model
   exposes other sample counts, they require coordinated changes to the MSP430,
   ESP32 `CONFIG_WP_DATA_RX_LENGTH`, and host decoder.
-- The SPI transfer is fixed length even when fewer sample bytes would be
-  meaningful.
 - The MSP430 has one RF transfer buffer; it waits for the ESP32 transaction
   before advancing, so prompt servicing of `DATA_READY` is required.
-- `dcdc_turnon` must be lower than `meas_period`. The profiler's `active-all`
-  mode fixes it at 100 us for a 2000 us period; custom configurations must
-  preserve the same event ordering.
 
-See [Firmware architecture](architecture.md) for buffering and task ownership,
-and [ESP-to-PC protocol](esp_protocol.md) for the outer framing applied by the
+See [Firmware architecture](firmware_architecture.md) for buffering and task ownership,
+and [ESP32-to-PC protocol](esp32_pc_protocol.md) for the outer framing applied by the
 ESP32.

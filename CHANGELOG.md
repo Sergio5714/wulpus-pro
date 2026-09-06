@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a host-board comparison covering the integrated WiFi host PCB,
+  standalone XIAO ESP32-C6, and legacy nRF52 BLE solution.
 - Added MSP430FR5043 firmware updating through the ESP32 over USB CDC or Wi-Fi,
   with staged images, boot-time JTAG programming/verification, and saved status
   and diagnostics. Added the dedicated update notebook.
@@ -80,8 +82,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documented the WULPUS PRO WiFi host PCB and its integrated XIAO ESP32-C6 as
   the primary ESP32 host, replacing the obsolete recommendation to use an
   external XIAO while the host PCB was under test.
-- Reworked the ESP32 README as a concise setup and documentation index with
-  isolated configurations for each supported ESP32-C6 board.
 - Increased the ESP32 DMA acquisition frame pool from 8 to 64 slots to tolerate
   longer host USB/GUI scheduling pauses at high frame rates.
 - Refactored ESP32 command processing and acquisition streaming around a shared,

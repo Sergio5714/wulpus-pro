@@ -4,9 +4,18 @@ The ESP32 exposes the same ordered byte-stream protocol over Wi-Fi/TCP and the
 ESP32-C6 native USB Serial/JTAG CDC interface. Packets, command IDs, payloads,
 and acknowledgements are transport-independent.
 
-The [WULPUS PRO WiFi host PCB](../../../hw/wulpus_wifi_host_pcb), containing a
-XIAO ESP32-C6, is the primary host board for this protocol. Standalone XIAO
-ESP32-C6 boards use the same protocol for development.
+## Contents
+
+- [Transports](#transports)
+- [Packet format](#packet-format)
+- [Commands](#commands)
+- [Persistent device configuration](#persistent-device-configuration)
+- [Acknowledgement model](#acknowledgement-model)
+- [Acquisition frame](#acquisition-frame)
+- [Typical acquisition session](#typical-acquisition-session)
+- [Runtime status](#runtime-status)
+- [Clearing status](#clearing-status)
+- [MSP430 firmware update commands](#msp430-firmware-update-commands)
 
 ## Transports
 
@@ -16,7 +25,7 @@ ESP32-C6 boards use the same protocol for development.
 | USB CDC | ESP32-C6 USB Serial/JTAG COM port | Baud-rate settings do not control USB line speed. The port must not be open in another GUI, terminal, or monitor. |
 
 Only one transport owns a protocol session at a time. See
-[Firmware architecture](architecture.md#usb-and-wi-fi-session-switching) for
+[Firmware architecture](firmware_architecture.md#usb-and-wi-fi-session-switching) for
 arbitration and switching.
 
 ## Packet format
@@ -24,18 +33,15 @@ arbitration and switching.
 Every message is one packed nine-byte header followed immediately by
 `data_length` payload bytes:
 
-| Offset | Size | Field | Encoding |
+| Offset | Size (bytes) | Field | Encoding |
 |---:|---:|---|---|
 | 0 | 6 | `magic` | ASCII `wulpus` (`77 75 6c 70 75 73`). |
 | 6 | 1 | `command` | Command ID from the table below. |
 | 7 | 2 | `data_length` | Unsigned little-endian payload length, 0–65535. |
 | 9 | variable | `payload` | Command-specific bytes. |
 
-In Python, a packet can be encoded as:
-
-```python
-packet = b"wulpus" + struct.pack("<BH", command, len(payload)) + payload
-```
+Construct a packet by concatenating the packed header and the payload. Multi-byte
+fields use little-endian byte order.
 
 TCP and USB may split or combine packets arbitrarily. A receiver must accumulate
 bytes until the complete header and declared payload are available; one socket
@@ -82,22 +88,45 @@ packet.
 | `0x73` | `MSP_UPDATE_DIAGNOSTICS` | ESP -> PC | 16-byte diagnostics | Last JTAG identification diagnostics. |
 
 Command values not explicitly listed above are invalid in the current protocol.
-Commands documented as ESP-to-PC should not be sent by a host.
+Commands documented as ESP32-to-PC should not be sent by a host.
 
 ## Persistent device configuration
 
-`DEVICE_CONFIG` is a packed 16-byte structure containing `version`, `size`,
-`wifi_enabled_at_boot`, `auto_provision`, `wifi_power_save_mode`, `twt_enabled`,
-and ten zero reserved bytes. Power-save values are 0 (none), 1 (minimum modem),
-and 2 (maximum modem). `SET_DEVICE_CONFIG` replaces the complete structure;
-clients read it, modify fields locally, write it, and issue `RESET`.
+The persistent device configuration controls how the ESP32 initializes Wi-Fi
+and its power-saving features at startup. It is stored in non-volatile memory,
+survives power cycles, and is applied after the ESP32 restarts.
+
+`DEVICE_CONFIG` is the following packed 16-byte structure:
+
+| Offset | Size (bytes) | Field | Allowed values | Default | Meaning |
+|---:|---:|---|---|---|---|
+| 0 | 1 | `version` | `1` | `1` | Structure version. |
+| 1 | 1 | `size` | `16` | `16` | Complete structure size in bytes. |
+| 2 | 1 | `wifi_enabled_at_boot` | `0` or `1` | `1` | Start Wi-Fi during boot. |
+| 3 | 1 | `auto_provision` | `0` or `1` | `1` | Start provisioning when Wi-Fi is enabled and no credentials are saved. |
+| 4 | 1 | `wifi_power_save_mode` | `0`: none; `1`: minimum modem; `2`: maximum modem | `2` | Select the Wi-Fi power-save mode. |
+| 5 | 1 | `twt_enabled` | `0` or `1` | `0` | Enable Target Wake Time when supported. |
+| 6 | 10 | `reserved` | All bytes zero | All bytes zero | Reserved for future versions. |
+
+`SET_DEVICE_CONFIG` replaces the complete structure. A client should read the
+current configuration, modify the required fields, write the complete structure,
+and issue `RESET` to apply it.
 
 `auto_provision` is consulted only when Wi-Fi is enabled at boot and no saved
 credentials exist. It remains persistent after provisioning, and saved
 credentials take priority.
 
-The credential payload starts with version, SSID byte length, password byte
-length, and a zero reserved byte, followed by the SSID and password bytes.
+The `SET_WIFI_CREDENTIALS` payload has this variable-length layout:
+
+| Offset | Size (bytes) | Field | Requirements |
+|---:|---:|---|---|
+| 0 | 1 | `version` | Must be `1`. |
+| 1 | 1 | `ssid_length` | 1–32 bytes. |
+| 2 | 1 | `password_length` | 0–64 bytes. |
+| 3 | 1 | `reserved` | Must be zero. |
+| 4 | `ssid_length` | `ssid` | Raw SSID bytes. |
+| 4 + `ssid_length` | `password_length` | `password` | Raw password bytes. |
+
 Credentials can be replaced or cleared but never read through this protocol.
 
 ## Acknowledgement model
@@ -132,7 +161,7 @@ CLOSE       -> CLOSE acknowledgement after stopping RX
 
 `GET_DATA` has an 804-byte payload:
 
-| Offset | Size | Field | Encoding |
+| Offset | Size (bytes) | Field | Encoding |
 |---:|---:|---|---|
 | 0 | 1 | `frame_marker` | `0xFF` from MSP430. |
 | 1 | 1 | `tx_rx_id` | Active TX/RX configuration index. |
@@ -143,19 +172,42 @@ Including the outer header, one acquisition packet occupies 813 application
 bytes. At 500 FPS this requires 406,500 bytes/s (3.252 Mbit/s) before USB or TCP
 transport overhead.
 
-The acquisition number is a wrapping sequence value, not an array index and not
-a reliable indication of progress within a newly requested GUI run. Detect a
-gap with modulo-65536 arithmetic:
+The acquisition number is a wrapping sequence value, not an array index or a
+reliable indication of progress within a newly requested acquisition. Detect
+gaps by comparing consecutive values with modulo-65536 arithmetic.
 
-```python
-gap = ((current - previous) & 0xFFFF) != 1
+## Typical acquisition session
+
+```text
+PC                                      ESP32 / MSP430
+--                                      --------------
+connect/open CDC
+PING ---------------------------------> claim session, release MSP430 reset
+     <------------------------------- PING acknowledgement
+     <------------------------------- PONG "pong"
+SET_ACQ_CONFIG(package) --------------> transfer configuration to MSP430
+     <------------------------------- SET_ACQ_CONFIG acknowledgement
+CLEAR_STATUS(mask, counters=1) -------> clear diagnostics
+     <------------------------------- CLEAR_STATUS acknowledgement
+START_RX -----------------------------> enable forwarding
+     <------------------------------- START_RX acknowledgement
+     <------------------------------- GET_DATA frame 0
+     <------------------------------- GET_DATA frame 1
+     <------------------------------- ...
+STOP_RX ------------------------------> stop and discard queued session frames
+     <------------------------------- STOP_RX acknowledgement
+GET_STATUS ---------------------------> snapshot diagnostics
+     <------------------------------- GET_STATUS acknowledgement
+     <------------------------------- STATUS payload
+CLOSE --------------------------------> stop and clean up MSP430/session
+     <------------------------------- CLOSE acknowledgement
 ```
 
 ## Runtime status
 
 The version-1 `STATUS` payload is a packed 40-byte little-endian structure:
 
-| Offset | Size | Field | Meaning |
+| Offset | Size (bytes) | Field | Meaning |
 |---:|---:|---|---|
 | 0 | 1 | `version` | Status schema version; currently 1. |
 | 1 | 1 | `size` | Total payload size; currently 40. |
@@ -192,102 +244,16 @@ acquisition unless the host requests it.
 An empty `CLEAR_STATUS` request clears all error bits but preserves counters.
 The optional five-byte request payload is:
 
-| Offset | Size | Field | Meaning |
+| Offset | Size (bytes) | Field | Meaning |
 |---:|---:|---|---|
 | 0 | 4 | `error_mask` | Little-endian bit mask of sticky errors to clear. |
 | 4 | 1 | `clear_counters` | Nonzero clears all diagnostic counters and resets the frame-pool high-water mark. |
 
-Example Python payload:
+For example, an `error_mask` of `0xFFFFFFFF` with `clear_counters` set to `1`
+clears every defined error flag and all counters.
 
-```python
-payload = struct.pack("<IB", 0xFFFFFFFF, 1)
-```
+## MSP430 firmware update commands
 
-## MSP430 update protocol
-
-All update fields are packed and little-endian. Requests still use the normal
-nine-byte packet header; the maximum request payload is 804 bytes.
-
-| Request/response | Field order (byte widths) |
-|---|---|
-| BEGIN | version (1, value 1), flags (1, send 0), reserved (2, zero), image_size (4), image_crc32 (4) |
-| DATA request | offset (4), sequence (2), data_length (2), data_crc32 (4), data (1–792) |
-| DATA response | next_offset (4), accepted_sequence (2), reserved (2, zero) |
-
-BEGIN's CRC covers the complete staged container, including header and table;
-DATA's CRC covers only that chunk. Offsets must equal the number of bytes
-already accepted. Sequence values are echoed; firmware enforces ordering by
-offset. BEGIN requires inactive acquisition and an available staging partition.
-The update-pending acquisition guard is set at COMMIT, not BEGIN: clients must
-keep acquisition stopped throughout upload. COMMIT requires all bytes received;
-full image validation happens after reboot. See the
-[update guide](msp430_update.md) for image layout and recovery limits.
-
-The 28-byte update status has this layout:
-
-| Offset | Bytes | Field |
-|---:|---:|---|
-| 0 | 1 | version (1) |
-| 1 | 1 | state |
-| 2 | 2 | flags; bit 0 = boot update pending |
-| 4 | 4 | received_bytes |
-| 8 | 4 | total_bytes (container size) |
-| 12 | 4 | processed_bytes (section data in current write/verify pass) |
-| 16 | 4 | current_address |
-| 20 | 4 | target_device_id (expected descriptor value `0x8317`) |
-| 24 | 4 | error (signed ESP error code) |
-
-State values are `IDLE=0`, `RECEIVING=1`, `READY=2`, `VALIDATING=3`,
-`PROGRAMMING=4`, `VERIFYING=5`, `RESETTING=6`, `WAITING_FOR_BOOT=7`,
-`COMPLETE=8`, `FAILED=9`, and `ABORTED=10`. Values 6 and 7 are currently unused.
-Processed bytes restart from zero for verification and exclude container
-metadata; they are not directly comparable to total upload bytes. The current
-Python status dataclass does not expose the wire flags field.
-
-The 16-byte diagnostics response is `(version:u8, stage:u8, jtag_id:u16,
-core_id:u16, control_signal:u16, descriptor_pointer:u32, quick_device_id:u16,
-direct_device_id:u16)`. Version is 1. Stage values are not-started (0), JTAG entry
-(1), core ID (2), descriptor pointer (3), synchronization (4), device-memory
-read (5), and device validated (6); the current implementation updates stages
-0, 1, 5, and 6. This query reads stored diagnostics and does not initiate JTAG.
-
-```text
-MSP_UPDATE_BEGIN -> empty acknowledgement
-MSP_UPDATE_DATA  -> next offset / accepted sequence (repeat per chunk)
-MSP_UPDATE_COMMIT -> empty acknowledgement -> ESP32 reboot
-                   validation / JTAG write / verification / normal startup
-reconnect
-MSP_UPDATE_GET_STATUS -> empty acknowledgement -> MSP_UPDATE_STATUS
-MSP_UPDATE_GET_DIAGNOSTICS -> MSP_UPDATE_DIAGNOSTICS
-```
-
-## Typical acquisition session
-
-```text
-PC                                      ESP32 / MSP430
---                                      --------------
-connect/open CDC
-PING ---------------------------------> claim session, release MSP430 reset
-     <------------------------------- PING acknowledgement
-     <------------------------------- PONG "pong"
-SET_ACQ_CONFIG(package) --------------> transfer configuration to MSP430
-     <------------------------------- SET_ACQ_CONFIG acknowledgement
-CLEAR_STATUS(mask, counters=1) -------> clear diagnostics
-     <------------------------------- CLEAR_STATUS acknowledgement
-START_RX -----------------------------> enable forwarding
-     <------------------------------- START_RX acknowledgement
-     <------------------------------- GET_DATA frame 0
-     <------------------------------- GET_DATA frame 1
-     <------------------------------- ...
-STOP_RX ------------------------------> stop and discard queued session frames
-     <------------------------------- STOP_RX acknowledgement
-GET_STATUS ---------------------------> snapshot diagnostics
-     <------------------------------- GET_STATUS acknowledgement
-     <------------------------------- STATUS payload
-CLOSE --------------------------------> stop and clean up MSP430/session
-     <------------------------------- CLOSE acknowledgement
-```
-
-The Python implementations are `WulpusProWiFiLink` and
-`WulpusProUsbCdcLink` under `sw/wulpus/`. They share one framed parser so TCP
-and USB follow identical packet-boundary and acknowledgement rules.
+The command table above includes the MSP430 update command IDs. See the
+[MSP430 firmware update protocol](msp430_update_protocol.md) for upload payloads,
+acknowledgements, status values, and diagnostics.

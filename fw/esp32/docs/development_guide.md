@@ -1,7 +1,19 @@
-# ESP32 firmware development setup
+# ESP32 firmware development guide
 
 Install the toolchain and build from source when developing firmware or
 preparing a board that does not already have firmware installed.
+
+## Contents
+
+- [Requirements](#requirements)
+- [Supported boards](#supported-boards)
+- [Install ESP-IDF](#install-esp-idf)
+- [Configure, compile, and flash](#configure-compile-and-flash)
+  - [Configure](#configure)
+  - [Compile the firmware](#compile-the-firmware)
+  - [Flash the firmware](#flash-the-firmware)
+  - [Create a merged firmware image](#create-a-merged-firmware-image)
+  - [Pin mapping](#pin-mapping)
 
 ## Requirements
 
@@ -51,7 +63,7 @@ Open an activated ESP-IDF terminal and verify:
 idf.py --version
 ```
 
-See [ESP-IDF toolchain setup](toolchain.md) for Windows, Linux, macOS,
+See [ESP-IDF toolchain setup](esp_idf_toolchain_guide.md) for Windows, Linux, macOS,
 VS Code, manual installation, and troubleshooting instructions.
 
 ## Configure, compile, and flash
@@ -115,12 +127,3 @@ For a single image to distribute to a fresh ESP32, run
 
 For a standalone XIAO, connect a common ground and verify the Acquisition PCB
 schematic and connector pinout before powering the boards.
-
-## After flashing
-
-After flashing, reset the ESP32 and follow
-[How to use (quick start)](../README.md#how-to-use-quick-start). The normal configuration
-disables the application console because USB CDC carries binary protocol data.
-Use a serial monitor only with a deliberately configured debug build, and close
-it before opening the acquisition GUI.
-

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a comparison of the integrated WiFi host PCB, standalone XIAO
+  ESP32-C6, and legacy nRF52 BLE host options.
 - Documented persistent device configuration, reboot-only Wi-Fi policy,
   write-only credential commands, Wi-Fi runtime status, and the persistent
   Wi-Fi/TCP task model.

@@ -1,25 +1,33 @@
 # Firmware architecture
 
-The ESP32 firmware bridges a WULPUS PRO acquisition board to one PC host over
+The ESP32 firmware bridges a WULPUS PRO Acquisition PCB to one PC host over
 either native USB CDC or Wi-Fi/TCP. Transport selection is dynamic: USB and TCP
 listen concurrently, but only one valid protocol session can control the board
 at a time.
 
-The [WULPUS PRO WiFi host PCB](../../../hw/wulpus_wifi_host_pcb) is the primary
-hardware target. It contains a Seeed Studio XIAO ESP32-C6 and uses the same
-XIAO firmware defaults as a standalone development module.
+## Contents
+
+- [Component layout](#component-layout)
+- [Application threads](#application-threads)
+- [Acquisition data path](#acquisition-data-path)
+- [Control path](#control-path)
+- [USB and Wi-Fi session switching](#usb-and-wi-fi-session-switching)
+- [Session and MSP430 lifecycle](#session-and-msp430-lifecycle)
+- [USB power management](#usb-power-management)
 
 ## Component layout
 
 | Path | Responsibility |
 |---|---|
 | `main/app_main.c` | Initialize components and start application threads. |
+| `components/bsp` | Initialize the XIAO board and control its status LED. |
 | `components/board` | Board GPIO, MSP430 reset, DATA_READY interrupt, SPI DMA, and USB light-sleep lock. |
 | `components/frames` | Fixed pool of DMA-capable acquisition buffers. |
 | `components/control` | Active session, acquisition state, sticky errors, and diagnostic counters. |
 | `components/protocol` | PC protocol headers, commands, validation, and status structures. |
 | `components/links` | Common ordered byte-stream interface plus USB and TCP adapters. |
-| `components/threads` | Every application-owned FreeRTOS thread. |
+| `components/sock` | TCP socket creation, listening, transfer, and synchronization. |
+| `components/threads` | Long-running acquisition, protocol, transport, transmission, and provisioning tasks. |
 | `components/provisioner` | Wi-Fi station setup and SoftAP provisioning workflow. |
 | `components/persistent_config` | Versioned device-wide boot policy stored in NVS. |
 | `components/mdns_manager` | Network discovery for the TCP service. |
@@ -33,11 +41,11 @@ configured TEST and JTAG GPIOs while programming.
 
 | Thread | Default priority | Role |
 |---|---:|---|
-| `acquisition` | 8 | Sole SPI acquisition owner. Responds to DATA_READY and receives one 804-byte DMA transfer into a frame slot. |
+| `acquisition` | 8 | Sole SPI acquisition owner. Responds to DATA_READY and receives each payload into a DMA frame slot. |
 | `protocol` | 6 | Sole reader of the active link. Parses PC commands and orchestrates the MSP430 lifecycle. |
 | `usb_link` | 5 | Detects a USB host, finds a valid protocol header, and attempts to claim the session. |
 | `tcp_link` | 5 | Starts once, waits for a Wi-Fi connection, then accepts TCP clients and attempts to claim the session. |
-| `provisioning` (`wifi_manager`) | 5 | Persistent Wi-Fi owner. Applies boot policy, provisions or reconnects, publishes connectivity, and configures power save/TWT. |
+| `provisioning` | 5 | Persistent Wi-Fi owner. Applies boot policy, provisions or reconnects, publishes connectivity, and configures power save/TWT. |
 | `packet_tx` | 4 | Sole writer to USB or TCP. Serializes control responses and acquisition packets. |
 
 `app_main()` performs initialization and starts these threads. It does not move
@@ -49,7 +57,7 @@ commit persists the request and creates a short-lived `msp430_reboot` task to
 restart the ESP32 after 250 ms. USB/TCP application commands are unavailable
 during the subsequent boot-time programming. Results and JTAG diagnostics are
 stored in NVS for retrieval after normal startup. See
-[MSP430 updates](msp430_update.md) for the lifecycle and recovery limits.
+[MSP430 updates](msp430_update_guide.md) for the lifecycle and recovery limits.
 
 ## Acquisition data path
 
@@ -57,19 +65,17 @@ stored in NVS for retrieval after normal startup. See
 flowchart LR
     MSP[MSP430 acquisition] -->|DATA_READY rising edge| ISR[GPIO ISR]
     ISR -->|task notification| ACQ[acquisition thread]
-    ACQ -->|804-byte SPI mode 1 transfer at 8 MHz| SLOT[DMA frame slot]
+    ACQ -->|SPI DMA transfer| SLOT[DMA frame slot]
     SLOT -->|READY ownership| TX[packet TX thread]
-    TX -->|9-byte PC header + 804-byte payload| LINK{Active session}
+    TX -->|framed acquisition packet| LINK{Active session}
     LINK --> USB[USB CDC]
     LINK --> TCP[Wi-Fi TCP]
-    USB --> HOST[Python host / GUI]
+    USB --> HOST[PC host]
     TCP --> HOST
 ```
 
-The MSP430 supplies a four-byte acquisition header followed by 400 signed
-16-bit samples. SPI DMA writes the complete 804-byte payload directly into a
-frame slot. The payload is not copied between the acquisition and packet-TX
-threads.
+SPI DMA writes each complete acquisition payload directly into a frame slot.
+The payload is not copied between the acquisition and packet-TX threads.
 
 The default frame pool contains 64 slots. At 500 frames/s it holds 128 ms of
 data and consumes 51,456 bytes for payload storage, plus small metadata and
@@ -104,18 +110,16 @@ frame; an in-progress packet is never interrupted.
 ## USB and Wi-Fi session switching
 
 USB and TCP listeners do not claim ownership merely because a cable is attached
-or a socket connects. A listener first resynchronizes on the six-byte `wulpus`
-magic and reads a valid nine-byte header. It then attempts to claim the global
-session.
+or a socket connects. A listener waits for a valid protocol frame before it
+attempts to claim the global session.
 
-The first valid header wins. A competing transport receives `BUSY` (`0x5F`),
-its prefetched payload is discarded, and it does not gain access to acquisition
-data.
+The first valid frame wins. A competing transport receives `BUSY`, and it does
+not gain access to acquisition data.
 
 To switch transports cleanly:
 
 1. Stop acquisition on the current transport.
-2. Send `CLOSE` (`0x5C`), normally through `link.close()` in Python.
+2. Send `CLOSE`.
 3. Wait for its acknowledgement and allow the ESP32 to return the MSP430 to its
    safe configuration state.
 4. Connect with the other transport and send its first command.
@@ -152,6 +156,6 @@ This prevents automatic light sleep from interrupting enumeration or CDC
 traffic. The lock is released after physical USB disconnection; protocol
 session ownership is independent of this power-management lock.
 
-See [ESP-to-PC protocol](esp_protocol.md), [ESP-to-MSP430 protocol](msp_protocol.md),
-and [Wi-Fi provisioning](provisioning.md) for the corresponding wire formats and
+See [ESP32-to-PC protocol](esp32_pc_protocol.md), [ESP32-to-MSP430 acquisition protocol](msp430_acq_protocol.md),
+and [Wi-Fi provisioning](wifi_provisioning_guide.md) for the corresponding wire formats and
 startup workflow.
