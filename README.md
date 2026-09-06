@@ -1,6 +1,6 @@
 # WULPUS PRO
-## A base platform for wearable ultra-low-power ultrasound
-> Independent fork by @Sergio5714 (Sergei Vostrikov)
+## Multi-mode Ultra-Low-Power Wearable Ultrasound Platform
+> Originally forked from the [WULPUS PRO project](https://github.com/pulp-bio/wulpus-pro), now developed and maintained independently by @Sergio5714 (Sergei Vostrikov).
 
 <p align="center">
   <img src="docs/images/v1_0/wulpus_pro_main.png" alt="WULPUS PRO main" width="80%"/>
@@ -212,7 +212,7 @@ If you would like to cite this repository, please use:
 
 ```bibtex
 @misc{wulpus_pro_repo_sergio5714_2026,
-  title={WULPUS PRO: A Base Platform for Wearable Ultra-Low-Power Ultrasound (Independent Fork)},
+  title={WULPUS PRO: Multi-mode Ultra-Low-Power Wearable Ultrasound Platform (Independently Maintained)},
   author={Vostrikov, Sergei and Villani, Federico and Hirschi, Cedric and Cossettini, Andrea and Benini, Luca},
   year={2026},
   howpublished={GitHub repository},
@@ -226,14 +226,14 @@ See [CHANGELOG.md](CHANGELOG.md) for release notes and main project changes.
 
 # Authors
 
-Since the conclusion of the original ETH Zurich project in 2025, this
-repository and the continued development of WULPUS PRO have been maintained
-independently by [Sergei Vostrikov](https://scholar.google.com/citations?user=a0KNUooAAAAJ&hl=en)
-(@Sergio5714), with contributions from others.
+Since 2025,
+[Sergei Vostrikov](https://scholar.google.com/citations?user=a0KNUooAAAAJ&hl=en)
+(@Sergio5714) has independently maintained this repository and continued
+developing WULPUS PRO, with contributions from others.
 
-The initial WULPUS PRO system was developed as a research project at the
-[Integrated Systems Laboratory (IIS)](https://iis.ee.ethz.ch/) at ETH Zurich
-from 2024 to 2025 by:
+The initial WULPUS PRO system was developed from 2024 to 2025 as a research
+project at the [Integrated Systems Laboratory (IIS)](https://iis.ee.ethz.ch/)
+at ETH Zurich by:
 
 - [Sergei Vostrikov](https://scholar.google.com/citations?user=a0KNUooAAAAJ&hl=en) (PCB design, firmware, software, open-sourcing)
 - [Federico Villani](https://scholar.google.com/citations?user=5LgLMCEAAAAJ&hl=en) (PCB design, component selection)
