@@ -26,11 +26,12 @@ limitations under the License.
 #include <esp_wifi.h>
 #include <esp_wifi_he.h>
 #include <esp_event.h>
+#include <esp_check.h>
+#include <string.h>
 
 #include <network_provisioning/manager.h>
 #include <network_provisioning/scheme_softap.h>
 
-#define LOG_LOCAL_LEVEL ESP_LOG_INFO
 #include <esp_log.h>
 
 #define TAG "provisioner"
@@ -39,10 +40,13 @@ limitations under the License.
 
 const int PROVISIONER_DONE_EVENT = BIT0;
 const int PROVISIONER_CONNECTED_EVENT = BIT1;
+const int PROVISIONER_DISCONNECTED_EVENT = BIT2;
 
 static EventGroupHandle_t provisioner_event_group = NULL;
-static TaskHandle_t provisioner_task_handle = NULL;
 static bool started = false;
+static wulpus_pro_wifi_state_t wifi_state = WULPUS_PRO_WIFI_DISABLED;
+static wulpus_pro_device_config_t device_config;
+static bool credentials_present = false;
 
 /**
  * @brief Initialize Wi-Fi in station mode
@@ -87,12 +91,7 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
         {
             // Credentials received from provisioning service
 
-            // Get and log Wi-Fi credentials
-            wifi_sta_config_t *wifi_sta_cfg = (wifi_sta_config_t *)event_data;
-            ESP_LOGI(TAG, "Received Wi-Fi credentials"
-                          "\n\tSSID     : %s\n\tPassword : %s",
-                     (const char *)wifi_sta_cfg->ssid,
-                     (const char *)wifi_sta_cfg->password);
+            ESP_LOGI(TAG, "Received Wi-Fi credentials");
             break;
         }
         case NETWORK_PROV_WIFI_CRED_FAIL:
@@ -120,6 +119,7 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
             // Provisioning successful
 
             ESP_LOGI(TAG, "Provisioning successful");
+            credentials_present = true;
 
 #ifdef CONFIG_PROVISIONER_RESET_ON_FAILURE
             retries = 0;
@@ -148,6 +148,7 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
         // Wi-Fi started in station mode
+        wifi_state = WULPUS_PRO_WIFI_CONNECTING;
         esp_wifi_connect();
     }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
@@ -157,14 +158,13 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
         // Get and log IP Address
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
         ESP_LOGI(TAG, "Connected with IP Address " IPSTR, IP2STR(&event->ip_info.ip));
+        wifi_state = WULPUS_PRO_WIFI_CONNECTED;
+        xEventGroupClearBits(provisioner_event_group, PROVISIONER_DISCONNECTED_EVENT);
 
-        // Get and log SSID
-        wifi_ap_record_t ap_info;
-        esp_wifi_sta_get_ap_info(&ap_info);
-        ESP_LOGI(TAG, "Connected to SSID %s", (const char *)ap_info.ssid);
-
-        // Set Wi-Fi power save mode to max modem
-        ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_MAX_MODEM));
+        wifi_ps_type_t power_save = WIFI_PS_NONE;
+        if (device_config.wifi_power_save_mode == WULPUS_PRO_WIFI_PS_MIN_MODEM) power_save = WIFI_PS_MIN_MODEM;
+        if (device_config.wifi_power_save_mode == WULPUS_PRO_WIFI_PS_MAX_MODEM) power_save = WIFI_PS_MAX_MODEM;
+        ESP_ERROR_CHECK(esp_wifi_set_ps(power_save));
 
         // Signal provisioning task that we are connected, but only after the restart after provisioning
         if (xEventGroupGetBits(provisioner_event_group) & PROVISIONER_DONE_EVENT)
@@ -175,6 +175,9 @@ static void provisioner_event_handler(void *arg, esp_event_base_t event_base, in
         // Wi-Fi disconnected
 
         // Restart Wi-Fi in station mode
+        wifi_state = WULPUS_PRO_WIFI_DISCONNECTED;
+        xEventGroupClearBits(provisioner_event_group, PROVISIONER_CONNECTED_EVENT);
+        xEventGroupSetBits(provisioner_event_group, PROVISIONER_DISCONNECTED_EVENT);
         ESP_LOGI(TAG, "Disconnected. Connecting to the AP again...");
         esp_wifi_connect();
     }
@@ -414,7 +417,7 @@ esp_err_t provisioner_reset(void)
 static void get_device_provisioning_name(char *service_name, size_t max)
 {
     uint8_t eth_mac[6];
-    const char *ssid_prefix = "PROV_WULPUS_";
+    const char *ssid_prefix = "PROV_WULPUS_PRO_";
     esp_wifi_get_mac(WIFI_IF_STA, eth_mac);
     snprintf(service_name, max, "%s%02X%02X%02X",
              ssid_prefix, eth_mac[3], eth_mac[4], eth_mac[5]);
@@ -428,21 +431,36 @@ static void get_device_provisioning_name(char *service_name, size_t max)
  * @note This function is static and should not be used outside of this file
  *
  */
-static void provisioner_task(void *pvParameter)
+static esp_err_t provisioner_process(void)
 {
-    (void)pvParameter;
-
     // Check if device is provisioned
     bool provisioned = false;
     ESP_ERROR_CHECK(network_prov_mgr_is_wifi_provisioned(&provisioned));
+    credentials_present = provisioned;
 
-    // If not provisioned, start provisioning service
+    if (!device_config.wifi_enabled_at_boot) {
+        ESP_LOGI(TAG, "Wi-Fi disabled by persistent device configuration");
+        network_prov_mgr_deinit();
+        wifi_state = WULPUS_PRO_WIFI_DISABLED;
+        xEventGroupSetBits(provisioner_event_group, PROVISIONER_DONE_EVENT);
+        return ESP_OK;
+    }
+
+    // If not provisioned, start provisioning service when configured to do so
     if (!provisioned)
     {
+        if (!device_config.auto_provision) {
+            ESP_LOGI(TAG, "No credentials and automatic provisioning disabled");
+            network_prov_mgr_deinit();
+            wifi_state = WULPUS_PRO_WIFI_DISABLED;
+            xEventGroupSetBits(provisioner_event_group, PROVISIONER_DONE_EVENT);
+            return ESP_OK;
+        }
         ESP_LOGI(TAG, "Starting provisioning");
+        wifi_state = WULPUS_PRO_WIFI_PROVISIONING;
 
         // Get device name
-        char service_name[19];
+        char service_name[23];
         get_device_provisioning_name(service_name, sizeof(service_name));
 
         // Set provisioning parameters
@@ -472,13 +490,14 @@ static void provisioner_task(void *pvParameter)
         wifi_init_sta();
     }
 
-    vTaskDelete(NULL);
+    return ESP_OK;
 }
 
 esp_err_t provisioner_start(bool reset)
 {
-    // Check if provisioner is already started
-    if (provisioner_task_handle != NULL)
+    // The caller owns the provisioning thread. This component performs the
+    // provisioning workflow synchronously and never creates a hidden task.
+    if (started)
     {
         ESP_LOGE(TAG, "Provisioner already started");
         return ESP_ERR_INVALID_STATE;
@@ -491,7 +510,10 @@ esp_err_t provisioner_start(bool reset)
         return ESP_ERR_INVALID_STATE;
     }
 
-    esp_err_t status = ESP_OK;
+    esp_err_t status = wulpus_pro_device_config_load(&device_config);
+    if (status != ESP_OK) return status;
+    xEventGroupClearBits(provisioner_event_group, PROVISIONER_DONE_EVENT |
+                         PROVISIONER_CONNECTED_EVENT | PROVISIONER_DISCONNECTED_EVENT);
 
     // Initialize Wi-Fi including netif with default config
     esp_netif_create_default_wifi_sta();
@@ -527,30 +549,22 @@ esp_err_t provisioner_start(bool reset)
             ESP_LOGE(TAG, "Error resetting provisioning manager %d", status);
             return status;
         }
+        // Double reset is a recovery override for this boot only. Do not
+        // rewrite the user's persistent device policy.
+        device_config.wifi_enabled_at_boot = true;
+        device_config.auto_provision = true;
     }
 
-    // Start provisioning task
-    xTaskCreate(provisioner_task, "provisioner_task", 4096, NULL, 5, &provisioner_task_handle);
-
-    return status;
+    return provisioner_process();
 }
 
 esp_err_t provisioner_stop(void)
 {
     esp_err_t status = ESP_OK;
 
-    // Check if task is initialized and running
-    if (provisioner_task_handle != NULL)
-    {
-        if (eTaskGetState(provisioner_task_handle) == eRunning)
-            // Delete provisioning task
-            vTaskDelete(provisioner_task_handle);
-
-        provisioner_task_handle = NULL;
-    }
-
     // Deinit provisioning manager
     network_prov_mgr_deinit();
+    started = false;
 
     ESP_LOGD(TAG, "Provisioner stopped");
 
@@ -560,7 +574,7 @@ esp_err_t provisioner_stop(void)
 esp_err_t provisioner_wait(void)
 {
     // Check if provisioner is started
-    if (provisioner_task_handle == NULL)
+    if (!started)
     {
         ESP_LOGE(TAG, "Provisioner not started");
         return ESP_ERR_INVALID_STATE;
@@ -573,9 +587,71 @@ esp_err_t provisioner_wait(void)
     return ESP_OK;
 }
 
+esp_err_t provisioner_wait_connected(void)
+{
+    if (provisioner_event_group == NULL) return ESP_ERR_INVALID_STATE;
+    xEventGroupWaitBits(provisioner_event_group, PROVISIONER_CONNECTED_EVENT,
+                        false, true, portMAX_DELAY);
+    return ESP_OK;
+}
+
+esp_err_t provisioner_wait_disconnected(void)
+{
+    if (provisioner_event_group == NULL) return ESP_ERR_INVALID_STATE;
+    xEventGroupWaitBits(provisioner_event_group, PROVISIONER_DISCONNECTED_EVENT,
+                        true, true, portMAX_DELAY);
+    return ESP_OK;
+}
+
+esp_err_t provisioner_get_status(wulpus_pro_wifi_status_t *status)
+{
+    if (status == NULL || !started) return ESP_ERR_INVALID_ARG;
+    *status = (wulpus_pro_wifi_status_t){.version = 1, .size = sizeof(*status), .state = wifi_state};
+    status->credentials_present = credentials_present;
+    if (wifi_state == WULPUS_PRO_WIFI_CONNECTED) {
+        wifi_ap_record_t ap = {0};
+        if (esp_wifi_sta_get_ap_info(&ap) == ESP_OK) status->rssi = ap.rssi;
+        esp_netif_t *netif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+        esp_netif_ip_info_t ip = {0};
+        if (netif != NULL && esp_netif_get_ip_info(netif, &ip) == ESP_OK) memcpy(status->ipv4, &ip.ip.addr, 4);
+    }
+    return ESP_OK;
+}
+
+esp_err_t provisioner_set_credentials(const uint8_t *ssid, size_t ssid_length,
+                                      const uint8_t *password, size_t password_length)
+{
+    if (!started || ssid == NULL || ssid_length == 0 || ssid_length > 32 ||
+        password_length > 64 || (password_length && password == NULL)) return ESP_ERR_INVALID_ARG;
+    if (wifi_state == WULPUS_PRO_WIFI_DISABLED) {
+        ESP_RETURN_ON_ERROR(esp_wifi_set_mode(WIFI_MODE_STA), TAG, "Wi-Fi station mode selection failed");
+    }
+    wifi_config_t config = {0};
+    memcpy(config.sta.ssid, ssid, ssid_length);
+    memcpy(config.sta.password, password, password_length);
+    ESP_RETURN_ON_ERROR(esp_wifi_set_storage(WIFI_STORAGE_FLASH), TAG, "Wi-Fi storage selection failed");
+    esp_err_t result = esp_wifi_set_config(WIFI_IF_STA, &config);
+    if (result == ESP_OK) credentials_present = true;
+    return result;
+}
+
+esp_err_t provisioner_clear_credentials(void)
+{
+    if (!started) return ESP_ERR_INVALID_STATE;
+    if (wifi_state == WULPUS_PRO_WIFI_DISABLED) {
+        ESP_RETURN_ON_ERROR(esp_wifi_set_mode(WIFI_MODE_STA), TAG, "Wi-Fi station mode selection failed");
+    }
+    wifi_config_t config = {0};
+    ESP_RETURN_ON_ERROR(esp_wifi_set_storage(WIFI_STORAGE_FLASH), TAG, "Wi-Fi storage selection failed");
+    esp_err_t result = esp_wifi_set_config(WIFI_IF_STA, &config);
+    if (result == ESP_OK) credentials_present = false;
+    return result;
+}
+
 esp_err_t provisioner_twt_setup(void)
 {
 #if CONFIG_PROVISIONER_TWT_ENABLED
+    if (!device_config.twt_enabled) return ESP_OK;
     wifi_phy_mode_t mode;
     ESP_ERROR_CHECK(esp_wifi_sta_get_negotiated_phymode(&mode));
     if (mode == WIFI_PHY_MODE_HE20)
@@ -617,6 +693,7 @@ esp_err_t provisioner_twt_setup(void)
 esp_err_t provisioner_twt_suspend(int time)
 {
 #if CONFIG_PROVISIONER_TWT_ENABLED
+    if (!device_config.twt_enabled || wifi_state != WULPUS_PRO_WIFI_CONNECTED) return ESP_OK;
     esp_err_t status = ESP_OK;
     status = esp_wifi_sta_itwt_suspend(FLOW_ID_ALL, time);
     if (status != ESP_OK)
