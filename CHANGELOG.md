@@ -71,6 +71,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Polished the WiFi host PCB description and aligned the README and host
+  documentation with support for up to 500 Hz PRF over Wi-Fi/TCP or USB CDC,
+  external Adafruit battery power through a standard JST connector, USB battery
+  charging, and integrated battery protection.
 - Added the `docs/images/v1_2` hardware photos, updated the README gallery,
   captions and alt text, and extended image authorship coverage.
 - Updated the project description and clarified attribution.

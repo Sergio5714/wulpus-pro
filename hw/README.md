@@ -21,13 +21,22 @@ in Altium Designer format. This board is required to build a WULPUS PRO system.
 
 Directory: [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb)
 
-A dedicated wireless host board for WULPUS PRO, based on the [Seeed Studio XIAO
-ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html). It is the primary host board for WULPUS PRO. It connects to the
-acquisition board and runs the ESP32 firmware in
-[`../fw/esp32`](../fw/esp32). It provides control and acquisition-data transfer
-over both Wi-Fi/TCP and native USB CDC, and can [flash the MSP430 firmware](../fw/esp32/docs/msp430_update_guide.md)
-on the acquisition PCB through its JTAG connection. The board also includes
-battery-charging functionality, although this feature has not yet been tested.
+An open-source companion board that integrates wireless communication, power
+delivery, and firmware programming for the WULPUS PRO Acquisition board. Based
+on the [Seeed Studio XIAO ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html),
+it supports runtime acquisition configuration and real-time ultrasound data
+streaming over Wi-Fi/TCP or native USB CDC at pulse repetition frequencies
+(PRFs) of up to 500 Hz. It is the primary host board for WULPUS PRO and runs
+the [ESP32 firmware](../fw/esp32).
+
+A single USB-C connection powers the complete system and enables wired
+communication and firmware updates, including [programming the acquisition
+board's MSP430 through integrated JTAG](../fw/esp32/docs/msp430_update_guide.md).
+The host supports Wi-Fi provisioning, automatic reconnection, and device
+discovery. The platform can also be powered by an external Adafruit battery
+with a standard JST connector. USB battery charging is supported, and battery
+protection is integrated.
+
 The design sources are provided in KiCad format, together with fabrication and
 assembly outputs.
 
@@ -65,9 +74,11 @@ private submodule.
 
 For convenient one-click PCB production and assembly, you can use the PCBWay shared projects:
 
-- [WULPUS PRO Evaluation Board v1.0.0](https://www.pcbway.com/project/shareproject/WULPUS_PRO_Evaluation_board_v1_0_0_992d7510.html)
+- [WULPUS PRO Acquisition PCB v1.0.0](https://www.pcbway.com/project/shareproject/WULPUS_PRO_Evaluation_board_v1_0_0_992d7510.html)
 
-This option is convenient for outsourced PCB production and assembly, with an estimated **~1 month lead time** and a price of about **USD 220** per probe (evaluation board), based on mid-2026 pricing.
+- [WULPUS PRO WiFi host PCB v1.0.0](https://www.pcbway.com/project/shareproject/WULPUS_PRO_WiFi_host_PCB_7cfe7806.html)
+
+This option is convenient for outsourced PCB production and assembly, with an estimated **~1 month lead time** and a price of about **220 USD** per probe for Acquisition PCB and **40 USD** for the WiFi host PCB, based on mid-2026 pricing.
 
 ## License
 
