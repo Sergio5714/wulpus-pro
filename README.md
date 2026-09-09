@@ -76,7 +76,7 @@ WULPUS PRO builds on the original [WULPUS](https://github.com/Sergio5714/wulpus)
 | Transducer biasing | - | Indirect or direct **bias**, **-30 V or 30 V** |
 | Analog front-end | 10 dB LNA + 30.8 dB PGA | 6 dB LNA + **70 dB VGA** |
 | TGC support | No (fixed gain) | **Yes** (linear profile) |
-| Maximum PRF | 50 Hz | **300 Hz** |
+| Maximum PRF | 50 Hz | **500 Hz** (with WiFi host PCB over Wi-Fi/TCP or USB CDC) |
 | Power budget at 50 Hz PRF | <=25 mW | <=40 mW |
 | Wireless link | BLE | BLE or **WiFi** (via host) |
 | Form factor | 46 x 25 mm footprint | **40 x 20 mm** footprint |

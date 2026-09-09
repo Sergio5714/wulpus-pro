@@ -31,9 +31,9 @@
 | --- | --- |
 | ADC | 8 Msps analog-to-digital converter, 12-bit resolution |
 | Host interface | SPI, 8 MHz |
-| Maximum PRF | 300 Hz |
+| Maximum PRF | Up to 500 Hz with the WiFi host PCB |
 | Raw streaming over BLE | 50 Hz PRF |
-| Raw streaming over Wi-Fi | Up to 300 Hz PRF |
+| Raw streaming over Wi-Fi/TCP or native USB CDC | Up to 500 Hz PRF with the WiFi host PCB |
 
 ## Power
 

@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated the WiFi host description and PRF specifications to document up to
+  500 Hz over Wi-Fi/TCP or USB CDC, and replaced the outdated battery-charging
+  status with external Adafruit battery support through a standard JST
+  connector, USB charging, and integrated battery protection.
 - Added the `images/v1_2` hardware photos, updated the root README gallery,
   captions and alt text, and extended image authorship coverage.
 - Updated setup documentation to use `wulpus_pro_example.ipynb` as the main
