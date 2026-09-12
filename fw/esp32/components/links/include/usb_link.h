@@ -14,6 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file usb_link.h
+ * @brief USB Serial/JTAG adapter for the common link interface.
+ */
+
 #pragma once
 #include "link.h"
+/**
+ * @brief Install the USB Serial/JTAG driver and initialize its link callbacks.
+ */
 esp_err_t usb_link_create(link_t* link);

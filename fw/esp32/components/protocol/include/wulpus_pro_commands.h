@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file wulpus_pro_commands.h
+ * @brief Wire command identifiers and printable command names.
+ */
+
 #pragma once
 #include <stdint.h>
 /* Command IDs must remain contiguous between the exclusive bounds below.
@@ -85,4 +90,7 @@ typedef struct __attribute__((packed)) {
     uint8_t command;
     int32_t error;
 } wulpus_pro_error_response_t;
+/**
+ * @brief Return a static command name, or UNKNOWN for an unrecognized value.
+ */
 const char* wulpus_pro_command_name(wulpus_pro_command_t command);

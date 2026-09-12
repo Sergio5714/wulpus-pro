@@ -16,6 +16,11 @@ limitations under the License.
 SPDX-License-Identifier: Apache-2.0
 */
 
+/**
+ * @file wulpus_pro_persistent_config.c
+ * @brief Versioned device policy defaults, validation, and NVS persistence.
+ */
+
 #include "wulpus_pro_persistent_config.h"
 
 #include <stdbool.h>

@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file tcp_thread.c
+ * @brief TCP connection acceptance and session handoff.
+ */
+
 #include "thread_internal.h"
 
 #include "freertos/task.h"
@@ -22,6 +27,9 @@ limitations under the License.
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_session.h"
 
+/**
+ * @brief Accept TCP clients, synchronize headers, and submit claimed sessions for processing.
+ */
 static void tcp_task(void* argument)
 {
     (void)argument;

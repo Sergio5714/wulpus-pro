@@ -16,6 +16,11 @@ limitations under the License.
 SPDX-License-Identifier: Apache-2.0
 */
 
+/**
+ * @file wulpus_pro_persistent_config.h
+ * @brief Versioned device policy defaults, validation, and NVS persistence.
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -39,7 +44,19 @@ typedef struct __attribute__((packed)) {
     uint8_t reserved[10];
 } wulpus_pro_device_config_t;
 
+/**
+ * @brief Fill a device configuration with the firmware's default policy.
+ */
 void wulpus_pro_device_config_defaults(wulpus_pro_device_config_t* config);
+/**
+ * @brief Validate configuration version, size, flags, power-save mode, and reserved bytes.
+ */
 esp_err_t wulpus_pro_device_config_validate(const wulpus_pro_device_config_t* config);
+/**
+ * @brief Load configuration from NVS, falling back to defaults for missing or invalid records.
+ */
 esp_err_t wulpus_pro_device_config_load(wulpus_pro_device_config_t* config);
+/**
+ * @brief Validate the device configuration and commit it to NVS.
+ */
 esp_err_t wulpus_pro_device_config_save(const wulpus_pro_device_config_t* config);

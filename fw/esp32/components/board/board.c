@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file board.c
+ * @brief Board GPIO, SPI, and USB light-sleep control.
+ */
+
 #include "board.h"
 
 #include "bsp.h"
@@ -48,6 +53,9 @@ esp_err_t board_data_ready_set_isr(gpio_isr_t handler, void* argument)
     return gpio_isr_handler_add(CONFIG_WP_GPIO_DATA_READY, handler, argument);
 }
 
+/**
+ * @brief Serialize a SPI transaction and wait for its completion.
+ */
 static esp_err_t board_spi_transfer(const void* tx, void* rx, size_t length)
 {
     if (xSemaphoreTake(spi_mutex, pdMS_TO_TICKS(1000)) != pdTRUE) {

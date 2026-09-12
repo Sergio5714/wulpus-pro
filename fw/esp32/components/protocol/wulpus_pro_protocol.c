@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file wulpus_pro_protocol.c
+ * @brief Packet headers, stream synchronization, and payload reception.
+ */
+
 #include "wulpus_pro_protocol.h"
 #include <string.h>
 #include "esp_check.h"

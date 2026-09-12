@@ -14,7 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file threads.h
+ * @brief Startup of the firmware runtime tasks.
+ */
+
 #pragma once
 #include <stdbool.h>
 #include "esp_err.h"
+/**
+ * @brief Start transmission, acquisition, protocol, USB, TCP, and provisioning tasks in order.
+ */
 esp_err_t threads_start(bool reset_provisioning);

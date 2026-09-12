@@ -14,23 +14,40 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file tcp_link.c
+ * @brief TCP server adapter for the common link interface.
+ */
+
 #include "tcp_link.h"
 
+/**
+ * @brief Receive socket bytes; the callback timeout argument is unused.
+ */
 static int read_bytes(void* context, void* buffer, size_t length, TickType_t timeout)
 {
     (void)timeout;
     size_t received = length;
     return sock_recv(context, buffer, &received) == ESP_OK ? (int)received : -1;
 }
+/**
+ * @brief Send all socket bytes; the callback timeout argument is unused.
+ */
 static int write_bytes(void* context, const void* buffer, size_t length, TickType_t timeout)
 {
     (void)timeout;
     return sock_send(context, buffer, length) == ESP_OK ? (int)length : -1;
 }
+/**
+ * @brief Close the socket backing the link.
+ */
 static esp_err_t close_link(void* context)
 {
     return sock_close(context);
 }
+/**
+ * @brief Return whether the client socket descriptor is nonnegative.
+ */
 static bool connected(void* context)
 {
     return ((socket_instance_t*)context)->fd >= 0;

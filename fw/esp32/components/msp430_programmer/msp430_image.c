@@ -1,4 +1,10 @@
 /* Copyright (C) 2026 Sergei Vostrikov, SPDX-License-Identifier: Apache-2.0 */
+
+/**
+ * @file msp430_image.c
+ * @brief Staged MSP430 image parsing, range validation, and CRC checking.
+ */
+
 #include "msp430_image.h"
 #include <string.h>
 #include "esp_check.h"
@@ -16,6 +22,9 @@ uint32_t msp430_crc32(uint32_t crc, const void* data, size_t length)
     return ~crc;
 }
 
+/**
+ * @brief Check that an aligned, nonempty range lies in application FRAM outside signature words.
+ */
 static bool allowed(uint32_t address, uint32_t length)
 {
     if (!length || (address & 1) || (length & 1) || address + length < address)

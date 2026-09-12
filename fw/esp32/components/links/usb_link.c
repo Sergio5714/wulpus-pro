@@ -14,25 +14,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file usb_link.c
+ * @brief USB Serial/JTAG adapter for the common link interface.
+ */
+
 #include "usb_link.h"
 #include "driver/usb_serial_jtag.h"
 #include "esp_check.h"
 
+/**
+ * @brief Read bytes through the USB driver using the supplied tick timeout.
+ */
 static int read_bytes(void* context, void* buffer, size_t length, TickType_t timeout)
 {
     (void)context;
     return usb_serial_jtag_read_bytes(buffer, length, timeout);
 }
+/**
+ * @brief Write bytes through the USB driver using the supplied tick timeout.
+ */
 static int write_bytes(void* context, const void* buffer, size_t length, TickType_t timeout)
 {
     (void)context;
     return usb_serial_jtag_write_bytes(buffer, length, timeout);
 }
+/**
+ * @brief Return success without uninstalling the shared USB driver.
+ */
 static esp_err_t close_link(void* context)
 {
     (void)context;
     return ESP_OK;
 }
+/**
+ * @brief Return the USB driver connection state.
+ */
 static bool connected(void* context)
 {
     (void)context;

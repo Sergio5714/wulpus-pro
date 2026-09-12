@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file wulpus_pro_status.c
+ * @brief Runtime error flags, counters, and frame-pool status snapshots.
+ */
+
 #include "wulpus_pro_status.h"
 
 #include <string.h>

@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file packet_tx_thread.c
+ * @brief Serialized control responses and acquisition frame transmission.
+ */
+
 #include "thread_internal.h"
 
 #include <string.h>
@@ -40,6 +45,9 @@ typedef struct {
 static TaskHandle_t task_handle;
 static QueueHandle_t control_queue;
 
+/**
+ * @brief Write a protocol header followed by its optional payload to a link.
+ */
 static esp_err_t send_packet(link_t* link, uint8_t command, const void* payload, uint16_t length)
 {
     wulpus_pro_header_t header;
@@ -50,11 +58,17 @@ static esp_err_t send_packet(link_t* link, uint8_t command, const void* payload,
     return result;
 }
 
+/**
+ * @brief Notify the requesting task of a control transmission's result.
+ */
 static void complete_request(const control_tx_t* request, esp_err_t result)
 {
     xTaskNotify(request->requester, (uint32_t)result, eSetValueWithOverwrite);
 }
 
+/**
+ * @brief Process queued control responses and transmit or discard ready acquisition frames.
+ */
 static void packet_tx_task(void* argument)
 {
     (void)argument;
@@ -116,6 +130,9 @@ esp_err_t packet_tx_thread_start(void)
                : ESP_ERR_NO_MEM;
 }
 
+/**
+ * @brief Copy a control payload into the queue and wait for the transmitting task's result.
+ */
 static esp_err_t submit(link_t* link, uint32_t generation, bool require_current, uint8_t command,
                         const void* payload, uint16_t length, TickType_t timeout)
 {

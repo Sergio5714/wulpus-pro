@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file provisioning_thread.c
+ * @brief Wi-Fi provisioning, mDNS advertisement, and TWT setup task.
+ */
+
 #include "thread_internal.h"
 
 #include "freertos/task.h"
@@ -21,6 +26,9 @@ limitations under the License.
 #include "mdns_manager.h"
 #include "provisioner.h"
 
+/**
+ * @brief Run provisioning, advertise mDNS after connection, and configure TWT on reconnect.
+ */
 static void provisioning_task(void* argument)
 {
     bool reset = (bool)(uintptr_t)argument;

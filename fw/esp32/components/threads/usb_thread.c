@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file usb_thread.c
+ * @brief USB connection monitoring and session handoff.
+ */
+
 #include "thread_internal.h"
 
 #include "board.h"
@@ -22,6 +27,9 @@ limitations under the License.
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_session.h"
 
+/**
+ * @brief Monitor USB connectivity, manage the sleep lock, and submit claimed sessions.
+ */
 static void usb_task(void* argument)
 {
     (void)argument;

@@ -1,4 +1,10 @@
 /* Copyright (C) 2026 Sergei Vostrikov, SPDX-License-Identifier: Apache-2.0 */
+
+/**
+ * @file msp430_programmer.c
+ * @brief Staged MSP430 firmware reception, persistent update state, and boot programming.
+ */
+
 #include "msp430_programmer.h"
 #include <stddef.h>
 #include <string.h>
@@ -38,11 +44,17 @@ typedef struct __attribute__((packed)) {
     uint32_t record_crc32;
 } msp430_persistent_record_t;
 
+/**
+ * @brief Calculate the persistent update record CRC, excluding its CRC field.
+ */
 static uint32_t record_crc(const msp430_persistent_record_t* record)
 {
     return msp430_crc32(0, record, offsetof(msp430_persistent_record_t, record_crc32));
 }
 
+/**
+ * @brief Commit update status and expected image CRC to NVS with a record CRC.
+ */
 static esp_err_t persist_status(void)
 {
     msp430_persistent_record_t record = {
@@ -64,6 +76,9 @@ static esp_err_t persist_status(void)
     return result;
 }
 
+/**
+ * @brief Restore update status and expected CRC from a valid NVS record.
+ */
 static bool load_status(void)
 {
     msp430_persistent_record_t record;
@@ -83,6 +98,9 @@ static bool load_status(void)
     return true;
 }
 
+/**
+ * @brief Commit the current MSP430 diagnostics to NVS.
+ */
 static esp_err_t persist_diagnostics(void)
 {
     nvs_handle_t handle = 0;
@@ -96,6 +114,9 @@ static esp_err_t persist_diagnostics(void)
     return result;
 }
 
+/**
+ * @brief Load diagnostics from NVS or initialize an empty versioned record.
+ */
 static void load_diagnostics(void)
 {
     size_t size = sizeof(diagnostics);
@@ -112,6 +133,9 @@ static void load_diagnostics(void)
     }
 }
 
+/**
+ * @brief Mark the firmware update as failed and store its error under the update mutex.
+ */
 static void fail(esp_err_t error)
 {
     xSemaphoreTake(lock, portMAX_DELAY);
@@ -120,6 +144,10 @@ static void fail(esp_err_t error)
     xSemaphoreGive(lock);
 }
 
+/**
+ * @brief Update programming progress, persist the first verification transition, and check
+ * cancellation.
+ */
 static esp_err_t progress(uint32_t address, uint32_t done, bool verifying, void* arg)
 {
     (void)arg;
@@ -140,6 +168,9 @@ static esp_err_t progress(uint32_t address, uint32_t done, bool verifying, void*
     return cancel ? ESP_ERR_INVALID_STATE : ESP_OK;
 }
 
+/**
+ * @brief Verify the staged file CRC and open its validated image structure.
+ */
 static esp_err_t validate(msp430_image_t* image)
 {
     uint8_t buffer[512];
@@ -159,6 +190,9 @@ static esp_err_t validate(msp430_image_t* image)
     return msp430_image_open(partition, status.total_bytes, image);
 }
 
+/**
+ * @brief Wait 250 milliseconds for the commit acknowledgement, then restart the ESP32.
+ */
 static void reboot_task(void* arg)
 {
     (void)arg;

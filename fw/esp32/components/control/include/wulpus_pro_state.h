@@ -14,11 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file wulpus_pro_state.h
+ * @brief Mutex-protected acquisition and firmware-update state.
+ */
+
 #pragma once
 #include <stdbool.h>
 #include "esp_err.h"
+/**
+ * @brief Create the mutex protecting acquisition and update flags.
+ */
 esp_err_t wulpus_pro_state_init(void);
+/**
+ * @brief Set the acquisition flag under the state mutex.
+ */
 void wulpus_pro_state_set_acquiring(bool enabled);
+/**
+ * @brief Return the acquisition flag under the state mutex.
+ */
 bool wulpus_pro_state_is_acquiring(void);
+/**
+ * @brief Set the firmware-update flag under the state mutex.
+ */
 void wulpus_pro_state_set_updating(bool enabled);
+/**
+ * @brief Return the firmware-update flag under the state mutex.
+ */
 bool wulpus_pro_state_is_updating(void);

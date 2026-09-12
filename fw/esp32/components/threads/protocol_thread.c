@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file protocol_thread.c
+ * @brief Session command processing and MSP430 control.
+ */
+
 #include "thread_internal.h"
 
 #include <string.h>
@@ -38,12 +43,18 @@ limitations under the License.
 
 static QueueHandle_t session_queue;
 
+/**
+ * @brief Submit a session control response using the configured command timeout.
+ */
 static esp_err_t send_control(wulpus_pro_session_ref_t session, uint8_t command,
                               const void* payload, uint16_t length)
 {
     return packet_tx_submit_control(session, command, payload, length, COMMAND_TIMEOUT);
 }
 
+/**
+ * @brief Send an error response containing the rejected command and error code.
+ */
 static esp_err_t send_command_error(wulpus_pro_session_ref_t session, uint8_t command,
                                     esp_err_t error)
 {
@@ -51,12 +62,18 @@ static esp_err_t send_command_error(wulpus_pro_session_ref_t session, uint8_t co
     return send_control(session, WULPUS_PRO_ERROR, &response, sizeof(response));
 }
 
+/**
+ * @brief Disable acquisition and discard queued ready frames.
+ */
 static void stop_acquisition(wulpus_pro_session_ref_t session)
 {
     acquisition_thread_set_enabled(false);
     packet_tx_discard_session(session);
 }
 
+/**
+ * @brief Pulse MSP reset, clear recorded edges, and wait for the boot delay.
+ */
 static esp_err_t reset_msp(void)
 {
     esp_err_t result = board_msp_reset(true);
@@ -71,6 +88,9 @@ static esp_err_t reset_msp(void)
     return ESP_OK;
 }
 
+/**
+ * @brief Read a header's payload after checking the destination capacity.
+ */
 static esp_err_t read_payload(link_t* link, const wulpus_pro_header_t* header, uint8_t* payload,
                               size_t capacity)
 {
@@ -79,6 +99,9 @@ static esp_err_t read_payload(link_t* link, const wulpus_pro_header_t* header, u
     return header->data_length ? link_read_exact(link, payload, header->data_length) : ESP_OK;
 }
 
+/**
+ * @brief Process commands for the active link, then stop acquisition and release the session.
+ */
 static void run_session(wulpus_pro_session_ref_t session)
 {
     provisioner_twt_suspend(1);
@@ -398,6 +421,9 @@ static void run_session(wulpus_pro_session_ref_t session)
     provisioner_twt_suspend(0);
 }
 
+/**
+ * @brief Consume queued session references and run sessions that are still current.
+ */
 static void protocol_task(void* argument)
 {
     (void)argument;

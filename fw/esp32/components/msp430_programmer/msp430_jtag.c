@@ -5,6 +5,12 @@
  * ESP32-C6 4-wire GPIO port of TI SLAU320AJ's MSP430Xv2 FRAM Replicator.
  * Included TI code and RAM funclets retain their BSD-3-Clause notices.
  */
+
+/**
+ * @file msp430_jtag.c
+ * @brief ESP32 GPIO implementation of MSP430 four-wire JTAG programming.
+ */
+
 #include "msp430_jtag.h"
 #include <string.h>
 #include "board.h"
@@ -21,54 +27,87 @@
 static portMUX_TYPE jtag_mux = portMUX_INITIALIZER_UNLOCKED;
 static bool pins_driven;
 static int tdi_level = 1;
+/**
+ * @brief Set the output level of a GPIO pin.
+ */
 static inline void pin(gpio_num_t number, int level)
 {
     gpio_set_level(number, level);
 }
+/**
+ * @brief Set the JTAG TMS output level.
+ */
 void msp_ll_set_tms(int level)
 {
     pin(CONFIG_WP_GPIO_MSP_TMS, level);
 }
+/**
+ * @brief Set and remember the TDI level, then wait one microsecond for setup.
+ */
 void msp_ll_set_tdi(int level)
 {
     tdi_level = !!level;
     pin(CONFIG_WP_GPIO_MSP_TDI, tdi_level);
     esp_rom_delay_us(1); /* TDI/TMS-to-TCK setup margin. */
 }
+/**
+ * @brief Set the JTAG clock level and wait two microseconds.
+ */
 void msp_ll_set_tck(int level)
 {
     pin(CONFIG_WP_GPIO_MSP_TCK, level);
     esp_rom_delay_us(2); /* Explicit high and low phase duration. */
 }
+/**
+ * @brief Drive TCLK on the TDI pin and wait two microseconds.
+ */
 void msp_ll_set_tclk(int level)
 {
     tdi_level = !!level;
     pin(CONFIG_WP_GPIO_MSP_TDI, tdi_level);
     esp_rom_delay_us(2); /* TCLK is carried on TDI in four-wire JTAG. */
 }
+/**
+ * @brief Restore the saved TCLK level on TDI and wait one microsecond.
+ */
 void msp_ll_restore_tclk(int level)
 {
     tdi_level = !!level;
     pin(CONFIG_WP_GPIO_MSP_TDI, tdi_level);
     esp_rom_delay_us(1);
 }
+/**
+ * @brief Set the MSP430 TEST output level.
+ */
 void msp_ll_set_test(int level)
 {
     pin(CONFIG_WP_GPIO_MSP_TEST, level);
 }
+/**
+ * @brief Set the physical level of the active-low MSP430 reset pin.
+ */
 void msp_ll_set_reset(int level)
 {
     pin(CONFIG_WP_GPIO_MSP_RST_N, level);
 }
+/**
+ * @brief Return the current JTAG TDO input level.
+ */
 int msp_ll_get_tdo(void)
 {
     return gpio_get_level(CONFIG_WP_GPIO_MSP_TDO);
 }
+/**
+ * @brief Return the last level recorded for the shared TDI/TCLK output.
+ */
 int msp_ll_tdi_level(void)
 {
     return tdi_level;
 }
 
+/**
+ * @brief Configure TDO as input and TEST, TDI, TMS, and TCK as driven outputs.
+ */
 void msp_ll_drive(void)
 {
     gpio_config_t input = {.pin_bit_mask = 1ULL << CONFIG_WP_GPIO_MSP_TDO,
@@ -89,6 +128,9 @@ void msp_ll_drive(void)
     pins_driven = true;
 }
 
+/**
+ * @brief Return the TEST, TDO, TDI, TMS, and TCK pins to input mode.
+ */
 void msp_ll_release(void)
 {
     gpio_config_t released = {
@@ -101,15 +143,24 @@ void msp_ll_release(void)
     pins_driven = false;
 }
 
+/**
+ * @brief Delay the calling task for the supplied millisecond duration converted to ticks.
+ */
 void MsDelay(word milliseconds)
 {
     vTaskDelay(pdMS_TO_TICKS(milliseconds));
 }
+/**
+ * @brief Busy-wait for the supplied number of microseconds.
+ */
 void usDelay(word microseconds)
 {
     esp_rom_delay_us(microseconds);
 }
 
+/**
+ * @brief Shift JTAG data most-significant bit first and return sampled TDO bits.
+ */
 unsigned long AllShifts(word format, unsigned long data)
 {
     uint32_t msb;
