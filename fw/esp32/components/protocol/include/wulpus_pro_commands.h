@@ -85,4 +85,4 @@ typedef struct __attribute__((packed)) {
     uint8_t command;
     int32_t error;
 } wulpus_pro_error_response_t;
-const char *wulpus_pro_command_name(wulpus_pro_command_t command);
+const char* wulpus_pro_command_name(wulpus_pro_command_t command);

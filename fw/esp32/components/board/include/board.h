@@ -26,10 +26,10 @@ limitations under the License.
 esp_err_t board_init(void);
 esp_err_t board_msp_reset(bool asserted);
 bool board_data_ready(void);
-esp_err_t board_data_ready_set_isr(gpio_isr_t handler, void *argument);
+esp_err_t board_data_ready_set_isr(gpio_isr_t handler, void* argument);
 
-esp_err_t board_spi_receive_dma(void *buffer, size_t length);
-esp_err_t board_spi_transmit(const void *buffer, size_t length);
+esp_err_t board_spi_receive_dma(void* buffer, size_t length);
+esp_err_t board_spi_transmit(const void* buffer, size_t length);
 
 esp_err_t board_usb_no_sleep_acquire(void);
 esp_err_t board_usb_no_sleep_release(void);

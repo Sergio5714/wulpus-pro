@@ -56,9 +56,9 @@ esp_err_t provisioner_twt_setup(void);
 esp_err_t provisioner_twt_suspend(int time);
 esp_err_t provisioner_wait_connected(void);
 esp_err_t provisioner_wait_disconnected(void);
-esp_err_t provisioner_get_status(wulpus_pro_wifi_status_t *status);
-esp_err_t provisioner_set_credentials(const uint8_t *ssid, size_t ssid_length,
-                                      const uint8_t *password, size_t password_length);
+esp_err_t provisioner_get_status(wulpus_pro_wifi_status_t* status);
+esp_err_t provisioner_set_credentials(const uint8_t* ssid, size_t ssid_length,
+                                      const uint8_t* password, size_t password_length);
 esp_err_t provisioner_clear_credentials(void);
 
 #endif

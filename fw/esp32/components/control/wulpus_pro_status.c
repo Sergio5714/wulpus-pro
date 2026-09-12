@@ -27,24 +27,54 @@ static wulpus_pro_status_snapshot_t status;
 esp_err_t wulpus_pro_status_init(void)
 {
     mutex = xSemaphoreCreateMutex();
-    if (mutex == NULL) return ESP_ERR_NO_MEM;
+    if (mutex == NULL)
+        return ESP_ERR_NO_MEM;
     memset(&status, 0, sizeof(status));
     status.version = 1;
     status.size = sizeof(status);
     return ESP_OK;
 }
 
-#define UPDATE(statement) do { xSemaphoreTake(mutex, portMAX_DELAY); statement; xSemaphoreGive(mutex); } while (0)
-void wulpus_pro_status_set_error(uint32_t flags) { UPDATE(status.error_flags |= flags); }
-void wulpus_pro_status_increment_data_ready(void) { UPDATE(++status.data_ready_count); }
-void wulpus_pro_status_increment_spi_complete(void) { UPDATE(++status.completed_spi_count); }
-void wulpus_pro_status_increment_spi_error(void) { UPDATE(++status.spi_error_count); }
-void wulpus_pro_status_increment_transmitted(void) { UPDATE(++status.transmitted_frame_count); }
-void wulpus_pro_status_increment_discarded(void) { UPDATE(++status.discarded_frame_count); }
-void wulpus_pro_status_increment_overflow(void) { UPDATE(++status.buffer_overflow_count); }
-void wulpus_pro_status_increment_link_error(void) { UPDATE(++status.link_error_count); }
+#define UPDATE(statement)                                                                          \
+    do {                                                                                           \
+        xSemaphoreTake(mutex, portMAX_DELAY);                                                      \
+        statement;                                                                                 \
+        xSemaphoreGive(mutex);                                                                     \
+    } while (0)
+void wulpus_pro_status_set_error(uint32_t flags)
+{
+    UPDATE(status.error_flags |= flags);
+}
+void wulpus_pro_status_increment_data_ready(void)
+{
+    UPDATE(++status.data_ready_count);
+}
+void wulpus_pro_status_increment_spi_complete(void)
+{
+    UPDATE(++status.completed_spi_count);
+}
+void wulpus_pro_status_increment_spi_error(void)
+{
+    UPDATE(++status.spi_error_count);
+}
+void wulpus_pro_status_increment_transmitted(void)
+{
+    UPDATE(++status.transmitted_frame_count);
+}
+void wulpus_pro_status_increment_discarded(void)
+{
+    UPDATE(++status.discarded_frame_count);
+}
+void wulpus_pro_status_increment_overflow(void)
+{
+    UPDATE(++status.buffer_overflow_count);
+}
+void wulpus_pro_status_increment_link_error(void)
+{
+    UPDATE(++status.link_error_count);
+}
 
-void wulpus_pro_status_snapshot(wulpus_pro_status_snapshot_t *snapshot)
+void wulpus_pro_status_snapshot(wulpus_pro_status_snapshot_t* snapshot)
 {
     xSemaphoreTake(mutex, portMAX_DELAY);
     *snapshot = status;
@@ -65,5 +95,6 @@ void wulpus_pro_status_clear(uint32_t mask, bool clear_counters)
         status.size = size;
     }
     xSemaphoreGive(mutex);
-    if (clear_counters) wulpus_pro_frame_pool_reset_max_usage();
+    if (clear_counters)
+        wulpus_pro_frame_pool_reset_max_usage();
 }

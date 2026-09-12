@@ -10,10 +10,17 @@
 #define MSP430_DIAGNOSTICS_VERSION 1
 
 typedef enum {
-    MSP430_UPDATE_IDLE = 0, MSP430_UPDATE_RECEIVING, MSP430_UPDATE_READY,
-    MSP430_UPDATE_VALIDATING, MSP430_UPDATE_PROGRAMMING, MSP430_UPDATE_VERIFYING,
-    MSP430_UPDATE_RESETTING, MSP430_UPDATE_WAITING_FOR_BOOT,
-    MSP430_UPDATE_COMPLETE, MSP430_UPDATE_FAILED, MSP430_UPDATE_ABORTED,
+    MSP430_UPDATE_IDLE = 0,
+    MSP430_UPDATE_RECEIVING,
+    MSP430_UPDATE_READY,
+    MSP430_UPDATE_VALIDATING,
+    MSP430_UPDATE_PROGRAMMING,
+    MSP430_UPDATE_VERIFYING,
+    MSP430_UPDATE_RESETTING,
+    MSP430_UPDATE_WAITING_FOR_BOOT,
+    MSP430_UPDATE_COMPLETE,
+    MSP430_UPDATE_FAILED,
+    MSP430_UPDATE_ABORTED,
 } msp430_update_state_t;
 
 typedef struct __attribute__((packed)) {
@@ -53,8 +60,8 @@ esp_err_t msp430_programmer_init(void);
 bool msp430_programmer_boot_update_pending(void);
 esp_err_t msp430_programmer_run_boot_update(void);
 esp_err_t msp430_programmer_begin(uint32_t size, uint32_t crc32);
-esp_err_t msp430_programmer_write(uint32_t offset, const void *data, size_t length);
+esp_err_t msp430_programmer_write(uint32_t offset, const void* data, size_t length);
 esp_err_t msp430_programmer_commit(void);
 esp_err_t msp430_programmer_abort(void);
-void msp430_programmer_get_status(msp430_update_status_t *status);
-void msp430_programmer_get_diagnostics(msp430_diagnostics_t *diagnostics);
+void msp430_programmer_get_status(msp430_update_status_t* status);
+void msp430_programmer_get_diagnostics(msp430_diagnostics_t* diagnostics);

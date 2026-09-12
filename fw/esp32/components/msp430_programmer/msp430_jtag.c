@@ -21,8 +21,14 @@
 static portMUX_TYPE jtag_mux = portMUX_INITIALIZER_UNLOCKED;
 static bool pins_driven;
 static int tdi_level = 1;
-static inline void pin(gpio_num_t number, int level) { gpio_set_level(number, level); }
-void msp_ll_set_tms(int level) { pin(CONFIG_WP_GPIO_MSP_TMS, level); }
+static inline void pin(gpio_num_t number, int level)
+{
+    gpio_set_level(number, level);
+}
+void msp_ll_set_tms(int level)
+{
+    pin(CONFIG_WP_GPIO_MSP_TMS, level);
+}
 void msp_ll_set_tdi(int level)
 {
     tdi_level = !!level;
@@ -46,24 +52,39 @@ void msp_ll_restore_tclk(int level)
     pin(CONFIG_WP_GPIO_MSP_TDI, tdi_level);
     esp_rom_delay_us(1);
 }
-void msp_ll_set_test(int level) { pin(CONFIG_WP_GPIO_MSP_TEST, level); }
-void msp_ll_set_reset(int level) { pin(CONFIG_WP_GPIO_MSP_RST_N, level); }
-int msp_ll_get_tdo(void) { return gpio_get_level(CONFIG_WP_GPIO_MSP_TDO); }
-int msp_ll_tdi_level(void) { return tdi_level; }
+void msp_ll_set_test(int level)
+{
+    pin(CONFIG_WP_GPIO_MSP_TEST, level);
+}
+void msp_ll_set_reset(int level)
+{
+    pin(CONFIG_WP_GPIO_MSP_RST_N, level);
+}
+int msp_ll_get_tdo(void)
+{
+    return gpio_get_level(CONFIG_WP_GPIO_MSP_TDO);
+}
+int msp_ll_tdi_level(void)
+{
+    return tdi_level;
+}
 
 void msp_ll_drive(void)
 {
     gpio_config_t input = {.pin_bit_mask = 1ULL << CONFIG_WP_GPIO_MSP_TDO,
-        .mode = GPIO_MODE_INPUT, .intr_type = GPIO_INTR_DISABLE};
+                           .mode = GPIO_MODE_INPUT,
+                           .intr_type = GPIO_INTR_DISABLE};
     gpio_config(&input);
-    msp_ll_set_tdi(1); msp_ll_set_tms(1); msp_ll_set_tck(1);
-    msp_ll_set_test(0); msp_ll_set_reset(1);
+    msp_ll_set_tdi(1);
+    msp_ll_set_tms(1);
+    msp_ll_set_tck(1);
+    msp_ll_set_test(0);
+    msp_ll_set_reset(1);
     gpio_config_t output = {
-        .pin_bit_mask = (1ULL << CONFIG_WP_GPIO_MSP_TEST) |
-                        (1ULL << CONFIG_WP_GPIO_MSP_TDI) |
-                        (1ULL << CONFIG_WP_GPIO_MSP_TMS) |
-                        (1ULL << CONFIG_WP_GPIO_MSP_TCK),
-        .mode = GPIO_MODE_OUTPUT, .intr_type = GPIO_INTR_DISABLE};
+        .pin_bit_mask = (1ULL << CONFIG_WP_GPIO_MSP_TEST) | (1ULL << CONFIG_WP_GPIO_MSP_TDI) |
+                        (1ULL << CONFIG_WP_GPIO_MSP_TMS) | (1ULL << CONFIG_WP_GPIO_MSP_TCK),
+        .mode = GPIO_MODE_OUTPUT,
+        .intr_type = GPIO_INTR_DISABLE};
     gpio_config(&output);
     pins_driven = true;
 }
@@ -71,28 +92,42 @@ void msp_ll_drive(void)
 void msp_ll_release(void)
 {
     gpio_config_t released = {
-        .pin_bit_mask = (1ULL << CONFIG_WP_GPIO_MSP_TEST) |
-                        (1ULL << CONFIG_WP_GPIO_MSP_TDO) |
-                        (1ULL << CONFIG_WP_GPIO_MSP_TDI) |
-                        (1ULL << CONFIG_WP_GPIO_MSP_TMS) |
+        .pin_bit_mask = (1ULL << CONFIG_WP_GPIO_MSP_TEST) | (1ULL << CONFIG_WP_GPIO_MSP_TDO) |
+                        (1ULL << CONFIG_WP_GPIO_MSP_TDI) | (1ULL << CONFIG_WP_GPIO_MSP_TMS) |
                         (1ULL << CONFIG_WP_GPIO_MSP_TCK),
-        .mode = GPIO_MODE_INPUT, .intr_type = GPIO_INTR_DISABLE};
+        .mode = GPIO_MODE_INPUT,
+        .intr_type = GPIO_INTR_DISABLE};
     gpio_config(&released);
     pins_driven = false;
 }
 
-void MsDelay(word milliseconds) { vTaskDelay(pdMS_TO_TICKS(milliseconds)); }
-void usDelay(word microseconds) { esp_rom_delay_us(microseconds); }
+void MsDelay(word milliseconds)
+{
+    vTaskDelay(pdMS_TO_TICKS(milliseconds));
+}
+void usDelay(word microseconds)
+{
+    esp_rom_delay_us(microseconds);
+}
 
 unsigned long AllShifts(word format, unsigned long data)
 {
     uint32_t msb;
     switch (format) {
-    case F_BYTE: msb = 0x80; break;
-    case F_WORD: msb = 0x8000; break;
-    case F_ADDR: msb = 0x80000; break;
-    case F_LONG: msb = 0x80000000; break;
-    default: return 0;
+    case F_BYTE:
+        msb = 0x80;
+        break;
+    case F_WORD:
+        msb = 0x8000;
+        break;
+    case F_ADDR:
+        msb = 0x80000;
+        break;
+    case F_LONG:
+        msb = 0x80000000;
+        break;
+    default:
+        return 0;
     }
     int saved_tclk = tdi_level;
     uint32_t out = 0;
@@ -100,16 +135,19 @@ unsigned long AllShifts(word format, unsigned long data)
     for (word remaining = format; remaining; --remaining) {
         msp_ll_set_tdi((data & msb) != 0);
         data <<= 1;
-        if (remaining == 1) msp_ll_set_tms(1);
+        if (remaining == 1)
+            msp_ll_set_tms(1);
         msp_ll_set_tck(0);
         msp_ll_set_tck(1);
         /* TI's four-wire reference samples TDO after the rising TCK edge. */
         out = (out << 1) | (uint32_t)msp_ll_get_tdo();
     }
     msp_ll_set_tdi(saved_tclk);
-    msp_ll_set_tck(0); msp_ll_set_tck(1);
+    msp_ll_set_tck(0);
+    msp_ll_set_tck(1);
     msp_ll_set_tms(0);
-    msp_ll_set_tck(0); msp_ll_set_tck(1);
+    msp_ll_set_tck(0);
+    msp_ll_set_tck(1);
     portEXIT_CRITICAL(&jtag_mux);
     /* TI applies the 20-bit TDO de-scrambling rotation only to Spy-Bi-Wire.
      * Standard four-wire JTAG returns the address bits in their natural order. */
@@ -118,13 +156,14 @@ unsigned long AllShifts(word format, unsigned long data)
 
 #include "ti/JTAGfunc430FR.c"
 
-esp_err_t msp430_jtag_program(const msp430_image_t *image,
-                              msp430_jtag_progress_fn progress, void *context,
-                              uint32_t *device_id, msp430_diagnostics_t *diagnostics)
+esp_err_t msp430_jtag_program(const msp430_image_t* image, msp430_jtag_progress_fn progress,
+                              void* context, uint32_t* device_id, msp430_diagnostics_t* diagnostics)
 {
-    if (!image) return ESP_ERR_INVALID_ARG;
+    if (!image)
+        return ESP_ERR_INVALID_ARG;
     esp_err_t result = board_usb_no_sleep_acquire();
-    if (result != ESP_OK) return result;
+    if (result != ESP_OK)
+        return result;
     bool connected = false;
     uint16_t words[128];
     if (diagnostics) {
@@ -134,8 +173,14 @@ esp_err_t msp430_jtag_program(const msp430_image_t *image,
     }
     msp_ll_drive();
     word access = GetDevice_430Xv2();
-    if (access == STATUS_FUSEBLOWN) { result = ESP_ERR_NOT_ALLOWED; goto done; }
-    if (access != STATUS_OK) { result = ESP_ERR_NOT_FOUND; goto done; }
+    if (access == STATUS_FUSEBLOWN) {
+        result = ESP_ERR_NOT_ALLOWED;
+        goto done;
+    }
+    if (access != STATUS_OK) {
+        result = ESP_ERR_NOT_FOUND;
+        goto done;
+    }
     connected = true;
     if (diagnostics) {
         diagnostics->jtag_id = IR_Shift(IR_CNTRL_SIG_CAPTURE);
@@ -163,29 +208,37 @@ esp_err_t msp430_jtag_program(const msp430_image_t *image,
         diagnostics->quick_device_id = fixed_device_id;
         diagnostics->direct_device_id = direct_device_id;
     }
-    if (device_id) *device_id = DeviceId;
+    if (device_id)
+        *device_id = DeviceId;
     if (DeviceId != MSP430FR5043_DEVICE_ID) {
         /* On identification failure expose TI's raw 20-bit descriptor pointer
          * through current_address without writing any target memory. */
-        if (progress) (void)progress(DeviceIdPointer, 0, false, context);
+        if (progress)
+            (void)progress(DeviceIdPointer, 0, false, context);
         result = ESP_ERR_NOT_SUPPORTED;
         goto done;
     }
-    if (diagnostics) diagnostics->stage = MSP430_DIAG_DEVICE_VALIDATED;
+    if (diagnostics)
+        diagnostics->stage = MSP430_DIAG_DEVICE_VALIDATED;
     if (DisableMpu_430Xv2() != STATUS_OK || DisableFramWprod_430Xv2() != STATUS_OK) {
-        result = ESP_ERR_INVALID_STATE; goto done;
+        result = ESP_ERR_INVALID_STATE;
+        goto done;
     }
     uint32_t processed = 0;
     for (unsigned section = 0; section < image->header.section_count; ++section) {
-        const msp430_image_section_t *s = &image->sections[section];
+        const msp430_image_section_t* s = &image->sections[section];
         for (uint32_t offset = 0; offset < s->length;) {
             size_t bytes = s->length - offset;
-            if (bytes > sizeof(words)) bytes = sizeof(words);
+            if (bytes > sizeof(words))
+                bytes = sizeof(words);
             result = msp430_image_read(image, section, offset, words, bytes);
-            if (result != ESP_OK) goto done;
+            if (result != ESP_OK)
+                goto done;
             WriteMemQuick_430Xv2(s->address + offset, bytes / 2, words);
-            offset += bytes; processed += bytes;
-            if (progress && (result = progress(s->address + offset, processed, false, context)) != ESP_OK)
+            offset += bytes;
+            processed += bytes;
+            if (progress &&
+                (result = progress(s->address + offset, processed, false, context)) != ESP_OK)
                 goto done;
         }
     }
@@ -193,26 +246,36 @@ esp_err_t msp430_jtag_program(const msp430_image_t *image,
         goto done;
     processed = 0;
     for (unsigned section = 0; section < image->header.section_count; ++section) {
-        const msp430_image_section_t *s = &image->sections[section];
+        const msp430_image_section_t* s = &image->sections[section];
         for (uint32_t offset = 0; offset < s->length;) {
             size_t bytes = s->length - offset;
-            if (bytes > sizeof(words)) bytes = sizeof(words);
+            if (bytes > sizeof(words))
+                bytes = sizeof(words);
             result = msp430_image_read(image, section, offset, words, bytes);
-            if (result != ESP_OK) goto done;
+            if (result != ESP_OK)
+                goto done;
             if (VerifyMem_430Xv2(s->address + offset, bytes / 2, words) != STATUS_OK) {
-                result = ESP_ERR_INVALID_RESPONSE; goto done;
+                result = ESP_ERR_INVALID_RESPONSE;
+                goto done;
             }
-            offset += bytes; processed += bytes;
-            if (progress && (result = progress(s->address + offset, processed, true, context)) != ESP_OK)
+            offset += bytes;
+            processed += bytes;
+            if (progress &&
+                (result = progress(s->address + offset, processed, true, context)) != ESP_OK)
                 goto done;
         }
     }
     result = ESP_OK;
 done:
-    if (connected) ReleaseDevice_430Xv2(V_RESET);
+    if (connected)
+        ReleaseDevice_430Xv2(V_RESET);
     msp_ll_release();
     board_usb_no_sleep_release();
     return result;
 }
 
-void msp430_jtag_release(void) { if (pins_driven) msp_ll_release(); }
+void msp430_jtag_release(void)
+{
+    if (pins_driven)
+        msp_ll_release();
+}

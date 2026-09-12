@@ -21,7 +21,7 @@ limitations under the License.
 #include "mdns_manager.h"
 #include "provisioner.h"
 
-static void provisioning_task(void *argument)
+static void provisioning_task(void* argument)
 {
     bool reset = (bool)(uintptr_t)argument;
     bool mdns_started = false;
@@ -30,8 +30,7 @@ static void provisioning_task(void *argument)
         ESP_ERROR_CHECK(provisioner_wait_connected());
         if (!mdns_started) {
             ESP_ERROR_CHECK(mdns_manager_init("wulpus_pro"));
-            ESP_ERROR_CHECK(mdns_manager_add("wulpus_pro", MDNS_PROTO_TCP,
-                                             CONFIG_WP_SOCKET_PORT));
+            ESP_ERROR_CHECK(mdns_manager_add("wulpus_pro", MDNS_PROTO_TCP, CONFIG_WP_SOCKET_PORT));
             mdns_started = true;
         }
         esp_err_t result = provisioner_twt_setup();
@@ -45,6 +44,7 @@ static void provisioning_task(void *argument)
 esp_err_t provisioning_thread_start(bool reset)
 {
     return xTaskCreate(provisioning_task, "provisioning", CONFIG_WP_PROVISIONING_STACK_SIZE,
-                       (void *)(uintptr_t)reset, CONFIG_WP_PROVISIONING_PRIORITY, NULL) == pdPASS
-               ? ESP_OK : ESP_ERR_NO_MEM;
+                       (void*)(uintptr_t)reset, CONFIG_WP_PROVISIONING_PRIORITY, NULL) == pdPASS
+               ? ESP_OK
+               : ESP_ERR_NO_MEM;
 }

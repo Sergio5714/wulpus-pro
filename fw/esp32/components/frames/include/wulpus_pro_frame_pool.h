@@ -25,7 +25,7 @@ limitations under the License.
 #define WULPUS_PRO_FRAME_SLOT_COUNT CONFIG_WP_FRAME_SLOT_COUNT
 
 typedef struct wulpus_pro_frame_slot {
-    uint8_t *payload;
+    uint8_t* payload;
     size_t length;
     uint32_t session_generation;
     int64_t data_ready_time_us;
@@ -34,10 +34,10 @@ typedef struct wulpus_pro_frame_slot {
 } wulpus_pro_frame_slot_t;
 
 esp_err_t wulpus_pro_frame_pool_init(size_t payload_size);
-wulpus_pro_frame_slot_t *wulpus_pro_frame_pool_acquire_for_spi(TickType_t timeout);
-void wulpus_pro_frame_pool_mark_ready(wulpus_pro_frame_slot_t *slot);
-wulpus_pro_frame_slot_t *wulpus_pro_frame_pool_acquire_for_tx(TickType_t timeout);
-void wulpus_pro_frame_pool_release(wulpus_pro_frame_slot_t *slot);
+wulpus_pro_frame_slot_t* wulpus_pro_frame_pool_acquire_for_spi(TickType_t timeout);
+void wulpus_pro_frame_pool_mark_ready(wulpus_pro_frame_slot_t* slot);
+wulpus_pro_frame_slot_t* wulpus_pro_frame_pool_acquire_for_tx(TickType_t timeout);
+void wulpus_pro_frame_pool_release(wulpus_pro_frame_slot_t* slot);
 void wulpus_pro_frame_pool_discard_ready(void);
 uint16_t wulpus_pro_frame_pool_usage(void);
 uint16_t wulpus_pro_frame_pool_max_usage(void);
