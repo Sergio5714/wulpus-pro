@@ -1,14 +1,16 @@
 # Host board options
 
-WULPUS PRO supports three host configurations. The
+WULPUS PRO has three host configurations. The
 [WULPUS PRO WiFi host PCB](../hw/wulpus_wifi_host_pcb) is recommended for normal
 use because it integrates communication, power delivery, and programming in one
 board. The other options are intended for development or compatibility with
-legacy setups.
+legacy setups. The nRF52 BLE option may also suit applications that need even
+lower power consumption than the WiFi host solution, but it is unsupported,
+is not recommended for new setups, and requires additional integration work.
 
 | Capability | WULPUS PRO WiFi host PCB | Standalone Seeed Studio XIAO ESP32-C6 | nRF52 BLE solution |
 |---|---|---|---|
-| Status | Primary and recommended | Development alternative | Legacy |
+| Status | Primary and recommended | Development alternative | Legacy, unsupported; not recommended for new setups |
 | PC connection | USB CDC or WiFi/TCP | USB CDC or WiFi/TCP | BLE through an nRF52840 USB dongle |
 | Acquisition PCB interface | Integrated WULPUS PRO connector | Manual Dupont wiring | Manual Dupont wiring to an nRF52832 DK |
 | Powers the Acquisition PCB | Yes | No; external lab supplies are required | No; external power is required |
@@ -37,6 +39,9 @@ firmware. See the [board setup and pin mapping](../fw/esp32/docs/development_gui
 ## nRF52 BLE solution
 
 The legacy BLE setup uses an nRF52832 DK as the Acquisition PCB host and an
-nRF52840 USB dongle at the PC. It requires manual wiring and external power and
+nRF52840 USB dongle at the PC. It may suit applications with stricter power
+requirements than the WiFi host solution, but it is unsupported and is not
+recommended for new setups. Additional integration work is required, including
+manual wiring, external power, and a separate programmer for the MSP430. It
 does not provide the integrated USB, WiFi, power, or MSP430-programming workflow
 of the WiFi host PCB. See the [legacy nRF52 firmware instructions](../fw/nrf52/README.md).

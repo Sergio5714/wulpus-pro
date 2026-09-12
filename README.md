@@ -135,7 +135,7 @@ workflow:
 
 1. **Get hardware**
 
-   Order the [Acquisition PCB](hw/wulpus_pro_acq_pcb_dev_board) and [WiFi host PCB](hw/wulpus_wifi_host_pcb) using the [PCBWay shared projects](hw/README.md#pcbway-shared-projects), or manufacture and assemble them yourself using the design files, schematics, and bills of materials linked in the [hardware guide](hw/README.md#included-pcb-designs).
+   Order the [Acquisition PCB](docs/images/v1_0/eval_board_main.jpg) and [WiFi host PCB](docs/images/v1_2/wifi_board_top.jpg) using the [PCBWay shared projects](hw/README.md#pcbway-shared-projects), or manufacture and assemble them yourself using the design files, schematics, and bills of materials linked in the [hardware guide](hw/README.md#included-pcb-designs).
 
 2. **Install the host software**
 
@@ -164,8 +164,8 @@ for getting started with each configuration are provided below.
 
 ## WULPUS PRO WiFi host PCB (WiFi/USB CDC)
 
-1. Connect the [WULPUS PRO WiFi host PCB](hw/wulpus_wifi_host_pcb) to the [Acquisition PCB](hw/wulpus_pro_acq_pcb_dev_board).
-2. Connect the host PCB to the PC with a data-capable USB-C cable, then reset the board. This connection powers both PCBs.
+1. Connect the [WULPUS PRO WiFi host PCB](docs/images/v1_2/wifi_board_top.jpg) to the [Acquisition PCB](docs/images/v1_0/eval_board_main.jpg).
+2. Connect the host PCB to the PC with a data-capable USB-C cable. This connection powers both PCBs.
 3. Start Jupyter from the `sw` folder:
 
    ```bash
@@ -180,7 +180,11 @@ For development with a standalone XIAO ESP32-C6, follow its [wiring and power re
 
 ## WULPUS PRO + nRF52 DK + nRF Dongle (BLE)
 
-> This is a legacy host solution and is not recommended for new setups.
+> The nRF52 BLE option may suit applications that need even lower power
+> consumption than the WiFi host solution. It is a legacy, unsupported option
+> and is not recommended for new setups. Using it requires additional
+> integration work, including manual wiring, external power, and a separate
+> programmer for the MSP430.
 
 1. Connect the nRF52 DK to the Acquisition PCB using the pin mapping documented in [fw/nrf52/README.md](fw/nrf52/README.md).
 2. Plug in the USB dongle and power the nRF52 DK via USB.

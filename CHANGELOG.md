@@ -71,6 +71,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Clarified in the README and host-board guide that the legacy nRF52 BLE option
+  may suit lower-power applications, but is unsupported, is not recommended for
+  new setups, and requires additional integration work.
 - Polished the WiFi host PCB description and aligned the README and host
   documentation with support for up to 500 Hz PRF over Wi-Fi/TCP or USB CDC,
   external Adafruit battery power through a standard JST connector, USB battery
