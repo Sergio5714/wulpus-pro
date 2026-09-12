@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file link.c
+ * @brief Transport-independent byte transfers and header prefetch state.
+ */
+
 #include "link.h"
 
 esp_err_t link_init(link_t* link)

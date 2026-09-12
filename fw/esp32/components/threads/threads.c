@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file threads.c
+ * @brief Startup of the firmware runtime tasks.
+ */
+
 #include "threads.h"
 #include "thread_internal.h"
 #include "esp_check.h"

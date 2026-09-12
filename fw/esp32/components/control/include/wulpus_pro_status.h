@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file wulpus_pro_status.h
+ * @brief Runtime error flags, counters, and frame-pool status snapshots.
+ */
+
 #pragma once
 
 #include <stdbool.h>
@@ -47,14 +52,51 @@ typedef struct __attribute__((packed)) {
     uint16_t maximum_buffer_usage;
 } wulpus_pro_status_snapshot_t;
 
+/**
+ * @brief Create the status mutex and initialize the versioned status snapshot.
+ */
 esp_err_t wulpus_pro_status_init(void);
+/**
+ * @brief Latch the supplied error bits into the status flags.
+ */
 void wulpus_pro_status_set_error(uint32_t flags);
+/**
+ * @brief Increment the counter for DATA_READY events under the status mutex.
+ */
 void wulpus_pro_status_increment_data_ready(void);
+/**
+ * @brief Increment the counter for completed SPI transfers under the status mutex.
+ */
 void wulpus_pro_status_increment_spi_complete(void);
+/**
+ * @brief Increment the counter for SPI errors under the status mutex.
+ */
 void wulpus_pro_status_increment_spi_error(void);
+/**
+ * @brief Increment the counter for transmitted frames under the status mutex.
+ */
 void wulpus_pro_status_increment_transmitted(void);
+/**
+ * @brief Increment the counter for discarded frames under the status mutex.
+ */
 void wulpus_pro_status_increment_discarded(void);
+/**
+ * @brief Increment the counter for buffer overflows under the status mutex.
+ */
 void wulpus_pro_status_increment_overflow(void);
+/**
+ * @brief Increment the counter for link errors under the status mutex.
+ */
 void wulpus_pro_status_increment_link_error(void);
+/**
+ * @brief Copy status counters and flags, then query current and peak pool usage.
+ */
 void wulpus_pro_status_snapshot(wulpus_pro_status_snapshot_t* snapshot);
+/**
+ * @brief Clear selected error bits and optionally reset all flags and counters.
+ *
+ * @param mask Error bits to clear.
+ * @param clear_counters If true, clear all error flags and counters and reset peak pool usage.
+ * @note The snapshot version and size are preserved.
+ */
 void wulpus_pro_status_clear(uint32_t mask, bool clear_counters);

@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file acquisition_thread.c
+ * @brief DATA_READY interrupt handling and SPI frame acquisition.
+ */
+
 #include "thread_internal.h"
 
 #include "board.h"
@@ -31,6 +36,9 @@ limitations under the License.
 static TaskHandle_t task_handle;
 static SemaphoreHandle_t edge_semaphore;
 
+/**
+ * @brief Notify the acquisition task from the GPIO ISR and yield when needed.
+ */
 static void IRAM_ATTR data_ready_isr(void* argument)
 {
     (void)argument;
@@ -40,6 +48,9 @@ static void IRAM_ATTR data_ready_isr(void* argument)
         portYIELD_FROM_ISR();
 }
 
+/**
+ * @brief Consume DATA_READY notifications and queue received SPI frames for transmission.
+ */
 static void acquisition_task(void* argument)
 {
     (void)argument;

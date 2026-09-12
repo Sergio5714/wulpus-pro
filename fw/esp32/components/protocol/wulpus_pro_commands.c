@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file wulpus_pro_commands.c
+ * @brief Wire command identifiers and printable command names.
+ */
+
 #include "wulpus_pro_commands.h"
 const char* wulpus_pro_command_name(wulpus_pro_command_t command)
 {

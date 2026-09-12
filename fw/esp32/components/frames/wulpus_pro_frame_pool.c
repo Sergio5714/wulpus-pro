@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file wulpus_pro_frame_pool.c
+ * @brief DMA frame storage and slot transitions between acquisition and transmission.
+ */
+
 #include "wulpus_pro_frame_pool.h"
 
 #include "esp_heap_caps.h"

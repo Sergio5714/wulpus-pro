@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/**
+ * @file wulpus_pro_state.c
+ * @brief Mutex-protected acquisition and firmware-update state.
+ */
+
 #include "wulpus_pro_state.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
