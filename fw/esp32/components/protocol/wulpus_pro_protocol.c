@@ -27,24 +27,10 @@ void wulpus_pro_protocol_make_header(wulpus_pro_header_t *header, wulpus_pro_com
 
 bool wulpus_pro_protocol_header_valid(const wulpus_pro_header_t *header)
 {
-    if (header == NULL || memcmp(header->magic, WULPUS_PRO_MAGIC, 6) != 0) return false;
-    switch ((wulpus_pro_command_t)header->command) {
-    case WULPUS_PRO_SET_ACQ_CONFIG: case WULPUS_PRO_GET_DATA: case WULPUS_PRO_PING:
-    case WULPUS_PRO_PONG: case WULPUS_PRO_RESET: case WULPUS_PRO_RESET_MSP:
-    case WULPUS_PRO_CLOSE: case WULPUS_PRO_START_RX: case WULPUS_PRO_STOP_RX:
-    case WULPUS_PRO_BUSY: case WULPUS_PRO_GET_STATUS: case WULPUS_PRO_STATUS:
-    case WULPUS_PRO_CLEAR_STATUS: case WULPUS_PRO_GET_DEVICE_CONFIG:
-    case WULPUS_PRO_DEVICE_CONFIG: case WULPUS_PRO_SET_DEVICE_CONFIG:
-    case WULPUS_PRO_GET_WIFI_STATUS: case WULPUS_PRO_WIFI_STATUS:
-    case WULPUS_PRO_SET_WIFI_CREDENTIALS: case WULPUS_PRO_CLEAR_WIFI_CREDENTIALS:
-    case WULPUS_PRO_ERROR: case WULPUS_PRO_MSP_UPDATE_BEGIN:
-    case WULPUS_PRO_MSP_UPDATE_DATA: case WULPUS_PRO_MSP_UPDATE_COMMIT:
-    case WULPUS_PRO_MSP_UPDATE_ABORT: case WULPUS_PRO_MSP_UPDATE_GET_STATUS:
-    case WULPUS_PRO_MSP_UPDATE_STATUS:
-    case WULPUS_PRO_MSP_UPDATE_GET_DIAGNOSTICS:
-    case WULPUS_PRO_MSP_UPDATE_DIAGNOSTICS: return true;
-    default: return false;
-    }
+    return header != NULL &&
+           memcmp(header->magic, WULPUS_PRO_MAGIC, sizeof(header->magic)) == 0 &&
+           header->command > WULPUS_PRO_CMD_ID_BEGIN &&
+           header->command < WULPUS_PRO_CMD_ID_END;
 }
 
 esp_err_t wulpus_pro_protocol_wait_for_header(link_t *link)

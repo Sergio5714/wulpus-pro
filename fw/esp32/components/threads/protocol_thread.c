@@ -344,6 +344,10 @@ static void run_session(wulpus_pro_session_ref_t session)
         case WULPUS_PRO_MSP_UPDATE_STATUS:
         case WULPUS_PRO_MSP_UPDATE_DIAGNOSTICS:
             break;
+        case WULPUS_PRO_CMD_ID_BEGIN:
+        case WULPUS_PRO_CMD_ID_END:
+            /* Not wire commands; rejected by header validation above. */
+            break;
         }
     }
 

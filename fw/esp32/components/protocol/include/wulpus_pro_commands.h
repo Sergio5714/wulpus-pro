@@ -16,13 +16,16 @@ limitations under the License.
 
 #pragma once
 #include <stdint.h>
+/* Command IDs must remain contiguous between the exclusive bounds below.
+ * The bounds are sentinels, not commands, and must never be transmitted.
+ */
 typedef enum {
+    WULPUS_PRO_CMD_ID_BEGIN = 0x56,
     WULPUS_PRO_SET_ACQ_CONFIG = 0x57,
     WULPUS_PRO_GET_DATA = 0x58,
     WULPUS_PRO_PING = 0x59,
     WULPUS_PRO_PONG = 0x5A,
     WULPUS_PRO_RESET = 0x5B,
-    WULPUS_PRO_RESET_MSP = 0x63,
     WULPUS_PRO_CLOSE = 0x5C,
     WULPUS_PRO_START_RX = 0x5D,
     WULPUS_PRO_STOP_RX = 0x5E,
@@ -30,6 +33,7 @@ typedef enum {
     WULPUS_PRO_GET_STATUS = 0x60,
     WULPUS_PRO_STATUS = 0x61,
     WULPUS_PRO_CLEAR_STATUS = 0x62,
+    WULPUS_PRO_RESET_MSP = 0x63,
     WULPUS_PRO_GET_DEVICE_CONFIG = 0x64,
     WULPUS_PRO_DEVICE_CONFIG = 0x65,
     WULPUS_PRO_SET_DEVICE_CONFIG = 0x66,
@@ -46,6 +50,7 @@ typedef enum {
     WULPUS_PRO_MSP_UPDATE_STATUS = 0x71,
     WULPUS_PRO_MSP_UPDATE_GET_DIAGNOSTICS = 0x72,
     WULPUS_PRO_MSP_UPDATE_DIAGNOSTICS = 0x73,
+    WULPUS_PRO_CMD_ID_END,
 } wulpus_pro_command_t;
 
 typedef struct __attribute__((packed)) {
