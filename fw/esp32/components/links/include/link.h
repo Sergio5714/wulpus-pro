@@ -26,14 +26,14 @@ limitations under the License.
 typedef enum { LINK_NONE = 0, LINK_TCP, LINK_USB } link_kind_t;
 typedef struct link link_t;
 
-typedef int (*link_read_fn)(void *, void *, size_t, TickType_t);
-typedef int (*link_write_fn)(void *, const void *, size_t, TickType_t);
-typedef esp_err_t (*link_close_fn)(void *);
-typedef bool (*link_connected_fn)(void *);
+typedef int (*link_read_fn)(void*, void*, size_t, TickType_t);
+typedef int (*link_write_fn)(void*, const void*, size_t, TickType_t);
+typedef esp_err_t (*link_close_fn)(void*);
+typedef bool (*link_connected_fn)(void*);
 
 struct link {
     link_kind_t kind;
-    void *context;
+    void* context;
     link_read_fn read;
     link_write_fn write;
     link_close_fn close;
@@ -44,9 +44,9 @@ struct link {
     size_t prefetch_offset;
 };
 
-esp_err_t link_init(link_t *link);
-esp_err_t link_read_exact(link_t *link, void *buffer, size_t length);
-esp_err_t link_write_all(link_t *link, const void *buffer, size_t length);
-bool link_is_connected(link_t *link);
-esp_err_t link_close(link_t *link);
-void link_reset_prefetch(link_t *link);
+esp_err_t link_init(link_t* link);
+esp_err_t link_read_exact(link_t* link, void* buffer, size_t length);
+esp_err_t link_write_all(link_t* link, const void* buffer, size_t length);
+bool link_is_connected(link_t* link);
+esp_err_t link_close(link_t* link);
+void link_reset_prefetch(link_t* link);

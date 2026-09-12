@@ -56,5 +56,5 @@ void wulpus_pro_status_increment_transmitted(void);
 void wulpus_pro_status_increment_discarded(void);
 void wulpus_pro_status_increment_overflow(void);
 void wulpus_pro_status_increment_link_error(void);
-void wulpus_pro_status_snapshot(wulpus_pro_status_snapshot_t *snapshot);
+void wulpus_pro_status_snapshot(wulpus_pro_status_snapshot_t* snapshot);
 void wulpus_pro_status_clear(uint32_t mask, bool clear_counters);

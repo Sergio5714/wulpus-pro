@@ -40,8 +40,8 @@ esp_err_t wulpus_pro_frame_pool_init(size_t payload_size)
         return ESP_ERR_NO_MEM;
     }
     for (uint8_t index = 0; index < WULPUS_PRO_FRAME_SLOT_COUNT; ++index) {
-        slots[index].payload = heap_caps_aligned_calloc(4, 1, payload_size,
-                                                        MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+        slots[index].payload =
+            heap_caps_aligned_calloc(4, 1, payload_size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
         if (slots[index].payload == NULL) {
             return ESP_ERR_NO_MEM;
         }
@@ -52,30 +52,32 @@ esp_err_t wulpus_pro_frame_pool_init(size_t payload_size)
     return ESP_OK;
 }
 
-wulpus_pro_frame_slot_t *wulpus_pro_frame_pool_acquire_for_spi(TickType_t timeout)
+wulpus_pro_frame_slot_t* wulpus_pro_frame_pool_acquire_for_spi(TickType_t timeout)
 {
     if (xSemaphoreTake(free_slots, timeout) != pdTRUE) {
         return NULL;
     }
     xSemaphoreTake(mutex, portMAX_DELAY);
-    wulpus_pro_frame_slot_t *result = NULL;
+    wulpus_pro_frame_slot_t* result = NULL;
     for (uint8_t count = 0; count < WULPUS_PRO_FRAME_SLOT_COUNT; ++count) {
         uint8_t index = (producer_index + count) % WULPUS_PRO_FRAME_SLOT_COUNT;
         if (states[index] == SLOT_FREE) {
             states[index] = SLOT_SPI;
             producer_index = (index + 1) % WULPUS_PRO_FRAME_SLOT_COUNT;
             ++usage;
-            if (usage > maximum_usage) maximum_usage = usage;
+            if (usage > maximum_usage)
+                maximum_usage = usage;
             result = &slots[index];
             break;
         }
     }
     xSemaphoreGive(mutex);
-    if (result == NULL) xSemaphoreGive(free_slots);
+    if (result == NULL)
+        xSemaphoreGive(free_slots);
     return result;
 }
 
-void wulpus_pro_frame_pool_mark_ready(wulpus_pro_frame_slot_t *slot)
+void wulpus_pro_frame_pool_mark_ready(wulpus_pro_frame_slot_t* slot)
 {
     xSemaphoreTake(mutex, portMAX_DELAY);
     states[slot->private_index] = SLOT_READY;
@@ -83,11 +85,12 @@ void wulpus_pro_frame_pool_mark_ready(wulpus_pro_frame_slot_t *slot)
     xSemaphoreGive(ready_slots);
 }
 
-wulpus_pro_frame_slot_t *wulpus_pro_frame_pool_acquire_for_tx(TickType_t timeout)
+wulpus_pro_frame_slot_t* wulpus_pro_frame_pool_acquire_for_tx(TickType_t timeout)
 {
-    if (xSemaphoreTake(ready_slots, timeout) != pdTRUE) return NULL;
+    if (xSemaphoreTake(ready_slots, timeout) != pdTRUE)
+        return NULL;
     xSemaphoreTake(mutex, portMAX_DELAY);
-    wulpus_pro_frame_slot_t *result = NULL;
+    wulpus_pro_frame_slot_t* result = NULL;
     for (uint8_t count = 0; count < WULPUS_PRO_FRAME_SLOT_COUNT; ++count) {
         uint8_t index = (consumer_index + count) % WULPUS_PRO_FRAME_SLOT_COUNT;
         if (states[index] == SLOT_READY) {
@@ -101,12 +104,14 @@ wulpus_pro_frame_slot_t *wulpus_pro_frame_pool_acquire_for_tx(TickType_t timeout
     return result;
 }
 
-void wulpus_pro_frame_pool_release(wulpus_pro_frame_slot_t *slot)
+void wulpus_pro_frame_pool_release(wulpus_pro_frame_slot_t* slot)
 {
-    if (slot == NULL) return;
+    if (slot == NULL)
+        return;
     xSemaphoreTake(mutex, portMAX_DELAY);
     states[slot->private_index] = SLOT_FREE;
-    if (usage > 0) --usage;
+    if (usage > 0)
+        --usage;
     xSemaphoreGive(mutex);
     xSemaphoreGive(free_slots);
 }
@@ -118,7 +123,8 @@ void wulpus_pro_frame_pool_discard_ready(void)
         for (uint8_t index = 0; index < WULPUS_PRO_FRAME_SLOT_COUNT; ++index) {
             if (states[index] == SLOT_READY) {
                 states[index] = SLOT_FREE;
-                if (usage > 0) --usage;
+                if (usage > 0)
+                    --usage;
                 xSemaphoreGive(free_slots);
                 break;
             }

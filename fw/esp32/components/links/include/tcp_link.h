@@ -17,6 +17,9 @@ limitations under the License.
 #pragma once
 #include "link.h"
 #include "sock.h"
-typedef struct { socket_instance_t listener; socket_instance_t client; } tcp_link_server_t;
-esp_err_t tcp_link_server_init(tcp_link_server_t *server, uint16_t port);
-esp_err_t tcp_link_accept(tcp_link_server_t *server, link_t *link);
+typedef struct {
+    socket_instance_t listener;
+    socket_instance_t client;
+} tcp_link_server_t;
+esp_err_t tcp_link_server_init(tcp_link_server_t* server, uint16_t port);
+esp_err_t tcp_link_accept(tcp_link_server_t* server, link_t* link);

@@ -39,7 +39,7 @@ typedef struct __attribute__((packed)) {
     uint8_t reserved[10];
 } wulpus_pro_device_config_t;
 
-void wulpus_pro_device_config_defaults(wulpus_pro_device_config_t *config);
-esp_err_t wulpus_pro_device_config_validate(const wulpus_pro_device_config_t *config);
-esp_err_t wulpus_pro_device_config_load(wulpus_pro_device_config_t *config);
-esp_err_t wulpus_pro_device_config_save(const wulpus_pro_device_config_t *config);
+void wulpus_pro_device_config_defaults(wulpus_pro_device_config_t* config);
+esp_err_t wulpus_pro_device_config_validate(const wulpus_pro_device_config_t* config);
+esp_err_t wulpus_pro_device_config_load(wulpus_pro_device_config_t* config);
+esp_err_t wulpus_pro_device_config_save(const wulpus_pro_device_config_t* config);

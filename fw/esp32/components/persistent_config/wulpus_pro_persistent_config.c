@@ -25,7 +25,7 @@ SPDX-License-Identifier: Apache-2.0
 #define WP_NVS_NAMESPACE "wulpus_pro"
 #define WP_NVS_DEVICE_CONFIG_KEY "device_cfg"
 
-void wulpus_pro_device_config_defaults(wulpus_pro_device_config_t *config)
+void wulpus_pro_device_config_defaults(wulpus_pro_device_config_t* config)
 {
     *config = (wulpus_pro_device_config_t){
         .version = WULPUS_PRO_DEVICE_CONFIG_VERSION,
@@ -37,32 +37,37 @@ void wulpus_pro_device_config_defaults(wulpus_pro_device_config_t *config)
     };
 }
 
-esp_err_t wulpus_pro_device_config_validate(const wulpus_pro_device_config_t *config)
+esp_err_t wulpus_pro_device_config_validate(const wulpus_pro_device_config_t* config)
 {
     if (config == NULL || config->version != WULPUS_PRO_DEVICE_CONFIG_VERSION ||
         config->size != sizeof(*config) || config->wifi_enabled_at_boot > 1 ||
         config->auto_provision > 1 || config->twt_enabled > 1 ||
-        config->wifi_power_save_mode > WULPUS_PRO_WIFI_PS_MAX_MODEM) return ESP_ERR_INVALID_ARG;
+        config->wifi_power_save_mode > WULPUS_PRO_WIFI_PS_MAX_MODEM)
+        return ESP_ERR_INVALID_ARG;
     for (size_t i = 0; i < sizeof(config->reserved); ++i) {
-        if (config->reserved[i] != 0) return ESP_ERR_INVALID_ARG;
+        if (config->reserved[i] != 0)
+            return ESP_ERR_INVALID_ARG;
     }
     return ESP_OK;
 }
 
-esp_err_t wulpus_pro_device_config_load(wulpus_pro_device_config_t *config)
+esp_err_t wulpus_pro_device_config_load(wulpus_pro_device_config_t* config)
 {
-    if (config == NULL) return ESP_ERR_INVALID_ARG;
+    if (config == NULL)
+        return ESP_ERR_INVALID_ARG;
     nvs_handle_t handle;
     esp_err_t result = nvs_open(WP_NVS_NAMESPACE, NVS_READONLY, &handle);
     if (result == ESP_ERR_NVS_NOT_FOUND) {
         wulpus_pro_device_config_defaults(config);
         return ESP_OK;
     }
-    if (result != ESP_OK) return result;
+    if (result != ESP_OK)
+        return result;
     size_t size = sizeof(*config);
     result = nvs_get_blob(handle, WP_NVS_DEVICE_CONFIG_KEY, config, &size);
     nvs_close(handle);
-    if (result != ESP_OK && result != ESP_ERR_NVS_NOT_FOUND) return result;
+    if (result != ESP_OK && result != ESP_ERR_NVS_NOT_FOUND)
+        return result;
     if (result == ESP_ERR_NVS_NOT_FOUND || size != sizeof(*config) ||
         wulpus_pro_device_config_validate(config) != ESP_OK) {
         wulpus_pro_device_config_defaults(config);
@@ -71,14 +76,18 @@ esp_err_t wulpus_pro_device_config_load(wulpus_pro_device_config_t *config)
     return result;
 }
 
-esp_err_t wulpus_pro_device_config_save(const wulpus_pro_device_config_t *config)
+esp_err_t wulpus_pro_device_config_save(const wulpus_pro_device_config_t* config)
 {
     esp_err_t result = wulpus_pro_device_config_validate(config);
-    if (result != ESP_OK) return result;
+    if (result != ESP_OK)
+        return result;
     nvs_handle_t handle = 0;
     result = nvs_open(WP_NVS_NAMESPACE, NVS_READWRITE, &handle);
-    if (result == ESP_OK) result = nvs_set_blob(handle, WP_NVS_DEVICE_CONFIG_KEY, config, sizeof(*config));
-    if (result == ESP_OK) result = nvs_commit(handle);
-    if (handle) nvs_close(handle);
+    if (result == ESP_OK)
+        result = nvs_set_blob(handle, WP_NVS_DEVICE_CONFIG_KEY, config, sizeof(*config));
+    if (result == ESP_OK)
+        result = nvs_commit(handle);
+    if (handle)
+        nvs_close(handle);
     return result;
 }

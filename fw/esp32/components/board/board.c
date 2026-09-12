@@ -39,7 +39,7 @@ bool board_data_ready(void)
     return gpio_get_level(CONFIG_WP_GPIO_DATA_READY) != 0;
 }
 
-esp_err_t board_data_ready_set_isr(gpio_isr_t handler, void *argument)
+esp_err_t board_data_ready_set_isr(gpio_isr_t handler, void* argument)
 {
     esp_err_t result = gpio_install_isr_service(0);
     if (result != ESP_OK && result != ESP_ERR_INVALID_STATE) {
@@ -48,7 +48,7 @@ esp_err_t board_data_ready_set_isr(gpio_isr_t handler, void *argument)
     return gpio_isr_handler_add(CONFIG_WP_GPIO_DATA_READY, handler, argument);
 }
 
-static esp_err_t board_spi_transfer(const void *tx, void *rx, size_t length)
+static esp_err_t board_spi_transfer(const void* tx, void* rx, size_t length)
 {
     if (xSemaphoreTake(spi_mutex, pdMS_TO_TICKS(1000)) != pdTRUE) {
         return ESP_ERR_TIMEOUT;
@@ -60,19 +60,19 @@ static esp_err_t board_spi_transfer(const void *tx, void *rx, size_t length)
     };
     esp_err_t result = spi_device_queue_trans(spi_device, &transaction, portMAX_DELAY);
     if (result == ESP_OK) {
-        spi_transaction_t *completed = NULL;
+        spi_transaction_t* completed = NULL;
         result = spi_device_get_trans_result(spi_device, &completed, portMAX_DELAY);
     }
     xSemaphoreGive(spi_mutex);
     return result;
 }
 
-esp_err_t board_spi_receive_dma(void *buffer, size_t length)
+esp_err_t board_spi_receive_dma(void* buffer, size_t length)
 {
     return board_spi_transfer(NULL, buffer, length);
 }
 
-esp_err_t board_spi_transmit(const void *buffer, size_t length)
+esp_err_t board_spi_transmit(const void* buffer, size_t length)
 {
     return board_spi_transfer(buffer, NULL, length);
 }
@@ -118,7 +118,8 @@ esp_err_t board_init(void)
     };
     ESP_RETURN_ON_ERROR(gpio_config(&gpio), "board", "MSP reset GPIO failed");
     ESP_RETURN_ON_ERROR(board_msp_reset(true), "board", "MSP reset failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_sel_dis(CONFIG_WP_GPIO_MSP_RST_N), "board", "MSP sleep GPIO failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_sel_dis(CONFIG_WP_GPIO_MSP_RST_N), "board",
+                        "MSP sleep GPIO failed");
 
     gpio = (gpio_config_t){
         .intr_type = GPIO_INTR_POSEDGE,
@@ -126,8 +127,10 @@ esp_err_t board_init(void)
         .pin_bit_mask = 1ULL << CONFIG_WP_GPIO_DATA_READY,
     };
     ESP_RETURN_ON_ERROR(gpio_config(&gpio), "board", "DATA_READY GPIO failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_GPIO_DATA_READY, GPIO_MODE_INPUT), "board", "DATA_READY sleep direction failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_GPIO_DATA_READY, GPIO_FLOATING), "board", "DATA_READY sleep pull failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_GPIO_DATA_READY, GPIO_MODE_INPUT),
+                        "board", "DATA_READY sleep direction failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_GPIO_DATA_READY, GPIO_FLOATING), "board",
+                        "DATA_READY sleep pull failed");
 
     spi_bus_config_t bus = {
         .miso_io_num = CONFIG_WP_SPI_MISO,
@@ -145,21 +148,31 @@ esp_err_t board_init(void)
         .cs_ena_pretrans = 16,
         .cs_ena_posttrans = 16,
     };
-    ESP_RETURN_ON_ERROR(spi_bus_initialize(CONFIG_WP_SPI_INSTANCE - 1, &bus, SPI_DMA_CH_AUTO), "board", "SPI bus failed");
-    ESP_RETURN_ON_ERROR(spi_bus_add_device(CONFIG_WP_SPI_INSTANCE - 1, &device, &spi_device), "board", "SPI device failed");
+    ESP_RETURN_ON_ERROR(spi_bus_initialize(CONFIG_WP_SPI_INSTANCE - 1, &bus, SPI_DMA_CH_AUTO),
+                        "board", "SPI bus failed");
+    ESP_RETURN_ON_ERROR(spi_bus_add_device(CONFIG_WP_SPI_INSTANCE - 1, &device, &spi_device),
+                        "board", "SPI device failed");
     spi_mutex = xSemaphoreCreateMutex();
     if (spi_mutex == NULL) {
         return ESP_ERR_NO_MEM;
     }
 
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_SPI_CLK, GPIO_MODE_OUTPUT), "board", "SPI CLK sleep failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_SPI_CLK, GPIO_PULLDOWN_ONLY), "board", "SPI CLK pull failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_SPI_MOSI, GPIO_MODE_OUTPUT), "board", "SPI MOSI sleep failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_SPI_MOSI, GPIO_PULLDOWN_ONLY), "board", "SPI MOSI pull failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_SPI_MISO, GPIO_MODE_INPUT), "board", "SPI MISO sleep failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_SPI_MISO, GPIO_FLOATING), "board", "SPI MISO pull failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_SPI_CS, GPIO_MODE_OUTPUT), "board", "SPI CS sleep failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_SPI_CS, GPIO_PULLUP_ONLY), "board", "SPI CS pull failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_SPI_CLK, GPIO_MODE_OUTPUT), "board",
+                        "SPI CLK sleep failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_SPI_CLK, GPIO_PULLDOWN_ONLY), "board",
+                        "SPI CLK pull failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_SPI_MOSI, GPIO_MODE_OUTPUT), "board",
+                        "SPI MOSI sleep failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_SPI_MOSI, GPIO_PULLDOWN_ONLY), "board",
+                        "SPI MOSI pull failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_SPI_MISO, GPIO_MODE_INPUT), "board",
+                        "SPI MISO sleep failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_SPI_MISO, GPIO_FLOATING), "board",
+                        "SPI MISO pull failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_SPI_CS, GPIO_MODE_OUTPUT), "board",
+                        "SPI CS sleep failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_SPI_CS, GPIO_PULLUP_ONLY), "board",
+                        "SPI CS pull failed");
 
 #if CONFIG_WP_ENABLE_PM
     esp_pm_config_t pm = {
@@ -168,7 +181,8 @@ esp_err_t board_init(void)
         .light_sleep_enable = true,
     };
     ESP_RETURN_ON_ERROR(esp_pm_configure(&pm), "board", "power management failed");
-    ESP_RETURN_ON_ERROR(esp_pm_lock_create(ESP_PM_NO_LIGHT_SLEEP, 0, "usb_host", &usb_sleep_lock), "board", "USB sleep lock failed");
+    ESP_RETURN_ON_ERROR(esp_pm_lock_create(ESP_PM_NO_LIGHT_SLEEP, 0, "usb_host", &usb_sleep_lock),
+                        "board", "USB sleep lock failed");
     ESP_RETURN_ON_ERROR(board_usb_no_sleep_acquire(), "board", "initial USB sleep lock failed");
 #endif
     return ESP_OK;

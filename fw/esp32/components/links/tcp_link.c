@@ -16,25 +16,48 @@ limitations under the License.
 
 #include "tcp_link.h"
 
-static int read_bytes(void *context, void *buffer, size_t length, TickType_t timeout) { (void)timeout; size_t received = length; return sock_recv(context, buffer, &received) == ESP_OK ? (int)received : -1; }
-static int write_bytes(void *context, const void *buffer, size_t length, TickType_t timeout) { (void)timeout; return sock_send(context, buffer, length) == ESP_OK ? (int)length : -1; }
-static esp_err_t close_link(void *context) { return sock_close(context); }
-static bool connected(void *context) { return ((socket_instance_t *)context)->fd >= 0; }
+static int read_bytes(void* context, void* buffer, size_t length, TickType_t timeout)
+{
+    (void)timeout;
+    size_t received = length;
+    return sock_recv(context, buffer, &received) == ESP_OK ? (int)received : -1;
+}
+static int write_bytes(void* context, const void* buffer, size_t length, TickType_t timeout)
+{
+    (void)timeout;
+    return sock_send(context, buffer, length) == ESP_OK ? (int)length : -1;
+}
+static esp_err_t close_link(void* context)
+{
+    return sock_close(context);
+}
+static bool connected(void* context)
+{
+    return ((socket_instance_t*)context)->fd >= 0;
+}
 
-esp_err_t tcp_link_server_init(tcp_link_server_t *server, uint16_t port)
+esp_err_t tcp_link_server_init(tcp_link_server_t* server, uint16_t port)
 {
     server->listener = sock_create();
     server->client = sock_create();
-    if (server->listener.mutex == NULL || server->client.mutex == NULL) return ESP_ERR_NO_MEM;
+    if (server->listener.mutex == NULL || server->client.mutex == NULL)
+        return ESP_ERR_NO_MEM;
     esp_err_t result = sock_init(&server->listener);
-    if (result == ESP_OK) result = sock_listen(&server->listener, INADDR_ANY, port);
+    if (result == ESP_OK)
+        result = sock_listen(&server->listener, INADDR_ANY, port);
     return result;
 }
 
-esp_err_t tcp_link_accept(tcp_link_server_t *server, link_t *link)
+esp_err_t tcp_link_accept(tcp_link_server_t* server, link_t* link)
 {
     esp_err_t result = sock_accept(&server->listener, &server->client);
-    if (result != ESP_OK) return result;
-    *link = (link_t){.kind = LINK_TCP, .context = &server->client, .read = read_bytes, .write = write_bytes, .close = close_link, .connected = connected};
+    if (result != ESP_OK)
+        return result;
+    *link = (link_t){.kind = LINK_TCP,
+                     .context = &server->client,
+                     .read = read_bytes,
+                     .write = write_bytes,
+                     .close = close_link,
+                     .connected = connected};
     return link_init(link);
 }

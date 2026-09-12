@@ -25,7 +25,7 @@ limitations under the License.
 #include "wulpus_pro_status.h"
 #include "msp430_programmer.h"
 
-static const char *TAG = "main";
+static const char* TAG = "main";
 
 void app_main(void)
 {
@@ -35,12 +35,13 @@ void app_main(void)
     if (msp430_programmer_boot_update_pending()) {
         ESP_LOGI(TAG, "Running pending MSP430 update before normal startup");
         esp_err_t update_result = msp430_programmer_run_boot_update();
-        if (update_result == ESP_OK) ESP_LOGI(TAG, "MSP430 update completed");
-        else ESP_LOGE(TAG, "MSP430 update failed: %s", esp_err_to_name(update_result));
+        if (update_result == ESP_OK)
+            ESP_LOGI(TAG, "MSP430 update completed");
+        else
+            ESP_LOGE(TAG, "MSP430 update failed: %s", esp_err_to_name(update_result));
     }
 #if CONFIG_WP_DOUBLE_RESET
-    ESP_ERROR_CHECK(double_reset_start(&reset_provisioning,
-                                       CONFIG_WP_DOUBLE_RESET_TIMEOUT));
+    ESP_ERROR_CHECK(double_reset_start(&reset_provisioning, CONFIG_WP_DOUBLE_RESET_TIMEOUT));
     if (reset_provisioning) {
         ESP_LOGI(TAG, "Double reset detected; provisioning will be reset");
     }

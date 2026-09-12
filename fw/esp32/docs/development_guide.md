@@ -5,6 +5,7 @@ preparing a board that does not already have firmware installed.
 
 ## Contents
 
+- [Code formatting](#code-formatting)
 - [Requirements](#requirements)
 - [Supported boards](#supported-boards)
 - [Install ESP-IDF](#install-esp-idf)
@@ -127,3 +128,44 @@ For a single image to distribute to a fresh ESP32, run
 
 For a standalone XIAO, connect a common ground and verify the Acquisition PCB
 schematic and connector pinout before powering the boards.
+
+## Code formatting
+
+Project-owned ESP32 C sources use clang-format, pinned in the development
+dependencies of `sw/pyproject.toml` and `sw/uv.lock`. The commands below reuse
+`sw/.venv`; do not create another Python environment or install a formatter
+into the ESP-IDF environment. Install `uv` as described in the
+[software setup](../../../sw/README.md#how-to-get-started) if needed.
+
+From the repository root, apply formatting before submitting changes:
+
+```powershell
+uv run --locked --project sw python scripts/format_esp32_fw.py --fix
+```
+
+Check without modifying files:
+
+```powershell
+uv run --locked --project sw python scripts/format_esp32_fw.py --check
+```
+
+GitHub Actions runs the same script with `--only-group dev` on `uv run`,
+installing only development tools in its temporary runner environment. Locally,
+use the commands above to retain the complete software environment.
+
+`uv run` installs locked dependencies into the existing software environment
+when needed. The script invokes that environment's clang-format binary, so an
+ESP-IDF formatter on PATH does not change the result. Rules are in
+[`fw/esp32/.clang-format`](../.clang-format).
+
+Scope is tracked `.c` and `.h` files under `fw/esp32/main/` and
+`fw/esp32/components/`, excluding bundled TI code in
+`components/msp430_programmer/ti/`. Build output, managed components, MSP430,
+and nRF52 firmware are outside this scope. Stage new source files with
+`git add` before running the script. If adding third-party sources under the
+selected directories, update `EXCLUDED` in the script first.
+
+A failing CI check means formatting needs attention: run `--fix`, review the
+diff, and commit the formatted files. Keep broad formatting changes separate
+from functional changes. Build the firmware after the initial formatting pass.
+Optional editor format-on-save should use the same pinned formatter and config.

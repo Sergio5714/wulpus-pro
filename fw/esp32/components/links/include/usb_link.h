@@ -16,4 +16,4 @@ limitations under the License.
 
 #pragma once
 #include "link.h"
-esp_err_t usb_link_create(link_t *link);
+esp_err_t usb_link_create(link_t* link);

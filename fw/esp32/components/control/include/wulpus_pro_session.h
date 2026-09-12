@@ -18,9 +18,13 @@ limitations under the License.
 #include <stdint.h>
 #include "esp_err.h"
 #include "link.h"
-typedef struct { link_t *link; uint32_t generation; link_kind_t kind; } wulpus_pro_session_ref_t;
+typedef struct {
+    link_t* link;
+    uint32_t generation;
+    link_kind_t kind;
+} wulpus_pro_session_ref_t;
 esp_err_t wulpus_pro_session_init(void);
-bool wulpus_pro_session_try_claim(link_t *link, wulpus_pro_session_ref_t *session);
+bool wulpus_pro_session_try_claim(link_t* link, wulpus_pro_session_ref_t* session);
 void wulpus_pro_session_release(wulpus_pro_session_ref_t session);
 wulpus_pro_session_ref_t wulpus_pro_session_current(void);
 bool wulpus_pro_session_is_current(wulpus_pro_session_ref_t session);

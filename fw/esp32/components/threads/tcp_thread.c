@@ -22,7 +22,7 @@ limitations under the License.
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_session.h"
 
-static void tcp_task(void *argument)
+static void tcp_task(void* argument)
 {
     (void)argument;
     tcp_link_server_t server;
@@ -34,7 +34,8 @@ static void tcp_task(void *argument)
             initialized = true;
         }
         link_t link;
-        if (tcp_link_accept(&server, &link) != ESP_OK) continue;
+        if (tcp_link_accept(&server, &link) != ESP_OK)
+            continue;
         if (wulpus_pro_protocol_wait_for_header(&link) != ESP_OK) {
             link_close(&link);
             continue;
@@ -51,12 +52,15 @@ static void tcp_task(void *argument)
             link_close(&link);
             continue;
         }
-        while (wulpus_pro_session_is_current(session)) vTaskDelay(pdMS_TO_TICKS(20));
+        while (wulpus_pro_session_is_current(session))
+            vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 
 esp_err_t tcp_thread_start(void)
 {
-    return xTaskCreate(tcp_task, "tcp_link", CONFIG_WP_LINK_STACK_SIZE,
-                       NULL, CONFIG_WP_LINK_PRIORITY, NULL) == pdPASS ? ESP_OK : ESP_ERR_NO_MEM;
+    return xTaskCreate(tcp_task, "tcp_link", CONFIG_WP_LINK_STACK_SIZE, NULL,
+                       CONFIG_WP_LINK_PRIORITY, NULL) == pdPASS
+               ? ESP_OK
+               : ESP_ERR_NO_MEM;
 }

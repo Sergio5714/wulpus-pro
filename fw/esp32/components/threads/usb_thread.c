@@ -22,7 +22,7 @@ limitations under the License.
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_session.h"
 
-static void usb_task(void *argument)
+static void usb_task(void* argument)
 {
     (void)argument;
     static link_t link;
@@ -35,7 +35,8 @@ static void usb_task(void *argument)
             vTaskDelay(pdMS_TO_TICKS(100));
             continue;
         }
-        if (wulpus_pro_protocol_wait_for_header(&link) != ESP_OK) continue;
+        if (wulpus_pro_protocol_wait_for_header(&link) != ESP_OK)
+            continue;
         wulpus_pro_session_ref_t session;
         if (!wulpus_pro_session_try_claim(&link, &session)) {
             packet_tx_submit_to_link(&link, WULPUS_PRO_BUSY, NULL, 0, pdMS_TO_TICKS(1000));
@@ -46,12 +47,15 @@ static void usb_task(void *argument)
             wulpus_pro_session_release(session);
             continue;
         }
-        while (wulpus_pro_session_is_current(session)) vTaskDelay(pdMS_TO_TICKS(20));
+        while (wulpus_pro_session_is_current(session))
+            vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 
 esp_err_t usb_thread_start(void)
 {
-    return xTaskCreate(usb_task, "usb_link", CONFIG_WP_LINK_STACK_SIZE,
-                       NULL, CONFIG_WP_LINK_PRIORITY, NULL) == pdPASS ? ESP_OK : ESP_ERR_NO_MEM;
+    return xTaskCreate(usb_task, "usb_link", CONFIG_WP_LINK_STACK_SIZE, NULL,
+                       CONFIG_WP_LINK_PRIORITY, NULL) == pdPASS
+               ? ESP_OK
+               : ESP_ERR_NO_MEM;
 }

@@ -35,8 +35,10 @@ typedef struct __attribute__((packed)) {
     uint8_t clear_counters;
 } wulpus_pro_clear_status_t;
 
-void wulpus_pro_protocol_make_header(wulpus_pro_header_t *header, wulpus_pro_command_t command, uint16_t length);
-bool wulpus_pro_protocol_header_valid(const wulpus_pro_header_t *header);
-esp_err_t wulpus_pro_protocol_wait_for_header(link_t *link);
-esp_err_t wulpus_pro_protocol_receive(link_t *link, wulpus_pro_header_t *header, void *payload, size_t capacity);
-esp_err_t wulpus_pro_protocol_discard_prefetched_payload(link_t *link);
+void wulpus_pro_protocol_make_header(wulpus_pro_header_t* header, wulpus_pro_command_t command,
+                                     uint16_t length);
+bool wulpus_pro_protocol_header_valid(const wulpus_pro_header_t* header);
+esp_err_t wulpus_pro_protocol_wait_for_header(link_t* link);
+esp_err_t wulpus_pro_protocol_receive(link_t* link, wulpus_pro_header_t* header, void* payload,
+                                      size_t capacity);
+esp_err_t wulpus_pro_protocol_discard_prefetched_payload(link_t* link);

@@ -28,7 +28,7 @@ limitations under the License.
 #define CONTROL_DEPTH 8
 
 typedef struct {
-    link_t *link;
+    link_t* link;
     uint32_t generation;
     bool require_current_session;
     uint8_t command;
@@ -40,21 +40,22 @@ typedef struct {
 static TaskHandle_t task_handle;
 static QueueHandle_t control_queue;
 
-static esp_err_t send_packet(link_t *link, uint8_t command, const void *payload, uint16_t length)
+static esp_err_t send_packet(link_t* link, uint8_t command, const void* payload, uint16_t length)
 {
     wulpus_pro_header_t header;
     wulpus_pro_protocol_make_header(&header, command, length);
     esp_err_t result = link_write_all(link, &header, sizeof(header));
-    if (result == ESP_OK && length > 0) result = link_write_all(link, payload, length);
+    if (result == ESP_OK && length > 0)
+        result = link_write_all(link, payload, length);
     return result;
 }
 
-static void complete_request(const control_tx_t *request, esp_err_t result)
+static void complete_request(const control_tx_t* request, esp_err_t result)
 {
     xTaskNotify(request->requester, (uint32_t)result, eSetValueWithOverwrite);
 }
 
-static void packet_tx_task(void *argument)
+static void packet_tx_task(void* argument)
 {
     (void)argument;
     while (true) {
@@ -64,10 +65,12 @@ static void packet_tx_task(void *argument)
         while (xQueueReceive(control_queue, &control, 0) == pdTRUE) {
             esp_err_t result = ESP_ERR_INVALID_STATE;
             if (!control.require_current_session ||
-                wulpus_pro_session_is_current((wulpus_pro_session_ref_t){
-                    .link = control.link, .generation = control.generation,
-                    .kind = control.link->kind})) {
-                result = send_packet(control.link, control.command, control.payload, control.length);
+                wulpus_pro_session_is_current(
+                    (wulpus_pro_session_ref_t){.link = control.link,
+                                               .generation = control.generation,
+                                               .kind = control.link->kind})) {
+                result =
+                    send_packet(control.link, control.command, control.payload, control.length);
             }
             if (result != ESP_OK) {
                 wulpus_pro_status_set_error(WULPUS_PRO_ERROR_LINK_TIMEOUT);
@@ -76,8 +79,9 @@ static void packet_tx_task(void *argument)
             complete_request(&control, result);
         }
 
-        wulpus_pro_frame_slot_t *slot = wulpus_pro_frame_pool_acquire_for_tx(0);
-        if (slot == NULL) continue;
+        wulpus_pro_frame_slot_t* slot = wulpus_pro_frame_pool_acquire_for_tx(0);
+        if (slot == NULL)
+            continue;
         wulpus_pro_session_ref_t session = wulpus_pro_session_current();
         if (session.link == NULL || session.generation != slot->session_generation ||
             !wulpus_pro_state_is_acquiring() || !link_is_connected(session.link)) {
@@ -85,8 +89,8 @@ static void packet_tx_task(void *argument)
             wulpus_pro_frame_pool_release(slot);
             continue;
         }
-        esp_err_t result = send_packet(session.link, WULPUS_PRO_GET_DATA,
-                                       slot->payload, slot->length);
+        esp_err_t result =
+            send_packet(session.link, WULPUS_PRO_GET_DATA, slot->payload, slot->length);
         if (result == ESP_OK) {
             wulpus_pro_status_increment_transmitted();
         } else {
@@ -104,44 +108,59 @@ static void packet_tx_task(void *argument)
 esp_err_t packet_tx_thread_start(void)
 {
     control_queue = xQueueCreate(CONTROL_DEPTH, sizeof(control_tx_t));
-    if (control_queue == NULL) return ESP_ERR_NO_MEM;
-    return xTaskCreate(packet_tx_task, "packet_tx", CONFIG_WP_PACKET_TX_STACK_SIZE,
-                       NULL, CONFIG_WP_PACKET_TX_PRIORITY, &task_handle) == pdPASS
-               ? ESP_OK : ESP_ERR_NO_MEM;
+    if (control_queue == NULL)
+        return ESP_ERR_NO_MEM;
+    return xTaskCreate(packet_tx_task, "packet_tx", CONFIG_WP_PACKET_TX_STACK_SIZE, NULL,
+                       CONFIG_WP_PACKET_TX_PRIORITY, &task_handle) == pdPASS
+               ? ESP_OK
+               : ESP_ERR_NO_MEM;
 }
 
-static esp_err_t submit(link_t *link, uint32_t generation, bool require_current,
-                        uint8_t command, const void *payload, uint16_t length,
-                        TickType_t timeout)
+static esp_err_t submit(link_t* link, uint32_t generation, bool require_current, uint8_t command,
+                        const void* payload, uint16_t length, TickType_t timeout)
 {
-    if (link == NULL || length > CONTROL_PAYLOAD_MAX || (length > 0 && payload == NULL)) return ESP_ERR_INVALID_ARG;
+    if (link == NULL || length > CONTROL_PAYLOAD_MAX || (length > 0 && payload == NULL))
+        return ESP_ERR_INVALID_ARG;
     control_tx_t request = {
-        .link = link, .generation = generation,
+        .link = link,
+        .generation = generation,
         .require_current_session = require_current,
-        .command = command, .length = length,
+        .command = command,
+        .length = length,
         .requester = xTaskGetCurrentTaskHandle(),
     };
-    if (length) memcpy(request.payload, payload, length);
+    if (length)
+        memcpy(request.payload, payload, length);
     uint32_t stale;
     xTaskNotifyWait(0, UINT32_MAX, &stale, 0);
-    if (xQueueSend(control_queue, &request, timeout) != pdTRUE) return ESP_ERR_TIMEOUT;
+    if (xQueueSend(control_queue, &request, timeout) != pdTRUE)
+        return ESP_ERR_TIMEOUT;
     xTaskNotifyGive(task_handle);
     uint32_t result;
-    if (xTaskNotifyWait(0, UINT32_MAX, &result, timeout) != pdTRUE) return ESP_ERR_TIMEOUT;
+    if (xTaskNotifyWait(0, UINT32_MAX, &result, timeout) != pdTRUE)
+        return ESP_ERR_TIMEOUT;
     return (esp_err_t)result;
 }
 
 esp_err_t packet_tx_submit_control(wulpus_pro_session_ref_t session, uint8_t command,
-                                   const void *payload, uint16_t length, TickType_t timeout)
+                                   const void* payload, uint16_t length, TickType_t timeout)
 {
     return submit(session.link, session.generation, true, command, payload, length, timeout);
 }
 
-esp_err_t packet_tx_submit_to_link(link_t *link, uint8_t command,
-                                   const void *payload, uint16_t length, TickType_t timeout)
+esp_err_t packet_tx_submit_to_link(link_t* link, uint8_t command, const void* payload,
+                                   uint16_t length, TickType_t timeout)
 {
     return submit(link, 0, false, command, payload, length, timeout);
 }
 
-void packet_tx_notify_frame_ready(void) { if (task_handle) xTaskNotifyGive(task_handle); }
-void packet_tx_discard_session(wulpus_pro_session_ref_t session) { (void)session; wulpus_pro_frame_pool_discard_ready(); }
+void packet_tx_notify_frame_ready(void)
+{
+    if (task_handle)
+        xTaskNotifyGive(task_handle);
+}
+void packet_tx_discard_session(wulpus_pro_session_ref_t session)
+{
+    (void)session;
+    wulpus_pro_frame_pool_discard_ready();
+}

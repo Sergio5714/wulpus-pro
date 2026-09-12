@@ -26,14 +26,14 @@ esp_err_t acquisition_thread_start(void);
 void acquisition_thread_set_enabled(bool enabled);
 esp_err_t acquisition_thread_wait_for_edge(TickType_t timeout);
 void acquisition_thread_clear_edges(void);
-esp_err_t acquisition_thread_send_block(const void *data, size_t length);
+esp_err_t acquisition_thread_send_block(const void* data, size_t length);
 esp_err_t acquisition_thread_graceful_shutdown(void);
 
 esp_err_t packet_tx_thread_start(void);
 esp_err_t packet_tx_submit_control(wulpus_pro_session_ref_t session, uint8_t command,
-                                   const void *payload, uint16_t length, TickType_t timeout);
-esp_err_t packet_tx_submit_to_link(link_t *link, uint8_t command,
-                                   const void *payload, uint16_t length, TickType_t timeout);
+                                   const void* payload, uint16_t length, TickType_t timeout);
+esp_err_t packet_tx_submit_to_link(link_t* link, uint8_t command, const void* payload,
+                                   uint16_t length, TickType_t timeout);
 void packet_tx_notify_frame_ready(void);
 void packet_tx_discard_session(wulpus_pro_session_ref_t session);
 

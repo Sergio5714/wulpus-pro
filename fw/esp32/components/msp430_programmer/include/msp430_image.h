@@ -27,14 +27,14 @@ typedef struct __attribute__((packed)) {
 } msp430_image_section_t;
 
 typedef struct {
-    const esp_partition_t *partition;
+    const esp_partition_t* partition;
     msp430_image_header_t header;
     msp430_image_section_t sections[MSP430_IMAGE_MAX_SECTIONS];
     uint32_t data_offsets[MSP430_IMAGE_MAX_SECTIONS];
 } msp430_image_t;
 
-uint32_t msp430_crc32(uint32_t crc, const void *data, size_t length);
-esp_err_t msp430_image_open(const esp_partition_t *partition, uint32_t staged_size,
-                            msp430_image_t *image);
-esp_err_t msp430_image_read(const msp430_image_t *image, unsigned section,
-                            uint32_t offset, void *data, size_t length);
+uint32_t msp430_crc32(uint32_t crc, const void* data, size_t length);
+esp_err_t msp430_image_open(const esp_partition_t* partition, uint32_t staged_size,
+                            msp430_image_t* image);
+esp_err_t msp430_image_read(const msp430_image_t* image, unsigned section, uint32_t offset,
+                            void* data, size_t length);

@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added pinned clang-format tooling in the existing software development
+  environment, an ESP32 formatting script, CI checks, and developer instructions.
 - Added a host-board comparison covering the integrated WiFi host PCB,
   standalone XIAO ESP32-C6, and legacy nRF52 BLE solution.
 - Added MSP430FR5043 firmware updating through the ESP32 over USB CDC or Wi-Fi,
