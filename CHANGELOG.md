@@ -105,6 +105,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Separated ESP32 board access, DMA frame storage, control state, protocol,
   links, and task implementations; SPI acquisition and packet transmission now
   have independent owners connected by a zero-copy frame pool.
+- Split the ESP32 acquisition owner into focused command/state, scheduler,
+  DATA_READY/SPI-handshake, and frame-ownership modules while retaining one
+  task as the sole owner of MSP430 acquisition operations.
 
 ## [1.1.0] - 2026-08-22
 

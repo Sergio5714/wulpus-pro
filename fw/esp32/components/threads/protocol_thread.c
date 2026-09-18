@@ -22,13 +22,11 @@ limitations under the License.
 #include "thread_internal.h"
 
 #include <string.h>
-#include "board.h"
 #include "esp_system.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "provisioner.h"
 #include "wulpus_pro_commands.h"
-#include "wulpus_pro_frame_pool.h"
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_state.h"
 #include "wulpus_pro_status.h"
@@ -37,9 +35,7 @@ limitations under the License.
 #include "msp430_image.h"
 
 #define COMMAND_TIMEOUT pdMS_TO_TICKS(5000)
-#define DATA_READY_TIMEOUT pdMS_TO_TICKS(1000)
-#define MSP_BOOT_DELAY_MS 100
-#define MSP_RESET_PULSE_MS 10
+#define ACQUISITION_TIMEOUT pdMS_TO_TICKS(8000)
 
 static QueueHandle_t session_queue;
 
@@ -62,30 +58,25 @@ static esp_err_t send_command_error(wulpus_pro_session_ref_t session, uint8_t co
     return send_control(session, WULPUS_PRO_ERROR, &response, sizeof(response));
 }
 
-/**
- * @brief Disable acquisition and discard queued ready frames.
- */
-static void stop_acquisition(wulpus_pro_session_ref_t session)
+static esp_err_t acq_command(wulpus_pro_session_ref_t session, acq_command_type_t type)
 {
-    acquisition_thread_set_enabled(false);
-    packet_tx_discard_session(session);
+    return acquisition_thread_command(type, session, NULL, 0, ACQUISITION_TIMEOUT);
 }
 
-/**
- * @brief Pulse MSP reset, clear recorded edges, and wait for the boot delay.
- */
-static esp_err_t reset_msp(void)
+static esp_err_t stop_acquisition(wulpus_pro_session_ref_t session)
 {
-    esp_err_t result = board_msp_reset(true);
+    return acq_command(session, ACQ_CMD_QUIESCE);
+}
+
+static esp_err_t shutdown_msp(wulpus_pro_session_ref_t session)
+{
+    esp_err_t result = stop_acquisition(session);
     if (result != ESP_OK)
         return result;
-    vTaskDelay(pdMS_TO_TICKS(MSP_RESET_PULSE_MS));
-    acquisition_thread_clear_edges();
-    result = board_msp_reset(false);
-    if (result != ESP_OK)
-        return result;
-    vTaskDelay(pdMS_TO_TICKS(MSP_BOOT_DELAY_MS));
-    return ESP_OK;
+    result = acq_command(session, ACQ_CMD_RESTART);
+    /* Reset is serialized by the acquisition owner even on handshake failure. */
+    esp_err_t reset_result = acq_command(session, ACQ_CMD_RESET);
+    return result == ESP_OK ? reset_result : result;
 }
 
 /**
@@ -105,11 +96,9 @@ static esp_err_t read_payload(link_t* link, const wulpus_pro_header_t* header, u
 static void run_session(wulpus_pro_session_ref_t session)
 {
     provisioner_twt_suspend(1);
-    acquisition_thread_clear_edges();
-    board_msp_reset(false);
-    vTaskDelay(pdMS_TO_TICKS(MSP_BOOT_DELAY_MS));
+    esp_err_t boot_result = acq_command(session, ACQ_CMD_BOOT);
     uint8_t payload[CONFIG_WP_DATA_RX_LENGTH];
-    bool running = true;
+    bool running = boot_result == ESP_OK;
 
     while (running && wulpus_pro_session_is_current(session) && link_is_connected(session.link)) {
         wulpus_pro_header_t header;
@@ -144,21 +133,13 @@ static void run_session(wulpus_pro_session_ref_t session)
                     running = false;
                 break;
             }
-            if (acquisition_thread_wait_for_edge(DATA_READY_TIMEOUT) != ESP_OK) {
-                wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_TIMEOUT);
-                if (send_command_error(session, WULPUS_PRO_SET_ACQ_CONFIG, ESP_ERR_TIMEOUT) !=
-                    ESP_OK)
-                    running = false;
-                break;
-            }
-            uint8_t config[CONFIG_WP_DATA_RX_LENGTH] = {0};
-            memcpy(config, payload, header.data_length);
-            if (acquisition_thread_send_block(config, sizeof(config)) != ESP_OK) {
-                wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_FAILURE);
-                wulpus_pro_status_increment_spi_error();
-                if (send_command_error(session, WULPUS_PRO_SET_ACQ_CONFIG, ESP_FAIL) != ESP_OK)
-                    running = false;
-            } else if (send_control(session, WULPUS_PRO_SET_ACQ_CONFIG, NULL, 0) != ESP_OK)
+            esp_err_t result = acquisition_thread_command(ACQ_CMD_CONFIGURE, session, payload,
+                                                          header.data_length, ACQUISITION_TIMEOUT);
+            if (result == ESP_OK)
+                result = send_control(session, header.command, NULL, 0);
+            else
+                result = send_command_error(session, header.command, result);
+            if (result != ESP_OK)
                 running = false;
             break;
         }
@@ -231,21 +212,27 @@ static void run_session(wulpus_pro_session_ref_t session)
             if (send_control(session, WULPUS_PRO_PONG, "pong", 4) != ESP_OK)
                 running = false;
             break;
-        case WULPUS_PRO_START_RX:
+        case WULPUS_PRO_START_RX: {
             if (wulpus_pro_state_is_updating()) {
                 if (send_control(session, WULPUS_PRO_BUSY, NULL, 0) != ESP_OK)
                     running = false;
                 break;
             }
-            acquisition_thread_set_enabled(true);
-            if (send_control(session, WULPUS_PRO_START_RX, NULL, 0) != ESP_OK)
+            esp_err_t result = acq_command(session, ACQ_CMD_ENABLE);
+            result = result == ESP_OK ? send_control(session, header.command, NULL, 0)
+                                      : send_command_error(session, header.command, result);
+            if (result != ESP_OK)
                 running = false;
             break;
-        case WULPUS_PRO_STOP_RX:
-            stop_acquisition(session);
-            if (send_control(session, WULPUS_PRO_STOP_RX, NULL, 0) != ESP_OK)
+        }
+        case WULPUS_PRO_STOP_RX: {
+            esp_err_t result = stop_acquisition(session);
+            result = result == ESP_OK ? send_control(session, header.command, NULL, 0)
+                                      : send_command_error(session, header.command, result);
+            if (result != ESP_OK)
                 running = false;
             break;
+        }
         case WULPUS_PRO_GET_STATUS: {
             wulpus_pro_status_snapshot_t snapshot;
             wulpus_pro_status_snapshot(&snapshot);
@@ -272,24 +259,31 @@ static void run_session(wulpus_pro_session_ref_t session)
                 running = false;
             break;
         }
-        case WULPUS_PRO_CLOSE:
-            stop_acquisition(session);
-            if (send_control(session, WULPUS_PRO_CLOSE, NULL, 0) != ESP_OK) {
+        case WULPUS_PRO_CLOSE: {
+            esp_err_t result = shutdown_msp(session);
+            result = result == ESP_OK ? send_control(session, header.command, NULL, 0)
+                                      : send_command_error(session, header.command, result);
+            if (result != ESP_OK) {
                 wulpus_pro_status_set_error(WULPUS_PRO_ERROR_LINK_TIMEOUT);
             }
             running = false;
             break;
+        }
         case WULPUS_PRO_RESET:
             if (wulpus_pro_state_is_updating()) {
                 if (send_control(session, WULPUS_PRO_BUSY, NULL, 0) != ESP_OK)
                     running = false;
                 break;
             }
-            stop_acquisition(session);
-            acquisition_thread_graceful_shutdown();
-            board_msp_reset(true);
-            send_control(session, WULPUS_PRO_RESET, NULL, 0);
-            esp_restart();
+            {
+                esp_err_t result = shutdown_msp(session);
+                if (result == ESP_OK) {
+                    send_control(session, WULPUS_PRO_RESET, NULL, 0);
+                    esp_restart();
+                } else if (send_command_error(session, header.command, result) != ESP_OK) {
+                    running = false;
+                }
+            }
             break;
         case WULPUS_PRO_RESET_MSP:
             if (wulpus_pro_state_is_acquiring() || wulpus_pro_state_is_updating()) {
@@ -297,7 +291,7 @@ static void run_session(wulpus_pro_session_ref_t session)
                     running = false;
                 break;
             }
-            if (reset_msp() != ESP_OK) {
+            if (acq_command(session, ACQ_CMD_BOOT) != ESP_OK) {
                 wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_FAILURE);
                 running = false;
                 break;
@@ -411,11 +405,9 @@ static void run_session(wulpus_pro_session_ref_t session)
         }
     }
 
-    stop_acquisition(session);
-    if (acquisition_thread_graceful_shutdown() != ESP_OK) {
+    if (shutdown_msp(session) != ESP_OK) {
         wulpus_pro_status_set_error(WULPUS_PRO_ERROR_SPI_TIMEOUT);
     }
-    board_msp_reset(true);
     link_close(session.link);
     wulpus_pro_session_release(session);
     provisioner_twt_suspend(0);

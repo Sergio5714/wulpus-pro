@@ -1,5 +1,6 @@
 idf_component_register(
-    SRCS "threads.c" "acquisition_thread.c" "packet_tx_thread.c"
+    SRCS "threads.c" "acquisition_thread.c" "acquisition_task.c"
+         "acquisition_handshake.c" "acquisition_frames.c" "packet_tx_thread.c"
          "protocol_thread.c" "usb_thread.c" "tcp_thread.c"
          "provisioning_thread.c"
     INCLUDE_DIRS "include"

@@ -13,134 +13,203 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+/** @file acquisition_thread.c
+ * @brief Acquisition command serialization and owner-task lifecycle. */
+#include "acquisition_internal.h"
 
-/**
- * @file acquisition_thread.c
- * @brief DATA_READY interrupt handling and SPI frame acquisition.
- */
-
-#include "thread_internal.h"
-
+#include <stdlib.h>
+#include <string.h>
 #include "board.h"
-#include "esp_check.h"
-#include "esp_timer.h"
-#include "freertos/semphr.h"
-#include "freertos/task.h"
-#include "wulpus_pro_frame_pool.h"
 #include "wulpus_pro_state.h"
 #include "wulpus_pro_status.h"
 
-#define BUFFER_WAIT pdMS_TO_TICKS(100)
-#define MSP_RESTART_COMMAND 0xFB
+TaskHandle_t acquisition_task_handle;
+QueueHandle_t acquisition_command_queue;
+portMUX_TYPE acquisition_lock = portMUX_INITIALIZER_UNLOCKED;
+acq_state_t acquisition_state = ACQ_STATE_RESET;
+bool acquisition_configured;
+bool acquisition_reset_asserted = true;
+wulpus_pro_session_ref_t acquisition_owner;
 
-static TaskHandle_t task_handle;
-static SemaphoreHandle_t edge_semaphore;
-
-/**
- * @brief Notify the acquisition task from the GPIO ISR and yield when needed.
- */
-static void IRAM_ATTR data_ready_isr(void* argument)
+bool acquisition_request_cancelled(acq_request_t* request)
 {
-    (void)argument;
-    BaseType_t wake = pdFALSE;
-    vTaskNotifyGiveFromISR(task_handle, &wake);
-    if (wake)
-        portYIELD_FROM_ISR();
+    if (request == NULL)
+        return false;
+    portENTER_CRITICAL(&acquisition_lock);
+    bool value = request->cancelled;
+    portEXIT_CRITICAL(&acquisition_lock);
+    value |= !wulpus_pro_session_is_current(request->session);
+    if (request->type == ACQ_CMD_CONFIGURE || request->type == ACQ_CMD_ENABLE)
+        value |= !link_is_connected(request->session.link);
+    return value;
 }
 
-/**
- * @brief Consume DATA_READY notifications and queue received SPI frames for transmission.
- */
-static void acquisition_task(void* argument)
+static void release_request(acq_request_t* request)
 {
-    (void)argument;
-    while (true) {
-        uint32_t edges = ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        while (edges-- > 0) {
-            wulpus_pro_status_increment_data_ready();
-            xSemaphoreGive(edge_semaphore);
-            if (!wulpus_pro_state_is_acquiring())
-                continue;
-
-            wulpus_pro_frame_slot_t* slot = wulpus_pro_frame_pool_acquire_for_spi(BUFFER_WAIT);
-            if (slot == NULL) {
-                wulpus_pro_status_set_error(WULPUS_PRO_ERROR_ACQ_BUFFER_OVERFLOW);
-                wulpus_pro_status_increment_overflow();
-                wulpus_pro_state_set_acquiring(false);
-                continue;
-            }
-            wulpus_pro_session_ref_t session = wulpus_pro_session_current();
-            slot->session_generation = session.generation;
-            slot->data_ready_time_us = esp_timer_get_time();
-            esp_err_t result = board_spi_receive_dma(slot->payload, slot->length);
-            slot->spi_complete_time_us = esp_timer_get_time();
-            if (result != ESP_OK) {
-                wulpus_pro_status_set_error(result == ESP_ERR_TIMEOUT
-                                                ? WULPUS_PRO_ERROR_SPI_TIMEOUT
-                                                : WULPUS_PRO_ERROR_SPI_FAILURE);
-                wulpus_pro_status_increment_spi_error();
-                wulpus_pro_frame_pool_release(slot);
-                continue;
-            }
-            wulpus_pro_status_increment_spi_complete();
-            wulpus_pro_frame_pool_mark_ready(slot);
-            packet_tx_notify_frame_ready();
-        }
+    portENTER_CRITICAL(&acquisition_lock);
+    bool destroy = --request->references == 0;
+    portEXIT_CRITICAL(&acquisition_lock);
+    if (destroy) {
+        vSemaphoreDelete(request->done);
+        free(request);
     }
+}
+
+void acquisition_report_error(esp_err_t result)
+{
+    wulpus_pro_status_set_error(result == ESP_ERR_TIMEOUT ? WULPUS_PRO_ERROR_SPI_TIMEOUT
+                                                          : WULPUS_PRO_ERROR_SPI_FAILURE);
+    wulpus_pro_status_increment_spi_error();
+}
+
+esp_err_t acquisition_execute(acq_request_t* request)
+{
+    if (acquisition_request_cancelled(request))
+        return ESP_ERR_INVALID_STATE;
+    esp_err_t result = ESP_OK;
+    switch (request->type) {
+    case ACQ_CMD_BOOT:
+    case ACQ_CMD_RESET:
+        acquisition_quiesce();
+        result = board_msp_reset(true);
+        acquisition_state = ACQ_STATE_RESET;
+        acquisition_configured = false;
+        if (result != ESP_OK)
+            return result;
+        acquisition_reset_asserted = true;
+        vTaskDelay(pdMS_TO_TICKS(10));
+        ulTaskNotifyTake(pdTRUE, 0);
+        acquisition_consumed_rise = acquisition_rise_count();
+        acquisition_assertion_consumed = false;
+        if (request->type == ACQ_CMD_BOOT) {
+            result = board_msp_reset(false);
+            if (result == ESP_OK) {
+                acquisition_reset_asserted = false;
+                acquisition_state = ACQ_STATE_WAIT_CONFIG;
+            }
+        }
+        return result;
+    case ACQ_CMD_CONFIGURE:
+        if (request->config[0] == 0xFB) {
+            acquisition_quiesce();
+            return acquisition_restart_msp(request);
+        }
+        if (acquisition_state != ACQ_STATE_WAIT_CONFIG)
+            return ESP_ERR_INVALID_STATE;
+        acquisition_state = ACQ_STATE_CONFIGURING;
+        result = acquisition_wait_ready(request);
+        if (result == ESP_OK) {
+            acquisition_consume_assertion();
+            result = board_spi_transmit(request->config, sizeof(request->config));
+            if (result == ESP_OK)
+                result = acquisition_wait_transfer_low(request);
+        }
+        if (result == ESP_OK && !acquisition_request_cancelled(request)) {
+            acquisition_owner = request->session;
+            acquisition_configured = true;
+            acquisition_state = ACQ_STATE_CONFIGURED;
+        } else {
+            acquisition_quiesce();
+            if (result == ESP_OK)
+                result = ESP_ERR_INVALID_STATE;
+        }
+        return result;
+    case ACQ_CMD_ENABLE:
+        if (!acquisition_configured ||
+            acquisition_owner.generation != request->session.generation ||
+            (acquisition_state != ACQ_STATE_CONFIGURED &&
+             acquisition_state != ACQ_STATE_QUIESCENT && acquisition_state != ACQ_STATE_ACQUIRING))
+            return ESP_ERR_INVALID_STATE;
+        acquisition_state = ACQ_STATE_ACQUIRING;
+        wulpus_pro_state_set_acquiring(true);
+        acquisition_publish_pending();
+        return ESP_OK;
+    case ACQ_CMD_DISABLE:
+        wulpus_pro_state_set_acquiring(false);
+        if (acquisition_configured && acquisition_state == ACQ_STATE_ACQUIRING)
+            acquisition_state = ACQ_STATE_CONFIGURED;
+        return ESP_OK;
+    case ACQ_CMD_QUIESCE:
+        acquisition_quiesce();
+        return ESP_OK;
+    case ACQ_CMD_RESTART:
+        return acquisition_restart_msp(request);
+    }
+    return ESP_ERR_INVALID_ARG;
+}
+
+bool acquisition_process_work(void)
+{
+    bool work_to_do = false;
+    acq_request_t* request;
+    while (xQueueReceive(acquisition_command_queue, &request, 0) == pdTRUE) {
+        request->result = acquisition_execute(request);
+        if (request->result != ESP_OK && request->result != ESP_ERR_INVALID_STATE)
+            acquisition_report_error(request->result);
+        xSemaphoreGive(request->done);
+        release_request(request);
+    }
+    if ((acquisition_state == ACQ_STATE_ACQUIRING || acquisition_state == ACQ_STATE_CONFIGURED) &&
+        acquisition_pending_frame == NULL && acquisition_ready()) {
+        acquisition_receive_frame();
+        work_to_do = true;
+    }
+    return work_to_do;
 }
 
 esp_err_t acquisition_thread_start(void)
 {
-    edge_semaphore = xSemaphoreCreateCounting(8, 0);
-    if (edge_semaphore == NULL)
+    acquisition_command_queue = xQueueCreate(4, sizeof(acq_request_t*));
+    if (acquisition_command_queue == NULL)
         return ESP_ERR_NO_MEM;
     if (xTaskCreate(acquisition_task, "acquisition", CONFIG_WP_ACQUISITION_STACK_SIZE, NULL,
-                    CONFIG_WP_ACQUISITION_PRIORITY, &task_handle) != pdPASS)
+                    CONFIG_WP_ACQUISITION_PRIORITY, &acquisition_task_handle) != pdPASS) {
+        vQueueDelete(acquisition_command_queue);
+        acquisition_command_queue = NULL;
         return ESP_ERR_NO_MEM;
-    return board_data_ready_set_isr(data_ready_isr, NULL);
-}
-
-void acquisition_thread_set_enabled(bool enabled)
-{
-    wulpus_pro_state_set_acquiring(enabled);
-    if (enabled && board_data_ready())
-        xTaskNotifyGive(task_handle);
-}
-
-esp_err_t acquisition_thread_wait_for_edge(TickType_t timeout)
-{
-    return xSemaphoreTake(edge_semaphore, timeout) == pdTRUE ? ESP_OK : ESP_ERR_TIMEOUT;
-}
-
-void acquisition_thread_clear_edges(void)
-{
-    while (xSemaphoreTake(edge_semaphore, 0) == pdTRUE) {
     }
+    return board_data_ready_set_isr(acquisition_data_ready_isr, NULL);
 }
 
-esp_err_t acquisition_thread_send_block(const void* data, size_t length)
+esp_err_t acquisition_thread_command(acq_command_type_t type, wulpus_pro_session_ref_t session,
+                                     const void* config, size_t length, TickType_t timeout)
 {
-    return board_spi_transmit(data, length);
-}
-
-esp_err_t acquisition_thread_graceful_shutdown(void)
-{
-    acquisition_thread_set_enabled(false);
-    wulpus_pro_frame_pool_discard_ready();
-    uint8_t restart[CONFIG_WP_DATA_RX_LENGTH] = {MSP_RESTART_COMMAND};
-    xSemaphoreTake(edge_semaphore, 0);
-    if (!board_data_ready()) {
-        ESP_RETURN_ON_ERROR(acquisition_thread_wait_for_edge(pdMS_TO_TICKS(2000)), "acquisition",
-                            "MSP shutdown edge timeout");
+    if (acquisition_command_queue == NULL || length > CONFIG_WP_DATA_RX_LENGTH ||
+        (length && config == NULL) ||
+        (type == ACQ_CMD_CONFIGURE && (length == 0 || (((const uint8_t*)config)[0] != 0xFA &&
+                                                       ((const uint8_t*)config)[0] != 0xFB))))
+        return ESP_ERR_INVALID_ARG;
+    acq_request_t* request = calloc(1, sizeof(*request));
+    if (request == NULL)
+        return ESP_ERR_NO_MEM;
+    request->done = xSemaphoreCreateBinary();
+    if (request->done == NULL) {
+        free(request);
+        return ESP_ERR_NO_MEM;
     }
-    ESP_RETURN_ON_ERROR(board_spi_transmit(restart, sizeof(restart)), "acquisition",
-                        "MSP restart transfer failed");
+    request->type = type;
+    request->session = session;
+    request->references = 2;
+    if (length)
+        memcpy(request->config, config, length);
     TickType_t started = xTaskGetTickCount();
-    while (board_data_ready()) {
-        if (xTaskGetTickCount() - started > pdMS_TO_TICKS(2000))
-            return ESP_ERR_TIMEOUT;
-        vTaskDelay(pdMS_TO_TICKS(1));
+    if (xQueueSend(acquisition_command_queue, &request, timeout) != pdTRUE) {
+        release_request(request);
+        release_request(request);
+        return ESP_ERR_TIMEOUT;
     }
-    xSemaphoreTake(edge_semaphore, 0);
-    return acquisition_thread_wait_for_edge(pdMS_TO_TICKS(2000));
+    xTaskNotifyGive(acquisition_task_handle);
+    TickType_t elapsed = xTaskGetTickCount() - started;
+    TickType_t remaining = elapsed < timeout ? timeout - elapsed : 0;
+    esp_err_t result;
+    if (xSemaphoreTake(request->done, remaining) == pdTRUE) {
+        result = request->result;
+    } else {
+        portENTER_CRITICAL(&acquisition_lock);
+        request->cancelled = true;
+        portEXIT_CRITICAL(&acquisition_lock);
+        result = ESP_ERR_TIMEOUT;
+    }
+    release_request(request);
+    return result;
 }

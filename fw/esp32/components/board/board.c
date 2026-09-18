@@ -31,6 +31,9 @@ static spi_device_handle_t spi_device;
 static SemaphoreHandle_t spi_mutex;
 #if CONFIG_WP_ENABLE_PM
 static esp_pm_lock_handle_t usb_sleep_lock;
+/* The C6 USB path corrupted command bytes and reported transient disconnects
+ * with DFS down to 10 MHz. Keep CPU/APB clocks stable while USB is attached. */
+static esp_pm_lock_handle_t usb_frequency_lock;
 static bool usb_sleep_lock_held;
 #endif
 
@@ -89,7 +92,12 @@ esp_err_t board_usb_no_sleep_acquire(void)
 {
 #if CONFIG_WP_ENABLE_PM
     if (!usb_sleep_lock_held) {
-        esp_err_t result = esp_pm_lock_acquire(usb_sleep_lock);
+        esp_err_t result = esp_pm_lock_acquire(usb_frequency_lock);
+        if (result != ESP_OK)
+            return result;
+        result = esp_pm_lock_acquire(usb_sleep_lock);
+        if (result != ESP_OK)
+            esp_pm_lock_release(usb_frequency_lock);
         if (result == ESP_OK) {
             usb_sleep_lock_held = true;
         }
@@ -105,6 +113,7 @@ esp_err_t board_usb_no_sleep_release(void)
     if (usb_sleep_lock_held) {
         esp_err_t result = esp_pm_lock_release(usb_sleep_lock);
         if (result == ESP_OK) {
+            esp_pm_lock_release(usb_frequency_lock);
             usb_sleep_lock_held = false;
         }
         return result;
@@ -133,12 +142,14 @@ esp_err_t board_init(void)
         .intr_type = GPIO_INTR_POSEDGE,
         .mode = GPIO_MODE_INPUT,
         .pin_bit_mask = 1ULL << CONFIG_WP_GPIO_DATA_READY,
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
     };
     ESP_RETURN_ON_ERROR(gpio_config(&gpio), "board", "DATA_READY GPIO failed");
     ESP_RETURN_ON_ERROR(gpio_sleep_set_direction(CONFIG_WP_GPIO_DATA_READY, GPIO_MODE_INPUT),
                         "board", "DATA_READY sleep direction failed");
-    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_GPIO_DATA_READY, GPIO_FLOATING), "board",
-                        "DATA_READY sleep pull failed");
+    ESP_RETURN_ON_ERROR(gpio_sleep_set_pull_mode(CONFIG_WP_GPIO_DATA_READY, GPIO_PULLDOWN_ONLY),
+                        "board", "DATA_READY sleep pull failed");
 
     spi_bus_config_t bus = {
         .miso_io_num = CONFIG_WP_SPI_MISO,
@@ -191,6 +202,9 @@ esp_err_t board_init(void)
     ESP_RETURN_ON_ERROR(esp_pm_configure(&pm), "board", "power management failed");
     ESP_RETURN_ON_ERROR(esp_pm_lock_create(ESP_PM_NO_LIGHT_SLEEP, 0, "usb_host", &usb_sleep_lock),
                         "board", "USB sleep lock failed");
+    ESP_RETURN_ON_ERROR(
+        esp_pm_lock_create(ESP_PM_CPU_FREQ_MAX, 0, "usb_clock", &usb_frequency_lock), "board",
+        "USB frequency lock failed");
     ESP_RETURN_ON_ERROR(board_usb_no_sleep_acquire(), "board", "initial USB sleep lock failed");
 #endif
     return ESP_OK;

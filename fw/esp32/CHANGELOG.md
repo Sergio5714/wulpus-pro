@@ -64,6 +64,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Made the acquisition thread the sole SPI readout owner and the packet TX
   thread the sole USB/TCP writer, isolating SPI DMA from link backpressure and
   prioritizing control responses at packet boundaries.
+- Split the acquisition owner into focused command/state, scheduler,
+  DATA_READY/SPI-handshake, and frame-ownership modules while retaining one
+  task as the sole owner of MSP430 acquisition operations.
 - Reduced `app_main()` to component initialization and task startup, and moved
   every application task implementation under `components/threads`.
 - Expanded the firmware README with communication architecture, arbitration, USB flashing/JTAG coexistence, logging, and power-management behavior.

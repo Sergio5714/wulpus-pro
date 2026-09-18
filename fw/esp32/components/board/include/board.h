@@ -81,14 +81,14 @@ esp_err_t board_spi_receive_dma(void* buffer, size_t length);
 esp_err_t board_spi_transmit(const void* buffer, size_t length);
 
 /**
- * @brief Hold the USB light-sleep lock if it is not already held.
+ * @brief Hold the USB light-sleep and CPU-frequency locks if not already held.
  *
  * @note Calls do not nest. With CONFIG_WP_ENABLE_PM disabled, this is a no-op.
  * @return ESP_OK if no change is needed or the operation succeeds; otherwise a PM error.
  */
 esp_err_t board_usb_no_sleep_acquire(void);
 /**
- * @brief Release the USB light-sleep lock if it is held.
+ * @brief Release the USB light-sleep and CPU-frequency locks if held.
  *
  * @note Calls do not nest. With CONFIG_WP_ENABLE_PM disabled, this is a no-op.
  * @return ESP_OK if no change is needed or the operation succeeds; otherwise a PM error.
