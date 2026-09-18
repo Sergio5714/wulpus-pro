@@ -110,7 +110,7 @@ static void packet_tx_task(void* argument)
         } else {
             wulpus_pro_status_set_error(WULPUS_PRO_ERROR_LINK_TIMEOUT);
             wulpus_pro_status_increment_link_error();
-            wulpus_pro_state_set_acquiring(false);
+            acquisition_thread_command(ACQ_CMD_QUIESCE, session, NULL, 0, pdMS_TO_TICKS(8000));
         }
         wulpus_pro_frame_pool_release(slot);
         // Schedule another pass. Notifications can coalesce while USB/TCP is

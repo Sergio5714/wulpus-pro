@@ -22,6 +22,13 @@ limitations under the License.
 #include "usb_link.h"
 #include "driver/usb_serial_jtag.h"
 #include "esp_check.h"
+#include "freertos/task.h"
+
+#define USB_DISCONNECT_CONFIRM pdMS_TO_TICKS(100)
+static portMUX_TYPE connection_lock = portMUX_INITIALIZER_UNLOCKED;
+static bool host_connected;
+static bool disconnect_pending;
+static TickType_t disconnect_started;
 
 /**
  * @brief Read bytes through the USB driver using the supplied tick timeout.
@@ -53,7 +60,25 @@ static esp_err_t close_link(void* context)
 static bool connected(void* context)
 {
     (void)context;
-    return usb_serial_jtag_is_connected();
+    bool observed = usb_serial_jtag_is_connected();
+    TickType_t now = xTaskGetTickCount();
+    portENTER_CRITICAL(&connection_lock);
+    if (observed) {
+        host_connected = true;
+        disconnect_pending = false;
+    } else if (host_connected) {
+        /* The driver's SOF monitor can briefly report false during traffic.
+         * Do not end the acquisition session on a single false sample. */
+        if (!disconnect_pending) {
+            disconnect_pending = true;
+            disconnect_started = now;
+        } else if (now - disconnect_started >= USB_DISCONNECT_CONFIRM) {
+            host_connected = false;
+        }
+    }
+    bool result = host_connected;
+    portEXIT_CRITICAL(&connection_lock);
+    return result;
 }
 
 esp_err_t usb_link_create(link_t* link)

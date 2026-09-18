@@ -154,8 +154,8 @@ detecting missing frames.
 ## Current constraints
 
 - Host `PING` is answered by the ESP32; it is not an MSP430 health check.
-  `SET_ACQ_CONFIG` is acknowledged after SPI transfer success, without a
-  separate MSP430 response confirming that the configuration was applied.
+  `SET_ACQ_CONFIG` is acknowledged after SPI transfer success and observation
+  of DATA_READY low, without a separate MSP430 response validating the fields.
 - ESP frame storage and the PC decoder are configured for a fixed 804-byte RF
   payload, corresponding to 400 samples. Although the configuration model
   exposes other sample counts, they require coordinated changes to the MSP430,

@@ -27,33 +27,27 @@ limitations under the License.
 #include "freertos/FreeRTOS.h"
 #include "wulpus_pro_session.h"
 
-/**
- * @brief Create edge tracking and the acquisition task, then register the GPIO ISR.
- */
+typedef enum {
+    ACQ_CMD_CONFIGURE,
+    ACQ_CMD_ENABLE,
+    ACQ_CMD_DISABLE,
+    ACQ_CMD_QUIESCE,
+    ACQ_CMD_RESTART,
+    ACQ_CMD_BOOT,  /* Quiesce, pulse reset, release into WAIT_CONFIG. */
+    ACQ_CMD_RESET, /* Quiesce and hold reset asserted. */
+} acq_command_type_t;
+
+/** @brief Create the command queue and SPI owner, then register the GPIO ISR. */
 esp_err_t acquisition_thread_start(void);
 /**
- * @brief Set acquisition state and notify the task if DATA_READY is already high.
+ * @brief Submit a copied command and wait for its private completion object.
+ * CONFIGURE accepts a 0xFA configuration or a legacy 0xFB restart block.
+ * Timeout cancels work not yet started; an in-flight SPI transfer must finish.
+ * QUIESCE success confirms no transfer/publication remains in progress.
+ * RESTART success confirms a new configuration request, or an MSP already held in reset.
  */
-void acquisition_thread_set_enabled(bool enabled);
-/**
- * @brief Consume one recorded DATA_READY event, waiting up to the supplied timeout.
- *
- * @param timeout FreeRTOS ticks to wait.
- * @return ESP_OK if an event is consumed; ESP_ERR_TIMEOUT otherwise.
- */
-esp_err_t acquisition_thread_wait_for_edge(TickType_t timeout);
-/**
- * @brief Drain recorded DATA_READY events without waiting.
- */
-void acquisition_thread_clear_edges(void);
-/**
- * @brief Transmit a block of bytes to the MSP430 over SPI.
- */
-esp_err_t acquisition_thread_send_block(const void* data, size_t length);
-/**
- * @brief Stop acquisition, discard ready frames, and perform the MSP restart handshake.
- */
-esp_err_t acquisition_thread_graceful_shutdown(void);
+esp_err_t acquisition_thread_command(acq_command_type_t type, wulpus_pro_session_ref_t session,
+                                     const void* config, size_t length, TickType_t timeout);
 
 /**
  * @brief Create the control-response queue and packet transmission task.
