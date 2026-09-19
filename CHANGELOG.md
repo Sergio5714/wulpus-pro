@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added ESP32 and MSP430 running-firmware version reporting through the common
+  USB/TCP protocol and main acquisition GUI.
 - Added pinned clang-format tooling in the existing software development
   environment, an ESP32 formatting script, CI checks, and developer instructions.
 - Added a host-board comparison covering the integrated WiFi host PCB,

@@ -79,6 +79,18 @@ esp_err_t board_spi_receive_dma(void* buffer, size_t length);
  * @return ESP_OK on success, ESP_ERR_TIMEOUT for mutex contention, or a SPI driver error.
  */
 esp_err_t board_spi_transmit(const void* buffer, size_t length);
+/**
+ * @brief Simultaneously transmit to and receive from the MSP430.
+ *
+ * @param tx_buffer Bytes
+ * to transmit.
+ * @param rx_buffer Writable receive storage.
+ * @param length Transfer length in
+ * bytes for both buffers.
+ * @return ESP_OK on success, ESP_ERR_TIMEOUT for mutex contention, or a
+ * SPI driver error.
+ */
+esp_err_t board_spi_transceive(const void* tx_buffer, void* rx_buffer, size_t length);
 
 /**
  * @brief Hold the USB light-sleep and CPU-frequency locks if not already held.

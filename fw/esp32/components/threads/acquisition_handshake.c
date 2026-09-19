@@ -13,10 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 /** @file acquisition_handshake.c
  * @brief DATA_READY accounting and MSP430 SPI handshake sequencing. */
+
 #include "acquisition_internal.h"
 #include "board.h"
+#include "wulpus_pro_firmware_info.h"
 #include "wulpus_pro_status.h"
 
 /* Edge bookkeeping is private; callers interact through handshake helpers. */
@@ -103,6 +106,7 @@ esp_err_t acquisition_restart_msp(acq_request_t* request)
         return ESP_ERR_INVALID_STATE;
     if (acquisition_reset_asserted)
         return ESP_OK;
+    wulpus_pro_firmware_info_clear_msp();
     acquisition_state = ACQ_STATE_RESTARTING;
     esp_err_t result = acquisition_wait_ready(request);
     if (result == ESP_OK) {

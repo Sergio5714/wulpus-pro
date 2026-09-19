@@ -88,6 +88,11 @@ esp_err_t board_spi_transmit(const void* buffer, size_t length)
     return board_spi_transfer(buffer, NULL, length);
 }
 
+esp_err_t board_spi_transceive(const void* tx_buffer, void* rx_buffer, size_t length)
+{
+    return board_spi_transfer(tx_buffer, rx_buffer, length);
+}
+
 esp_err_t board_usb_no_sleep_acquire(void)
 {
 #if CONFIG_WP_ENABLE_PM

@@ -30,6 +30,7 @@ limitations under the License.
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_state.h"
 #include "wulpus_pro_status.h"
+#include "wulpus_pro_firmware_info.h"
 #include "wulpus_pro_persistent_config.h"
 #include "msp430_programmer.h"
 #include "msp430_image.h"
@@ -240,6 +241,13 @@ static void run_session(wulpus_pro_session_ref_t session)
                 running = false;
             break;
         }
+        case WULPUS_PRO_GET_FIRMWARE_INFO: {
+            wulpus_pro_firmware_info_t info;
+            wulpus_pro_firmware_info_get(&info);
+            if (send_control(session, WULPUS_PRO_FIRMWARE_INFO, &info, sizeof(info)) != ESP_OK)
+                running = false;
+            break;
+        }
         case WULPUS_PRO_CLEAR_STATUS: {
             if (header.data_length != 0 &&
                 header.data_length != sizeof(wulpus_pro_clear_status_t)) {
@@ -397,6 +405,7 @@ static void run_session(wulpus_pro_session_ref_t session)
         case WULPUS_PRO_ERROR:
         case WULPUS_PRO_MSP_UPDATE_STATUS:
         case WULPUS_PRO_MSP_UPDATE_DIAGNOSTICS:
+        case WULPUS_PRO_FIRMWARE_INFO:
             break;
         case WULPUS_PRO_CMD_ID_BEGIN:
         case WULPUS_PRO_CMD_ID_END:

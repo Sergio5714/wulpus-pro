@@ -51,6 +51,8 @@ class WulpusProCommunicationLink(Protocol):
 
     def get_status(self, timeout: float = 5.0) -> Any: ...
 
+    def get_firmware_info(self, timeout: float = 5.0) -> Any: ...
+
     def clear_status(
         self,
         error_mask: int = 0xFFFFFFFF,
@@ -261,6 +263,7 @@ class WulpusGuiSingleCh(widgets.VBox):
 
         self.save_data_label = widgets.Label(value="")
         self.acquisition_status_label = widgets.Label(value="Status: Idle")
+        self.firmware_version_label = widgets.Label(value="Firmware: not connected")
 
         # Setup Visualization
         self.output = widgets.Output()
@@ -280,6 +283,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             [
                 self.transport_dd,
                 widgets.HBox([self.ser_open_button, self.ser_scan_button]),
+                self.firmware_version_label,
                 self.ports_dd,
                 self.tx_rx_sel_dd,
                 self.band_pass_frs,
@@ -449,6 +453,7 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.ser_open_button.description = "Open device"
             self.start_stop_button.disabled = True
             self.reset_msp_button.disabled = True
+            self.firmware_version_label.value = "Firmware: not connected"
 
         self.com_link = self.com_links[change.new]
         self.com_link.acq_length = self.uss_conf.num_samples
@@ -504,6 +509,8 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.reset_msp_button.disabled = not hasattr(self.com_link, "reset_msp")
             self.transport_dd.disabled = True
 
+            self.update_firmware_version()
+
             self.log.debug("Port opened")
 
         else:
@@ -516,8 +523,24 @@ class WulpusGuiSingleCh(widgets.VBox):
             self.start_stop_button.disabled = True
             self.reset_msp_button.disabled = True
             self.transport_dd.disabled = len(self.com_links) == 1
+            self.firmware_version_label.value = "Firmware: not connected"
 
             self.log.debug("Port closed")
+
+    def update_firmware_version(self):
+        """Read and display firmware versions when supported by the transport."""
+        if not hasattr(self.com_link, "get_firmware_info"):
+            self.firmware_version_label.value = "Firmware: unavailable"
+            return
+        try:
+            info = self.com_link.get_firmware_info(timeout=2.0)
+            msp_version = info.msp_version or "unknown (configure device to detect)"
+            self.firmware_version_label.value = (
+                f"Firmware: ESP32 {info.esp_version}; MSP430 {msp_version}"
+            )
+        except Exception as exc:
+            self.firmware_version_label.value = "Firmware: unavailable"
+            self.log.warning("Could not read firmware versions: %s", exc)
 
     def turn_on_off_raw_data_plot(self, change):
         self.raw_data_line.set_visible(change.new)
@@ -686,6 +709,7 @@ class WulpusGuiSingleCh(widgets.VBox):
         try:
             self.log.info("Sending configuration package")
             self.com_link.send_acq_config(self.uss_conf.get_conf_package())
+            self.update_firmware_version()
             self.log.debug("Configuration package sent")
         except ValueError as e:
             self.log.error(f"Error sending configuration package: {e}")

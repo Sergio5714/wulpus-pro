@@ -15,6 +15,7 @@ and acknowledgements are transport-independent.
 - [Typical acquisition session](#typical-acquisition-session)
 - [Runtime status](#runtime-status)
 - [Clearing status](#clearing-status)
+- [Firmware information](#firmware-information)
 - [MSP430 firmware update commands](#msp430-firmware-update-commands)
 
 ## Transports
@@ -86,6 +87,8 @@ packet.
 | `0x71` | `MSP_UPDATE_STATUS` | ESP -> PC | 28-byte update status | Separate from acquisition `STATUS`. |
 | `0x72` | `MSP_UPDATE_GET_DIAGNOSTICS` | PC -> ESP | Empty | Direct `MSP_UPDATE_DIAGNOSTICS` response, without a separate empty acknowledgement. |
 | `0x73` | `MSP_UPDATE_DIAGNOSTICS` | ESP -> PC | 16-byte diagnostics | Last JTAG identification diagnostics. |
+| `0x74` | `GET_FIRMWARE_INFO` | PC -> ESP | Empty | Empty acknowledgement followed by `FIRMWARE_INFO`. |
+| `0x75` | `FIRMWARE_INFO` | ESP -> PC | 72-byte versioned firmware information | ESP32 build version and the MSP430 version detected during configuration, with reserved Git build metadata. |
 
 Command values not explicitly listed above are invalid in the current protocol.
 Commands documented as ESP32-to-PC should not be sent by a host.
@@ -251,6 +254,34 @@ The optional five-byte request payload is:
 
 For example, an `error_mask` of `0xFFFFFFFF` with `clear_counters` set to `1`
 clears every defined error flag and all counters.
+
+## Firmware information
+
+`GET_FIRMWARE_INFO` receives an empty acknowledgement followed by a
+`FIRMWARE_INFO` response. The version-1 response payload is the following packed
+72-byte structure:
+
+| Offset | Size (bytes) | Field | Meaning |
+|---:|---:|---|---|
+| 0 | 1 | `version` | Firmware-information schema version; currently `1`. |
+| 1 | 1 | `size` | Total payload size; currently `72`. |
+| 2 | 1 | `flags` | Bit 0: MSP430 version valid; bit 1: ESP32 source dirty; bit 2: MSP430 source dirty; bits 3-7 reserved. Dirty bits are reserved and currently remain clear. |
+| 3 | 1 | `reserved` | Reserved, currently zero. |
+| 4 | 1 | `msp_major` | MSP430 semantic-version major component. |
+| 5 | 1 | `msp_minor` | MSP430 semantic-version minor component. |
+| 6 | 1 | `msp_patch` | MSP430 semantic-version patch component. |
+| 7 | 1 | `reserved_2` | Reserved, currently zero. |
+| 8 | 32 | `esp_version` | NUL-terminated ESP-IDF application-version string. |
+| 40 | 13 | `esp_git_hash` | NUL-terminated Git hash of up to 12 hexadecimal characters; reserved and currently empty. |
+| 53 | 13 | `msp_git_hash` | NUL-terminated Git hash of up to 12 hexadecimal characters; reserved and currently empty. |
+| 66 | 6 | `reserved_3` | Reserved, currently zero. |
+
+The MSP430 version becomes available after a successful acquisition-
+configuration SPI transfer. Until then, or when using older MSP430 firmware,
+flag bit 0 is clear and the MSP430 version fields must be ignored.
+Git-hash generation and scoped dirty-source detection are not yet integrated
+into the firmware builds, so both hash fields are empty and both dirty bits are
+currently clear.
 
 ## MSP430 firmware update commands
 

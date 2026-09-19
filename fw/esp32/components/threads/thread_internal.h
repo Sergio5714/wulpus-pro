@@ -56,8 +56,9 @@ esp_err_t packet_tx_thread_start(void);
 /**
  * @brief Queue a control response that requires the supplied session to remain current.
  *
- * @note Payloads are copied into the queue and must not exceed 64 bytes.
- * @param timeout FreeRTOS ticks allowed separately for queueing and completion.
+ * @note Payloads are copied into the queue and must not exceed 72 bytes.
+ * @param timeout FreeRTOS
+ * ticks allowed separately for queueing and completion.
  * @return Transmission result, ESP_ERR_INVALID_ARG, or ESP_ERR_TIMEOUT.
  * @note A completion timeout does not cancel an already queued request.
  */
@@ -66,8 +67,9 @@ esp_err_t packet_tx_submit_control(wulpus_pro_session_ref_t session, uint8_t com
 /**
  * @brief Queue a control response without requiring ownership of the current session.
  *
- * @note Payloads are copied into the queue and must not exceed 64 bytes.
- * @param timeout FreeRTOS ticks allowed separately for queueing and completion.
+ * @note Payloads are copied into the queue and must not exceed 72 bytes.
+ * @param timeout FreeRTOS
+ * ticks allowed separately for queueing and completion.
  * @return Transmission result, ESP_ERR_INVALID_ARG, or ESP_ERR_TIMEOUT.
  * @note A completion timeout does not cancel an already queued request.
  */
