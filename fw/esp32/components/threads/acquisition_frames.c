@@ -13,8 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 /** @file acquisition_frames.c
  * @brief Acquisition frame reception, ownership, cleanup, and publication. */
+
 #include "acquisition_internal.h"
 #include "board.h"
 #include "esp_timer.h"
@@ -23,7 +25,8 @@ limitations under the License.
 
 wulpus_pro_frame_slot_t* acquisition_pending_frame;
 
-void acquisition_discard_pending(void)
+/** @brief Releases the unpublished pending frame, if one exists. */
+static void acquisition_discard_pending(void)
 {
     if (acquisition_pending_frame != NULL) {
         wulpus_pro_status_increment_discarded();
@@ -32,6 +35,7 @@ void acquisition_discard_pending(void)
     }
 }
 
+/** @brief Stops publication and discards all pending and ready frames. */
 void acquisition_quiesce(void)
 {
     acquisition_state = ACQ_STATE_QUIESCENT;
@@ -41,6 +45,7 @@ void acquisition_quiesce(void)
     wulpus_pro_frame_pool_discard_ready();
 }
 
+/** @brief Publishes the frame retained before acquisition was enabled. */
 void acquisition_publish_pending(void)
 {
     if (acquisition_pending_frame != NULL) {
@@ -50,6 +55,7 @@ void acquisition_publish_pending(void)
     }
 }
 
+/** @brief Receives, validates, and either publishes or retains one SPI frame. */
 void acquisition_receive_frame(void)
 {
     if (!wulpus_pro_session_is_current(acquisition_owner) ||

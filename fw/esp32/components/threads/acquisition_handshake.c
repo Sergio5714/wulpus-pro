@@ -19,10 +19,12 @@ limitations under the License.
 #include "board.h"
 #include "wulpus_pro_status.h"
 
-uint32_t acquisition_rising_edges;
-uint32_t acquisition_consumed_rise;
-bool acquisition_assertion_consumed;
+/* Edge bookkeeping is private; callers interact through handshake helpers. */
+static uint32_t acquisition_rising_edges;
+static uint32_t acquisition_consumed_rise;
+static bool acquisition_assertion_consumed;
 
+/** @brief Records a DATA_READY rising edge and wakes the acquisition task. */
 void IRAM_ATTR acquisition_data_ready_isr(void* argument)
 {
     (void)argument;
@@ -35,7 +37,8 @@ void IRAM_ATTR acquisition_data_ready_isr(void* argument)
         portYIELD_FROM_ISR();
 }
 
-uint32_t acquisition_rise_count(void)
+/** @brief Returns an interrupt-safe snapshot of the DATA_READY rising-edge count. */
+uint32_t acquisition_data_ready_rise_count(void)
 {
     portENTER_CRITICAL(&acquisition_lock);
     uint32_t count = acquisition_rising_edges;
@@ -43,16 +46,18 @@ uint32_t acquisition_rise_count(void)
     return count;
 }
 
-bool acquisition_ready(void)
+/** @brief Reports whether DATA_READY has an asserted edge that has not been consumed. */
+bool acquisition_data_ready_pending(void)
 {
     return board_data_ready() && (!acquisition_assertion_consumed ||
-                                  acquisition_rise_count() != acquisition_consumed_rise);
+                                  acquisition_data_ready_rise_count() != acquisition_consumed_rise);
 }
 
+/** @brief Waits for an unconsumed DATA_READY assertion or cancellation/timeout. */
 esp_err_t acquisition_wait_ready(acq_request_t* request)
 {
     TickType_t started = xTaskGetTickCount();
-    while (!acquisition_ready()) {
+    while (!acquisition_data_ready_pending()) {
         if (acquisition_request_cancelled(request))
             return ESP_ERR_INVALID_STATE;
         if (xTaskGetTickCount() - started >= ACQUISITION_HANDSHAKE_TIMEOUT)
@@ -62,17 +67,26 @@ esp_err_t acquisition_wait_ready(acq_request_t* request)
     return acquisition_request_cancelled(request) ? ESP_ERR_INVALID_STATE : ESP_OK;
 }
 
+/** @brief Marks the current DATA_READY assertion as handled. */
 void acquisition_consume_assertion(void)
 {
-    acquisition_consumed_rise = acquisition_rise_count();
+    acquisition_consumed_rise = acquisition_data_ready_rise_count();
     acquisition_assertion_consumed = true;
     wulpus_pro_status_increment_data_ready();
 }
 
+/** @brief Resynchronizes handshake bookkeeping after an MSP430 reset. */
+void acquisition_reset_handshake(void)
+{
+    acquisition_consumed_rise = acquisition_data_ready_rise_count();
+    acquisition_assertion_consumed = false;
+}
+
+/** @brief Waits for the MSP430 to acknowledge a transfer by lowering DATA_READY. */
 esp_err_t acquisition_wait_transfer_low(acq_request_t* request)
 {
     TickType_t started = xTaskGetTickCount();
-    while (board_data_ready() && acquisition_rise_count() == acquisition_consumed_rise) {
+    while (board_data_ready() && acquisition_data_ready_rise_count() == acquisition_consumed_rise) {
         if (acquisition_request_cancelled(request))
             return ESP_ERR_INVALID_STATE;
         if (xTaskGetTickCount() - started >= ACQUISITION_HANDSHAKE_TIMEOUT)
@@ -82,6 +96,7 @@ esp_err_t acquisition_wait_transfer_low(acq_request_t* request)
     return ESP_OK;
 }
 
+/** @brief Sends the restart command and waits for the next configuration request. */
 esp_err_t acquisition_restart_msp(acq_request_t* request)
 {
     if (acquisition_state != ACQ_STATE_QUIESCENT)
