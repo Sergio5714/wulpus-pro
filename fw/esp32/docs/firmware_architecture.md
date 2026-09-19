@@ -13,7 +13,7 @@ at a time.
 - [Control path](#control-path)
 - [USB and Wi-Fi session switching](#usb-and-wi-fi-session-switching)
 - [Acquisition state machine and MSP430 handshake](#acquisition-state-machine-and-msp430-handshake)
-- [USB power management](#usb-power-management)
+- [USB management](#usb-management)
 
 ## Component layout
 
@@ -47,6 +47,21 @@ configured TEST and JTAG GPIOs while programming.
 | `tcp_link` | 5 | Starts once, waits for a Wi-Fi connection, then accepts TCP clients and attempts to claim the session. |
 | `provisioning` | 5 | Persistent Wi-Fi owner. Applies boot policy, provisions or reconnects, publishes connectivity, and configures power save/TWT. |
 | `packet_tx` | 4 | Sole writer to USB or TCP. Serializes control responses and acquisition packets. |
+
+The threads exchange data and synchronize through these channels:
+
+| Communication mechanism | Producer | Consumer | Why it is needed |
+|---|---|---|---|
+| Protocol session queue | `usb_link`, `tcp_link` | `protocol` | Hands a newly claimed USB or TCP session to the sole command reader without letting the link tasks process commands themselves. |
+| Acquisition command queue | `protocol`, `packet_tx` | `acquisition` | Serializes all MSP430 reset, configuration, start, stop, and cleanup operations in the only task allowed to own acquisition hardware. |
+| Control-response queue | `protocol`, `usb_link`, `tcp_link` | `packet_tx` | Funnels acknowledgements, errors, and `BUSY` replies through the sole transport writer so packets cannot interleave. |
+| DMA frame pool and counting semaphores | `acquisition` | `packet_tx` | Transfers ownership of completed frames without copying their payloads and applies bounded buffering when transmission is slower than acquisition. |
+| Per-command binary semaphore | `acquisition` | Command submitter (`protocol` or `packet_tx`) | Returns the result of one acquisition command and keeps its request alive if the submitter times out before execution finishes. |
+| Per-response task notification | `packet_tx` | Response submitter (`protocol`, `usb_link`, or `tcp_link`) | Returns the result of a synchronous control-packet transmission without requiring a separate response queue. |
+| Task wake notifications | GPIO ISR and acquisition-command submitters; `acquisition` and control-response submitters | `acquisition`; `packet_tx` | Wakes an owner task after new work arrives; queues and frame state remain the authoritative record of that work. |
+| Mutex-protected session state | `usb_link`, `tcp_link`, `protocol` | All transport, protocol, acquisition, and TX tasks | Enforces one active transport and uses a generation number to reject commands or frames belonging to an old session. |
+| Mutex-protected acquisition state and status | `acquisition`, `packet_tx` | `protocol`, `packet_tx` | Publishes whether acquisition is active plus sticky errors and counters for status replies and safe TX decisions. |
+| Provisioner event group and protected state | Wi-Fi event handlers, `protocol` | `provisioning`, `tcp_link`, `protocol` | Announces connection changes and coordinates credential updates, reconnection, mDNS, power saving, and when TCP may listen. |
 
 `app_main()` performs initialization and starts these threads. It does not move
 acquisition data.
@@ -94,13 +109,14 @@ discarded frames.
 
 ```mermaid
 flowchart LR
-    HOST[PC host] -->|framed command| LINK[USB or TCP link thread]
-    LINK -->|claim request| SESSION[session manager]
-    SESSION -->|session reference| PROTO[protocol thread]
-    PROTO -->|copied command queue| SPI[acquisition thread / SPI]
-    SPI -->|private command completion| PROTO
-    PROTO -->|control packet request| TX[packet TX thread]
-    TX -->|framed response| HOST
+    HOST[PC host] -->|framed command| TRANSPORT[USB or TCP transport]
+    TRANSPORT -->|claim| SESSION[session manager]
+    TRANSPORT -->|session queue| PROTO[protocol thread]
+    PROTO -->|command queue| ACQ[acquisition thread / SPI]
+    ACQ -.->|completion| PROTO
+    PROTO -->|control-response queue| TX[packet TX thread]
+    TX -->|framed response| TRANSPORT
+    TRANSPORT -->|framed response| HOST
 ```
 
 The protocol thread is the only active-link reader. The packet-TX thread is the
@@ -146,7 +162,9 @@ stateDiagram-v2
     [*] --> RESET
     RESTARTING --> WAIT_CONFIG: handshake succeeds
     RESET --> WAIT_CONFIG: session opens / reset released
+    RESET --> QUIESCENT: STOP_RX or cleanup
     WAIT_CONFIG --> CONFIGURING: 0xFA configuration received
+    WAIT_CONFIG --> QUIESCENT: STOP_RX or cleanup
     CONFIGURING --> CONFIGURED: handshake succeeds
     CONFIGURING --> QUIESCENT: failure or cancellation
     CONFIGURED --> ACQUIRING: START_RX
@@ -156,7 +174,7 @@ stateDiagram-v2
     QUIESCENT --> ACQUIRING: START_RX with valid configuration
     QUIESCENT --> RESTARTING: new restart command
     RESTARTING --> QUIESCENT: handshake fails
-    QUIESCENT --> RESET: session closes / reset asserted
+    QUIESCENT --> RESET: session closes / MSP430 reset asserted
 ```
 
 The main transitions are:
@@ -204,19 +222,21 @@ SET_ACQ_CONFIG(0xFA) -> START_RX` remains supported.
 Host regression tests and the physical-board verification matrix are documented
 in [acquisition tests](../tests/acquisition/README.md).
 
-## USB power management
+## USB management
 
 The native USB CDC link uses the ESP32-C6 USB Serial/JTAG peripheral. Power
-management follows physical USB presence, independently of protocol session
-ownership.
+management and CPU frequency scaling follow physical USB presence,
+independently of protocol session ownership.
 
 ```mermaid
 flowchart LR
-    DETECT[USB host detected] --> LOCK[Acquire USB power locks]
-    LOCK --> ACTIVE[USB available]
+    POLL[USB monitor cycle] --> LOCK[Hold sleep + CPU-max locks]
+    LOCK -->|wait 10 ms| CHECK{Host present?}
+    CHECK -->|yes| ACTIVE[USB available]
+    CHECK -->|no| RELEASE[Release both locks]
     ACTIVE -->|brief missing indication| ACTIVE
-    ACTIVE -->|missing for 100 ms| RELEASE[Release power locks]
-    RELEASE --> DISCONNECTED[USB disconnected]
+    ACTIVE -->|missing for 100 ms| RELEASE[Release both locks]
+    RELEASE -->|retry after 100 ms| POLL
 ```
 
 | Mechanism | Purpose |
@@ -225,11 +245,12 @@ flowchart LR
 | `ESP_PM_CPU_FREQ_MAX` | Keep USB clocks stable while a host is attached. |
 | 100 ms disconnect filter | Ignore brief false disconnect indications from USB SOF monitoring. |
 
-Both locks are acquired when a USB host is detected and released after a
-sustained physical disconnect. Holding the maximum-frequency lock increases
-power consumption while USB is attached, but avoids corrupted command bytes
-and transient disconnects observed when the tested ESP32-C6 rev0.2 board used
-dynamic frequency scaling down to 10 MHz.
+Both locks are acquired before checking USB presence and retained while a host
+is attached. They are released when no host is found, after applying the 100 ms
+filter to a previously active connection. Holding the maximum-frequency lock
+increases power consumption while USB is attached, but avoids corrupted command
+bytes and transient disconnects observed when the tested ESP32-C6 rev0.2 board
+used dynamic frequency scaling down to 10 MHz.
 
 An attached USB cable does not claim the protocol session. USB and Wi-Fi
 session ownership continues to follow the first valid command as described
