@@ -53,8 +53,10 @@ esp_err_t acquisition_wait_ready(acq_request_t* request)
 {
     TickType_t started = xTaskGetTickCount();
     while (!acquisition_ready()) {
-        if (acquisition_request_cancelled(request)) return ESP_ERR_INVALID_STATE;
-        if (xTaskGetTickCount() - started >= ACQUISITION_HANDSHAKE_TIMEOUT) return ESP_ERR_TIMEOUT;
+        if (acquisition_request_cancelled(request))
+            return ESP_ERR_INVALID_STATE;
+        if (xTaskGetTickCount() - started >= ACQUISITION_HANDSHAKE_TIMEOUT)
+            return ESP_ERR_TIMEOUT;
         ulTaskNotifyTake(pdTRUE, 1);
     }
     return acquisition_request_cancelled(request) ? ESP_ERR_INVALID_STATE : ESP_OK;
@@ -71,8 +73,10 @@ esp_err_t acquisition_wait_transfer_low(acq_request_t* request)
 {
     TickType_t started = xTaskGetTickCount();
     while (board_data_ready() && acquisition_rise_count() == acquisition_consumed_rise) {
-        if (acquisition_request_cancelled(request)) return ESP_ERR_INVALID_STATE;
-        if (xTaskGetTickCount() - started >= ACQUISITION_HANDSHAKE_TIMEOUT) return ESP_ERR_TIMEOUT;
+        if (acquisition_request_cancelled(request))
+            return ESP_ERR_INVALID_STATE;
+        if (xTaskGetTickCount() - started >= ACQUISITION_HANDSHAKE_TIMEOUT)
+            return ESP_ERR_TIMEOUT;
         ulTaskNotifyTake(pdTRUE, 1);
     }
     return ESP_OK;
@@ -80,16 +84,20 @@ esp_err_t acquisition_wait_transfer_low(acq_request_t* request)
 
 esp_err_t acquisition_restart_msp(acq_request_t* request)
 {
-    if (acquisition_state != ACQ_STATE_QUIESCENT) return ESP_ERR_INVALID_STATE;
-    if (acquisition_reset_asserted) return ESP_OK;
+    if (acquisition_state != ACQ_STATE_QUIESCENT)
+        return ESP_ERR_INVALID_STATE;
+    if (acquisition_reset_asserted)
+        return ESP_OK;
     acquisition_state = ACQ_STATE_RESTARTING;
     esp_err_t result = acquisition_wait_ready(request);
     if (result == ESP_OK) {
         uint8_t restart[CONFIG_WP_DATA_RX_LENGTH] = {0xFB};
         acquisition_consume_assertion();
         result = board_spi_transmit(restart, sizeof(restart));
-        if (result == ESP_OK) result = acquisition_wait_transfer_low(request);
-        if (result == ESP_OK) result = acquisition_wait_ready(request);
+        if (result == ESP_OK)
+            result = acquisition_wait_transfer_low(request);
+        if (result == ESP_OK)
+            result = acquisition_wait_ready(request);
     }
     if (result == ESP_OK) {
         acquisition_configured = false;

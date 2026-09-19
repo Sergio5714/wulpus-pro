@@ -69,8 +69,10 @@ void acquisition_receive_frame(void)
     acquisition_consume_assertion();
     esp_err_t result = board_spi_receive_dma(slot->payload, slot->length);
     slot->spi_complete_time_us = esp_timer_get_time();
-    if (result == ESP_OK) result = acquisition_wait_transfer_low(NULL);
-    if (result == ESP_OK && slot->payload[0] != 0xFF) result = ESP_ERR_INVALID_RESPONSE;
+    if (result == ESP_OK)
+        result = acquisition_wait_transfer_low(NULL);
+    if (result == ESP_OK && slot->payload[0] != 0xFF)
+        result = ESP_ERR_INVALID_RESPONSE;
     if (result != ESP_OK) {
         acquisition_report_error(result);
         wulpus_pro_frame_pool_release(slot);
