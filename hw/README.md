@@ -17,15 +17,35 @@ the transmit and receive signal paths, high-voltage switching, power supplies,
 MSP430 control circuitry, and the host interface. The design sources are provided
 in Altium Designer format. This board is required to build a WULPUS PRO system.
 
-### WULPUS PRO Wifi host
+### WULPUS PRO WiFi host PCB
 
 Directory: [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb)
 
-A dedicated wireless host board for WULPUS PRO, based on the Seeed Studio XIAO
-ESP32-C6. It connects to the acquisition board and runs the ESP32 firmware in
-[`../fw/esp32`](../fw/esp32), providing Wi-Fi control and data transfer. The
-design sources are provided in KiCad format, together with fabrication and
+An open-source companion board that integrates wireless communication, power
+delivery, and firmware programming for the WULPUS PRO Acquisition board. Based
+on the [Seeed Studio XIAO ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html),
+it supports runtime acquisition configuration and real-time ultrasound data
+streaming over Wi-Fi/TCP or native USB CDC at pulse repetition frequencies
+(PRFs) of up to 500 Hz. It is the primary host board for WULPUS PRO and runs
+the [ESP32 firmware](../fw/esp32).
+
+A single USB-C connection powers the complete system and enables wired
+communication and firmware updates, including [programming the acquisition
+board's MSP430 through integrated JTAG](../fw/esp32/docs/msp430_update_guide.md).
+The host supports Wi-Fi provisioning, automatic reconnection, and device
+discovery. The platform can also be powered by an external Adafruit battery
+with a standard JST connector. USB battery charging is supported, and battery
+protection is integrated.
+
+The design sources are provided in KiCad format, together with fabrication and
 assembly outputs.
+
+Using the XIAO module provides a stable, actively supported wireless platform
+with a proven RF design. Seeed publishes compliance records for the
+module, including [FCC Part 15](https://files.seeedstudio.com/Seeed_Certificate/documents_certificate/113991254-FCC.pdf)
+and [CE RED](https://files.seeedstudio.com/Seeed_Certificate/documents_certificate/113991254-CE.pdf)
+testing. This pre-tested module significantly reduces RF design effort and
+compliance risk compared with developing a custom, uncertified RF implementation.
 
 ### polyCMUT adapter board
 
@@ -52,11 +72,13 @@ private submodule.
 
 ## PCBWay shared projects
 
-For convenient one-click PCB production and assembly, you can use the PCBWay shared projects (optional; DIY using the design and fabrication files in this folder is also supported):
+For convenient one-click PCB production and assembly, you can use the PCBWay shared projects:
 
-- [WULPUS PRO Evaluation Board v1.0.0](https://www.pcbway.com/project/shareproject/WULPUS_PRO_Evaluation_board_v1_0_0_992d7510.html)
+- [WULPUS PRO Acquisition PCB v1.0.0](https://www.pcbway.com/project/shareproject/WULPUS_PRO_Evaluation_board_v1_0_0_992d7510.html)
 
-This option is convenient for outsourced PCB production and assembly, with an estimated **~1 month lead time** and a price of about **USD 220** per probe (evaluation board), based on mid-2026 pricing.
+- [WULPUS PRO WiFi host PCB v1.0.0](https://www.pcbway.com/project/shareproject/WULPUS_PRO_WiFi_host_PCB_7cfe7806.html)
+
+This option is convenient for outsourced PCB production and assembly, with an estimated **~1 month lead time** and a price of about **220 USD** per probe for Acquisition PCB and **40 USD** for the WiFi host PCB, based on mid-2026 pricing.
 
 ## License
 
@@ -68,7 +90,7 @@ differ:
 | --- | --- | --- | --- |
 | WULPUS PRO acquisition board | [`wulpus_pro_acq_pcb_dev_board`](wulpus_pro_acq_pcb_dev_board) | [`LICENSE_ETH`](LICENSE_ETH) | Copyright (C) 2025 ETH Zurich. All rights reserved. |
 | WULPUS polyCMUT adapter | [`wulpus_polycmut_adapter`](wulpus_polycmut_adapter) | [`LICENSE_ETH`](LICENSE_ETH) | Copyright (C) 2025 ETH Zurich. All rights reserved. |
-| WULPUS PRO Wifi host | [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb) | [`LICENSE`](LICENSE) | Copyright (C) 2026 Sergei Vostrikov. All rights reserved. |
+| WULPUS PRO WiFi host PCB | [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb) | [`LICENSE`](LICENSE) | Copyright (C) 2026 Sergei Vostrikov. All rights reserved. |
 
 The license terms are otherwise identical. The internal `kicad_us_lib`
 submodule contains third-party material and is not covered by this table; its
