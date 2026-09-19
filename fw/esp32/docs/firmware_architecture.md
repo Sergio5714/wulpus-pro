@@ -193,8 +193,7 @@ The acquisition implementation is split by responsibility:
 
 | File | Responsibility |
 |---|---|
-| `acquisition_thread.c` | Command queue, state transitions, and task lifecycle. |
-| `acquisition_task.c` | Acquisition task scheduling loop. |
+| `acquisition_thread.c` | Command queue, state transitions, scheduling loop, and task lifecycle. |
 | `acquisition_handshake.c` | DATA_READY ISR, edge tracking, handshake waits, and MSP430 restart transfer. |
 | `acquisition_frames.c` | SPI frame reception, pending-frame ownership, publication, and cleanup. |
 | `acquisition_internal.h` | Private state and interfaces shared by those files. |

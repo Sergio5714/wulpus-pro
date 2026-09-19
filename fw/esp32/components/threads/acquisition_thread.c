@@ -24,13 +24,16 @@ limitations under the License.
 #include "wulpus_pro_status.h"
 
 TaskHandle_t acquisition_task_handle;
-QueueHandle_t acquisition_command_queue;
 portMUX_TYPE acquisition_lock = portMUX_INITIALIZER_UNLOCKED;
 acq_state_t acquisition_state = ACQ_STATE_RESET;
 bool acquisition_configured;
 bool acquisition_reset_asserted = true;
 wulpus_pro_session_ref_t acquisition_owner;
 
+/* The command queue is owned and consumed entirely by this module. */
+static QueueHandle_t acquisition_command_queue;
+
+/** @brief Reports whether a request was cancelled or belongs to a stale session. */
 bool acquisition_request_cancelled(acq_request_t* request)
 {
     if (request == NULL)
@@ -44,6 +47,7 @@ bool acquisition_request_cancelled(acq_request_t* request)
     return value;
 }
 
+/** @brief Drops one request reference and destroys the request at zero references. */
 static void release_request(acq_request_t* request)
 {
     portENTER_CRITICAL(&acquisition_lock);
@@ -55,6 +59,7 @@ static void release_request(acq_request_t* request)
     }
 }
 
+/** @brief Converts an acquisition failure into persistent status and error counters. */
 void acquisition_report_error(esp_err_t result)
 {
     wulpus_pro_status_set_error(result == ESP_ERR_TIMEOUT ? WULPUS_PRO_ERROR_SPI_TIMEOUT
@@ -62,7 +67,8 @@ void acquisition_report_error(esp_err_t result)
     wulpus_pro_status_increment_spi_error();
 }
 
-esp_err_t acquisition_execute(acq_request_t* request)
+/** @brief Applies one serialized command to the acquisition state machine. */
+static esp_err_t acquisition_execute(acq_request_t* request)
 {
     if (acquisition_request_cancelled(request))
         return ESP_ERR_INVALID_STATE;
@@ -79,8 +85,7 @@ esp_err_t acquisition_execute(acq_request_t* request)
         acquisition_reset_asserted = true;
         vTaskDelay(pdMS_TO_TICKS(10));
         ulTaskNotifyTake(pdTRUE, 0);
-        acquisition_consumed_rise = acquisition_rise_count();
-        acquisition_assertion_consumed = false;
+        acquisition_reset_handshake();
         if (request->type == ACQ_CMD_BOOT) {
             result = board_msp_reset(false);
             if (result == ESP_OK) {
@@ -138,6 +143,7 @@ esp_err_t acquisition_execute(acq_request_t* request)
     return ESP_ERR_INVALID_ARG;
 }
 
+/** @brief Drains queued commands and receives at most one pending data frame. */
 bool acquisition_process_work(void)
 {
     bool work_to_do = false;
@@ -150,13 +156,25 @@ bool acquisition_process_work(void)
         release_request(request);
     }
     if ((acquisition_state == ACQ_STATE_ACQUIRING || acquisition_state == ACQ_STATE_CONFIGURED) &&
-        acquisition_pending_frame == NULL && acquisition_ready()) {
+        acquisition_pending_frame == NULL && acquisition_data_ready_pending()) {
         acquisition_receive_frame();
         work_to_do = true;
     }
     return work_to_do;
 }
 
+/** @brief Runs the acquisition work loop and sleeps until new work arrives. */
+static void acquisition_task(void* argument)
+{
+    (void)argument;
+
+    for (;;) {
+        if (!acquisition_process_work())
+            ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    }
+}
+
+/** @brief Creates the command queue and owner task, then installs the DATA_READY ISR. */
 esp_err_t acquisition_thread_start(void)
 {
     acquisition_command_queue = xQueueCreate(4, sizeof(acq_request_t*));
@@ -171,6 +189,7 @@ esp_err_t acquisition_thread_start(void)
     return board_data_ready_set_isr(acquisition_data_ready_isr, NULL);
 }
 
+/** @brief Queues a synchronous command and waits for completion within the timeout. */
 esp_err_t acquisition_thread_command(acq_command_type_t type, wulpus_pro_session_ref_t session,
                                      const void* config, size_t length, TickType_t timeout)
 {
