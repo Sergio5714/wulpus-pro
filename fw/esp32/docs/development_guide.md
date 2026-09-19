@@ -89,6 +89,13 @@ which continues to the flashing instructions.
 
 ### Compile the firmware
 
+The ESP32 application version is read from
+[`firmware_version.txt`](../firmware_version.txt). Update that file with a
+`major.minor.patch` release before compiling; CMake rejects other formats. The
+version must match the corresponding release heading in
+[`CHANGELOG.md`](../CHANGELOG.md), for example `firmware_version.txt` value
+`1.1.0` matches the `## [1.1.0]` changelog entry.
+
 ```powershell
 idf.py -B build-xiao build
 ```

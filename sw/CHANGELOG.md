@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added a firmware-information API and GUI label for the running ESP32 and
+  detected MSP430 firmware versions, including reserved Git hash and dirty-state
+  fields for future firmware build integration.
 - Added USB CDC APIs and a Jupyter GUI for persistent device configuration and
   write-only Wi-Fi credential management.
 - Added an interactive Jupyter NPZ viewer with browser upload, direct path

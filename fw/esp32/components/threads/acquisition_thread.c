@@ -22,6 +22,7 @@ limitations under the License.
 #include "board.h"
 #include "wulpus_pro_state.h"
 #include "wulpus_pro_status.h"
+#include "wulpus_pro_firmware_info.h"
 
 TaskHandle_t acquisition_task_handle;
 portMUX_TYPE acquisition_lock = portMUX_INITIALIZER_UNLOCKED;
@@ -77,6 +78,7 @@ static esp_err_t acquisition_execute(acq_request_t* request)
     case ACQ_CMD_BOOT:
     case ACQ_CMD_RESET:
         acquisition_quiesce();
+        wulpus_pro_firmware_info_clear_msp();
         result = board_msp_reset(true);
         acquisition_state = ACQ_STATE_RESET;
         acquisition_configured = false;
@@ -104,8 +106,11 @@ static esp_err_t acquisition_execute(acq_request_t* request)
         acquisition_state = ACQ_STATE_CONFIGURING;
         result = acquisition_wait_ready(request);
         if (result == ESP_OK) {
+            uint8_t response[CONFIG_WP_DATA_RX_LENGTH] __attribute__((aligned(4)));
             acquisition_consume_assertion();
-            result = board_spi_transmit(request->config, sizeof(request->config));
+            result = board_spi_transceive(request->config, response, sizeof(response));
+            if (result == ESP_OK)
+                wulpus_pro_firmware_info_set_msp(response, sizeof(response));
             if (result == ESP_OK)
                 result = acquisition_wait_transfer_low(request);
         }

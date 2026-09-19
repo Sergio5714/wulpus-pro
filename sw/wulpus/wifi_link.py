@@ -35,6 +35,11 @@ logger = logging.getLogger(__name__)
 HEADER_MAGIC = b"wulpus"
 HEADER_LENGTH = 9
 MAX_PAYLOAD_LENGTH = 65535
+FIRMWARE_INFO_STRUCT = struct.Struct("<BBBBBBBB32s13s13s6s")
+FIRMWARE_INFO_VERSION = 1
+FIRMWARE_INFO_MSP_VALID = 1 << 0
+FIRMWARE_INFO_ESP_DIRTY = 1 << 1
+FIRMWARE_INFO_MSP_DIRTY = 1 << 2
 
 
 class WulpusProWiFiCommand(IntEnum):
@@ -69,6 +74,8 @@ class WulpusProWiFiCommand(IntEnum):
     MSP_UPDATE_STATUS = 0x71
     MSP_UPDATE_GET_DIAGNOSTICS = 0x72
     MSP_UPDATE_DIAGNOSTICS = 0x73
+    GET_FIRMWARE_INFO = 0x74
+    FIRMWARE_INFO = 0x75
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}.{self.name}"
@@ -152,6 +159,17 @@ class WulpusProStatus:
     link_error_count: int
     current_buffer_usage: int
     maximum_buffer_usage: int
+
+
+@dataclass(frozen=True)
+class WulpusProFirmwareInfo:
+    esp_version: str
+    msp_version: Optional[str]
+    esp_git_hash: Optional[str] = None
+    msp_git_hash: Optional[str] = None
+    esp_dirty: bool = False
+    msp_dirty: bool = False
+    version: int = 1
 
 
 @dataclass(frozen=True)
@@ -614,6 +632,67 @@ class WulpusProWiFiLink:
                     f"STATUS reports size {size}, received {len(payload)}"
                 )
             return WulpusProStatus(version, *fields)
+
+    def get_firmware_info(self, timeout: float = 5.0) -> WulpusProFirmwareInfo:
+        """Return versions of the running ESP32 and detected MSP430 firmware."""
+        self.send_command(WulpusProWiFiCommand.GET_FIRMWARE_INFO, timeout=timeout)
+        deadline = time.monotonic() + timeout
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise WulpusProWiFiTimeout("Timed out waiting for FIRMWARE_INFO")
+            header, payload = self.receive_command(remaining)
+            if header.command == WulpusProWiFiCommand.GET_DATA:
+                continue
+            if header.command != WulpusProWiFiCommand.FIRMWARE_INFO:
+                raise WulpusProWiFiProtocolError(
+                    f"Expected {WulpusProWiFiCommand.FIRMWARE_INFO}, received {header.command}"
+                )
+            if len(payload) != FIRMWARE_INFO_STRUCT.size:
+                raise WulpusProWiFiProtocolError(
+                    f"Invalid FIRMWARE_INFO payload length {len(payload)}"
+                )
+            (
+                version,
+                size,
+                flags,
+                _,
+                major,
+                minor,
+                patch,
+                _,
+                esp_raw,
+                esp_hash_raw,
+                msp_hash_raw,
+                _,
+            ) = FIRMWARE_INFO_STRUCT.unpack(payload)
+            if version != FIRMWARE_INFO_VERSION or size != len(payload):
+                raise WulpusProWiFiProtocolError(
+                    f"Unsupported FIRMWARE_INFO version/size {version}/{size}"
+                )
+            esp_version = esp_raw.split(b"\0", 1)[0].decode("ascii", errors="replace")
+            msp_version = (
+                f"{major}.{minor}.{patch}"
+                if flags & FIRMWARE_INFO_MSP_VALID
+                else None
+            )
+            esp_hash = (
+                esp_hash_raw.split(b"\0", 1)[0].decode("ascii", errors="replace")
+                or None
+            )
+            msp_hash = (
+                msp_hash_raw.split(b"\0", 1)[0].decode("ascii", errors="replace")
+                or None
+            )
+            return WulpusProFirmwareInfo(
+                esp_version=esp_version,
+                msp_version=msp_version,
+                esp_git_hash=esp_hash,
+                msp_git_hash=msp_hash,
+                esp_dirty=bool(flags & FIRMWARE_INFO_ESP_DIRTY),
+                msp_dirty=bool(flags & FIRMWARE_INFO_MSP_DIRTY),
+                version=version,
+            )
 
     def clear_status(
         self,

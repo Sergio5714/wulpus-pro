@@ -81,6 +81,10 @@ const char* wulpus_pro_command_name(wulpus_pro_command_t command)
         return "MSP_UPDATE_GET_DIAGNOSTICS";
     case WULPUS_PRO_MSP_UPDATE_DIAGNOSTICS:
         return "MSP_UPDATE_DIAGNOSTICS";
+    case WULPUS_PRO_GET_FIRMWARE_INFO:
+        return "GET_FIRMWARE_INFO";
+    case WULPUS_PRO_FIRMWARE_INFO:
+        return "FIRMWARE_INFO";
     default:
         return "UNKNOWN";
     }

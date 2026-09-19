@@ -19,6 +19,7 @@
  */
 
 #include <msp430.h> 
+#include "firmware_version.h"
 #include "wulpus_sys.h"
 
 #include "uslib_timers_isrs.h"
@@ -40,6 +41,15 @@ uint8_t tx_rx_id = 0;
 
 // VGA fixed gain mode flag
 uint8_t vga_fixed_gain = 1;
+
+// Firmware metadata shifted out while the ESP32 sends an acquisition config.
+// The hash and dirty-state extension is reserved for future build integration.
+static const uint8_t firmware_hello[8] = {
+    'W', 'V', 'E', 'R', WULPUS_MSP_FW_HELLO_VERSION,
+    WULPUS_MSP_FW_VERSION_MAJOR,
+    WULPUS_MSP_FW_VERSION_MINOR,
+    WULPUS_MSP_FW_VERSION_PATCH,
+};
 
 // A routine to get configuration package from nRF
 static void getConfigPack(void);
@@ -300,6 +310,7 @@ static void getConfigPack(void)
     // Initiate an SPI transaction to receive a config file
     // Clear TX buffer
     memset((uint16_t *) 0x4000, 0, (uint32_t)BYTES_PR_XFER_TX);
+    memcpy((uint16_t *) 0x4000, firmware_hello, sizeof(firmware_hello));
     // Start SPI transaction
     usStartSPI();
 

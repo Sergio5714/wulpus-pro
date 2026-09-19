@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added ESP-IDF application-version and runtime MSP430-version reporting over
+  the PC protocol, with the ESP32 release read from `firmware_version.txt` and
+  required to match the firmware changelog, plus MSP430 discovery during the
+  configuration SPI exchange. Reserved per-firmware Git hash fields and dirty
+  flags for future build integration.
 - Added MSP430FR5043 updates over USB/TCP with a 256 KiB staging partition,
   CRC-checked section images, boot-time four-wire JTAG programming/verification,
   persisted results and diagnostics, and XIAO JTAG GPIO defaults.

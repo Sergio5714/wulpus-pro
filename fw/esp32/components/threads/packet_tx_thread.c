@@ -25,11 +25,12 @@ limitations under the License.
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "wulpus_pro_frame_pool.h"
+#include "wulpus_pro_firmware_info.h"
 #include "wulpus_pro_protocol.h"
 #include "wulpus_pro_state.h"
 #include "wulpus_pro_status.h"
 
-#define CONTROL_PAYLOAD_MAX 64
+#define CONTROL_PAYLOAD_MAX WULPUS_PRO_FIRMWARE_INFO_SIZE
 #define CONTROL_DEPTH 8
 
 typedef struct {
