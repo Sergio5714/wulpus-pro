@@ -188,7 +188,7 @@ cd path/to/wulpus-pro/fw/esp32
 ```
 
 Then follow the board-specific commands in the
-[development guide](development_guide.md). The WULPUS PRO WiFi host PCB is
+[development guide](development_guide.md). The WULPUS Pro Max WiFi host PCB is
 the primary host board and uses the XIAO ESP32-C6 configuration.
 
 The first configure/build may download managed ESP-IDF components declared by

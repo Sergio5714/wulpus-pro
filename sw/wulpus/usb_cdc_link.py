@@ -1,8 +1,21 @@
 """
 Copyright (C) 2026 Sergei Vostrikov
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 SPDX-License-Identifier: Apache-2.0
 
-USB CDC communication link for a directly connected WULPUS PRO ESP32-C6 host.
+USB CDC communication link for a directly connected WULPUS Pro Max ESP32-C6 host.
 """
 
 from dataclasses import dataclass
@@ -110,7 +123,7 @@ class _SerialByteStream:
 
 
 class WulpusProUsbCdcLink(WulpusProWiFiLink):
-    """Run the WULPUS PRO stream protocol over native ESP32-C6 USB CDC.
+    """Run the WULPUS Pro Max stream protocol over native ESP32-C6 USB CDC.
 
     The ESP32-C6 exposes one fixed USB Serial/JTAG device. The GUI must close
     this link before ``idf.py flash`` or a serial monitor can claim the COM
@@ -137,7 +150,7 @@ class WulpusProUsbCdcLink(WulpusProWiFiLink):
                 devices.append(
                     WulpusProUsbCdcDevice(
                         device=port.device,
-                        description=port.description or "WULPUS PRO USB CDC",
+                        description=port.description or "WULPUS Pro Max USB CDC",
                         serial_number=port.serial_number,
                     )
                 )
@@ -148,7 +161,7 @@ class WulpusProUsbCdcLink(WulpusProWiFiLink):
             return True
         selected_port = device.device if device is not None else self.port
         if not selected_port:
-            logger.error("No WULPUS PRO USB CDC port was selected")
+            logger.error("No WULPUS Pro Max USB CDC port was selected")
             return False
 
         try:
@@ -173,7 +186,7 @@ class WulpusProUsbCdcLink(WulpusProWiFiLink):
         self.port = selected_port
         self.device = device or WulpusProUsbCdcDevice(
             device=selected_port,
-            description="WULPUS PRO USB CDC",
+            description="WULPUS Pro Max USB CDC",
         )
         self.backlog = b""
         self.rx_enabled = False

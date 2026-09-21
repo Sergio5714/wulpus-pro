@@ -1,6 +1,6 @@
 # ESP32-to-MSP430 acquisition protocol
 
-The ESP32 is the SPI master and the WULPUS PRO MSP430 acquisition controller is
+The ESP32 is the SPI master and the MSP430 acquisition controller is
 the SPI slave. The interface uses fixed-length, full-duplex transactions: data
 from the ESP32 configures or restarts the MSP430 while data from the MSP430
 contains an acquisition frame when one is available.

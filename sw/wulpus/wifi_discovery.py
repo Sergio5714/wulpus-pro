@@ -2,6 +2,12 @@
    Copyright (C) 2026 ETH Zurich. All rights reserved.
    Author: Cedric Hirschi, ETH Zurich
            Sergei Vostrikov, ETH Zurich
+   Modifications Copyright (C) 2026 Sergei Vostrikov
+   Modifications by Sergei Vostrikov:
+   - Refactored discovery into a thread-safe mDNS browser with endpoint
+     validation, deduplication, and deterministic ordering.
+   - Changed the default mDNS service identity from `wulpus` to `wulpus_pro`.
+   - Renamed user-facing product references to WULPUS Pro Max.
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -28,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class WulpusProWiFiDevice:
-    """A WULPUS PRO Wi-Fi endpoint discovered through mDNS."""
+    """A WULPUS Pro Max Wi-Fi endpoint discovered through mDNS."""
 
     name: str
     server: str
@@ -82,7 +88,7 @@ class _WulpusProServiceListener(ServiceListener):
 
 
 class WulpusProWiFiDiscovery:
-    """Discover WULPUS PRO TCP services advertised over mDNS."""
+    """Discover WULPUS Pro Max TCP services advertised over mDNS."""
 
     def __init__(self, service_name: str = "wulpus_pro", service_type: str = "tcp"):
         self.service_name = service_name
@@ -130,5 +136,5 @@ class WulpusProWiFiDiscovery:
             }.values(),
             key=lambda device: (device.name, device.ip, device.port),
         )
-        logger.info("Found %d WULPUS PRO Wi-Fi device(s)", len(self.devices))
+        logger.info("Found %d WULPUS Pro Max Wi-Fi device(s)", len(self.devices))
         return list(self.devices)

@@ -1,6 +1,6 @@
-# WULPUS PRO ESP32 firmware
+# WULPUS Pro Max ESP32 firmware
 
-This ESP-IDF firmware connects the WULPUS PRO Acquisition PCB to a PC through
+This ESP-IDF firmware connects the Acquisition PCB to a PC through
 either Wi-Fi/TCP or the native USB Serial/JTAG CDC interface of an ESP32-C6.
 Both transports use the same framed binary protocol and can remain available
 concurrently, while session arbitration ensures that only one host controls the
@@ -10,7 +10,7 @@ Acquisition PCB at a time.
 
 ### Host board
 
-The **[WULPUS PRO WiFi host PCB](../../hw/wulpus_wifi_host_pcb)** is the primary
+The **[WULPUS Pro Max WiFi host PCB](../../hw/wulpus_wifi_host_pcb)** is the primary
 host board for this firmware. It contains a Seeed Studio XIAO ESP32-C6 and uses
 the XIAO board configuration in this project. A standalone XIAO ESP32-C6 is
 supported as a development alternative.
@@ -31,7 +31,7 @@ supported as a development alternative.
 - **Buffering and diagnostics:** buffers acquisition frames and reports SPI,
   transport, and buffer errors, frame counters, and MSP430 update results.
 
-> MSP430 firmware flashing is available only with the WULPUS PRO WiFi host PCB;
+> MSP430 firmware flashing is available only with the WULPUS Pro Max WiFi host PCB;
 > it is not available with a standalone XIAO ESP32-C6.
 
 ## Reference documentation

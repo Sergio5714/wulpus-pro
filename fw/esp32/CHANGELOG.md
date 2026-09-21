@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added structured ESP32 documentation for firmware threads and data/control
   paths, USB/TCP session switching, Wi-Fi provisioning, the MSP430 SPI and
   configuration protocol, and the framed ESP32-to-PC command/status protocol.
-- Added native ESP32-C6 USB CDC as a wired WULPUS PRO command and RF-data transport.
+- Added native ESP32-C6 USB CDC as a wired WULPUS Pro Max command and RF-data transport.
 - Added first-valid-command arbitration between concurrent TCP and USB listeners, including a `BUSY` response for the losing transport.
 - Added a transport-neutral byte-stream layer with exact reads, complete writes, header prefetching, and packet-level TX locking.
 - Added a fixed DMA-capable acquisition frame pool, sticky runtime error status,
@@ -40,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the user-facing ESP32 project branding from WULPUS PRO to WULPUS Pro
+  Max. This naming change does not alter the existing ETH Zurich copyright,
+  authorship, or license notices in inherited source files.
 - Acquisition configuration now acknowledges after SPI success and reports
   transfer failures through `ERROR`; start/reset commands acknowledge after
   their actions. Acquisition configuration, start, and resets reject requests
@@ -51,7 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   mDNS startup under the persistent Wi-Fi workflow.
 - Corrected the documented MSP430 timer ordering: DC-DC turn-on precedes and
   therefore has a lower timer value than the acquisition period.
-- Identified the WULPUS PRO WiFi host PCB, containing a XIAO ESP32-C6, as the
+- Identified the WULPUS Pro Max WiFi host PCB, containing a XIAO ESP32-C6, as the
   primary firmware target throughout the documentation; standalone XIAO
   boards remain a development alternative.
 - Increased the default DMA acquisition frame pool from 8 to 64 slots, giving
@@ -80,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Matched the XIAO ESP32-C6 defaults to the WULPUS PRO Wi-Fi host PCB routing.
+- Matched the XIAO ESP32-C6 defaults to the WULPUS Pro Max Wi-Fi host PCB routing.
 
 ### Changed
 
@@ -95,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added ESP32-C6 Wi-Fi firmware for using an ESP32 module as a WULPUS PRO host interface.
+- Added ESP32-C6 Wi-Fi firmware for using an ESP32 module as a WULPUS Pro Max host interface.
 - Added support for the Seeed Studio XIAO ESP32-C6 board.
 - Added board-specific defaults for the Seeed Studio XIAO ESP32-C6 and ESP32-C6-DEVKITM-1.
 - Added Wi-Fi provisioning support for storing network credentials in non-volatile memory.

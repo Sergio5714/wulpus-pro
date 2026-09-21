@@ -25,8 +25,8 @@ preparing a board that does not already have firmware installed.
 
 ## Supported boards
 
-- **[WULPUS PRO WiFi host PCB](../../../hw/wulpus_wifi_host_pcb)** — the primary
-  and recommended XIAO ESP32-C6-based host board, compatible with the WULPUS PRO
+- **[WULPUS Pro Max WiFi host PCB](../../../hw/wulpus_wifi_host_pcb)** — the primary
+  and recommended XIAO ESP32-C6-based host board, compatible with the WULPUS Pro Max
   connector. It is highly integrated: it supplies power to the Acquisition PCB,
   provides Wi-Fi and USB connectivity, and supports MSP430 firmware flashing.
 - **[Seeed Studio XIAO ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html)** —

@@ -22,7 +22,7 @@ provide the ESP32 GPIO interface.
 
 ## Requirements
 
-- A WULPUS PRO WiFi host PCB connected to the Acquisition PCB.
+- A WiFi host PCB connected to the Acquisition PCB.
 - A data-capable USB-C cable.
 - ESP32 firmware built with the current `partitions.csv` and flashed as a
   complete image, including the partition table.

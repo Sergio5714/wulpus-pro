@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the WULPUS PRO documentation will be documented in this file.
+All notable changes to the WULPUS Pro Max documentation will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -14,17 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documented persistent device configuration, reboot-only Wi-Fi policy,
   write-only credential commands, Wi-Fi runtime status, and the persistent
   Wi-Fi/TCP task model.
-- Added WULPUS PRO full specifications as a dedicated documentation page.
+- Added WULPUS Pro Max full specifications as a dedicated documentation page.
 - Added project-level documentation changelog.
 - Added image documentation README with authorship and CC BY-ND 4.0 license information.
-- Added WULPUS PRO images to the root README hero and hardware photos sections.
-- Added the WULPUS PRO system diagram to the root README.
+- Added PCB images to the root README hero and hardware photos sections.
+- Added the system diagram to the root README.
 - Documented native ESP32-C6 USB CDC operation, TCP/USB session arbitration,
   flashing and JTAG coexistence, binary-protocol logging constraints, and USB
   frame-rate profiling.
 
 ### Changed
 
+- Renamed user-facing documentation from WULPUS PRO to WULPUS Pro Max and
+  updated repository links for the new `wulpus-pro-max` name.
 - Updated the WiFi host description and PRF specifications to document up to
   500 Hz over Wi-Fi/TCP or USB CDC, and replaced the outdated battery-charging
   status with external Adafruit battery support through a standard JST

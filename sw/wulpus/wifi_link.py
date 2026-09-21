@@ -1,6 +1,14 @@
 """
 Copyright (C) 2025 ETH Zurich. All rights reserved.
 
+Modifications Copyright (C) 2026 Sergei Vostrikov
+Modifications by Sergei Vostrikov:
+- Refactored Wi-Fi communication with reliable TCP framing, RF-frame parsing,
+  command acknowledgements, asynchronous frame handling, and connection recovery.
+- Added protocol support for transport arbitration, runtime status, MSP430 reset
+  and firmware updates, persistent device/Wi-Fi configuration, and firmware info.
+- Renamed user-facing product references to WULPUS Pro Max.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -15,7 +23,7 @@ limitations under the License.
 
 SPDX-License-Identifier: Apache-2.0
 
-TCP communication link for WULPUS PRO Wi-Fi hosts.
+TCP communication link for WULPUS Pro Max Wi-Fi hosts.
 """
 
 import logging
@@ -43,7 +51,7 @@ FIRMWARE_INFO_MSP_DIRTY = 1 << 2
 
 
 class WulpusProWiFiCommand(IntEnum):
-    """Commands used by the WULPUS PRO TCP and USB CDC protocol."""
+    """Commands used by the WULPUS Pro Max TCP and USB CDC protocol."""
 
     SET_ACQ_CONFIG = 0x57
     GET_DATA = 0x58
@@ -85,7 +93,7 @@ class WulpusProWiFiCommand(IntEnum):
 
 
 class WulpusProWiFiError(Exception):
-    """Base exception for WULPUS PRO Wi-Fi communication failures."""
+    """Base exception for WULPUS Pro Max Wi-Fi communication failures."""
 
 
 class WulpusProWiFiTimeout(WulpusProWiFiError):
@@ -191,7 +199,7 @@ class WulpusProWiFiStatus:
 
 
 class WulpusProWiFiLink:
-    """Discover and communicate with an ESP32-based WULPUS PRO host."""
+    """Discover and communicate with an ESP32-based WULPUS Pro Max host."""
 
     def __init__(
         self,
@@ -254,17 +262,17 @@ class WulpusProWiFiLink:
             port=self.port,
         )
         self.discovery.devices = [device]
-        logger.info("Resolved WULPUS PRO Wi-Fi device as %s", device)
+        logger.info("Resolved WULPUS Pro Max Wi-Fi device as %s", device)
         return [device]
 
     def open(self, device: Optional[WulpusProWiFiDevice] = None) -> bool:
         if self.connected:
-            logger.warning("WULPUS PRO Wi-Fi link is already open")
+            logger.warning("WULPUS Pro Max Wi-Fi link is already open")
             return True
 
         if device is None:
             if not self.discovery.devices:
-                logger.error("No discovered WULPUS PRO Wi-Fi device is available")
+                logger.error("No discovered WULPUS Pro Max Wi-Fi device is available")
                 return False
             device = self.discovery.devices[0]
 
@@ -290,7 +298,7 @@ class WulpusProWiFiLink:
 
     def _require_socket(self) -> socket.socket:
         if self.sock is None:
-            raise WulpusProWiFiDisconnected("WULPUS PRO Wi-Fi link is not open")
+            raise WulpusProWiFiDisconnected("WULPUS Pro Max Wi-Fi link is not open")
         return self.sock
 
     @staticmethod
@@ -440,7 +448,7 @@ class WulpusProWiFiLink:
                 continue
             if header.command == WulpusProWiFiCommand.BUSY:
                 raise WulpusProWiFiBusy(
-                    "WULPUS PRO is busy or controlled through another transport"
+                    "WULPUS Pro Max is busy or controlled through another transport"
                 )
             if header.command == WulpusProWiFiCommand.ERROR:
                 if len(payload) != 5:
@@ -723,7 +731,7 @@ class WulpusProWiFiLink:
     ) -> List[WulpusProFrame]:
         """Configure the MSP430, acquire frames, and return it to a safe state."""
         if not self.connected:
-            raise WulpusProWiFiDisconnected("WULPUS PRO Wi-Fi link is not open")
+            raise WulpusProWiFiDisconnected("WULPUS Pro Max Wi-Fi link is not open")
 
         self.acq_length = int(config.num_samples)
         frames: List[WulpusProFrame] = []

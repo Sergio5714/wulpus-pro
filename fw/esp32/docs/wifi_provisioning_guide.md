@@ -13,7 +13,7 @@ cycling.
 - [USB operation during provisioning](#usb-operation-during-provisioning)
 - [Troubleshooting](#troubleshooting)
 
-Provisioning controls only Wi-Fi setup. It does not own the WULPUS PRO PC
+Provisioning controls only Wi-Fi setup. It does not own the WULPUS Pro Max PC
 protocol session, and native USB CDC remains available while the board is
 waiting for credentials or network association.
 
@@ -75,7 +75,7 @@ flowchart TD
 The persistent device configuration selects no, minimum-modem, or maximum-modem
 Wi-Fi power saving. It also selects TWT; the firmware build must include
 `CONFIG_PROVISIONER_TWT_ENABLED` for TWT to be available. TWT is suspended while
-a WULPUS PRO protocol session is active.
+a WULPUS Pro Max protocol session is active.
 
 `auto_provision` is a persistent policy and is not cleared after successful
 provisioning. It is consulted only when Wi-Fi is enabled at boot and no saved
@@ -125,5 +125,5 @@ protocol session before connecting over TCP; see
   ensure the access point is reachable by an ESP32-C6. With
   `CONFIG_PROVISIONER_RESET_ON_FAILURE`, the provisioning state machine resets
   after the configured number of failed attempts.
-- **TCP reports `BUSY`:** another transport owns the WULPUS PRO protocol
+- **TCP reports `BUSY`:** another transport owns the WULPUS Pro Max protocol
   session. Close the USB session before retrying TCP.

@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   extraction, plus asynchronous replay from the current slider position at a
   configurable frame rate and a fixed Y-axis range during playback.
 - Selectable Wi-Fi and BLE communication transports in `WulpusGuiSingleCh`.
-- Native ESP32-C6 USB CDC transport for wired WULPUS PRO communication.
+- Native ESP32-C6 USB CDC transport for wired WULPUS Pro Max communication.
 - Added a GUI acquisition-status field that reports decoded ESP32 error flags,
   overflow, SPI, transmission, discard, and frame-buffer counters when frame
   reception stalls.
@@ -65,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed user-facing software branding from WULPUS PRO to WULPUS Pro Max.
 - Renamed acquisition configuration APIs to `send_acq_config` without keeping
   the old method name.
 - Renamed the main notebook to `wulpus_pro_example.ipynb`, made USB CDC its
@@ -74,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   disconnect support.
 - Renamed the BLE serial transport from `dongle.py` / `WulpusDongle` to `ble_dongle.py` / `WulpusBleDongle`.
 - Decoupled `WulpusGuiSingleCh` from the BLE transport and made its device controls transport-neutral.
-- Renamed the Wi-Fi transport and discovery APIs for WULPUS PRO and hardened TCP framing, command handling, connection cleanup, and acquisition lifecycle management.
+- Renamed the Wi-Fi transport and discovery APIs for WULPUS Pro Max and hardened TCP framing, command handling, connection cleanup, and acquisition lifecycle management.
 - Reorganized `wulpus_pro_example.ipynb` to launch the GUI after explicit TX/RX and interactive ultrasound configuration, followed by the detailed manual Wi-Fi workflow.
 - Added single-owner TCP/USB session arbitration to the ESP32 firmware while preserving the existing WULPUS wire protocol.
 - Made the common framed-packet backlog and parser serve both command responses
@@ -82,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Removed the legacy 8-channel WULPUS configuration, packet, and channel-GUI modules. This repository now exposes only the WULPUS PRO configuration stack.
+- Removed the legacy 8-channel WULPUS configuration, packet, and channel-GUI modules. This repository now exposes only the WULPUS Pro Max configuration stack.
 
 ## [0.1.0] - 2025-05-01
 

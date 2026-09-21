@@ -1,6 +1,6 @@
-# WULPUS PRO PCB design files
+# WULPUS Pro Max PCB design files
 
-This directory contains the PCB designs used by WULPUS PRO. The source files are
+This directory contains the PCB designs used by WULPUS Pro Max. The source files are
 provided in Altium Designer or KiCad format, depending on the board. Where
 available, each project also includes PDF schematics and assembly drawings under
 `docs`, and production-ready files under `fabrication_outputs`, including bills
@@ -8,25 +8,27 @@ of materials, Gerber files, NC drill files, and pick-and-place files.
 
 ## Included PCB designs
 
-### WULPUS PRO acquisition board
+### WULPUS PRO Acquisition PCB
 
 Directory: [`wulpus_pro_acq_pcb_dev_board`](wulpus_pro_acq_pcb_dev_board)
 
-The main WULPUS PRO ultrasound acquisition and pulser board. This board contains
+The WULPUS PRO Acquisition PCB is the platform's ultrasound acquisition and
+pulser board. It contains
 the transmit and receive signal paths, high-voltage switching, power supplies,
 MSP430 control circuitry, and the host interface. The design sources are provided
-in Altium Designer format. This board is required to build a WULPUS PRO system.
+in Altium Designer format. This board is required to build a WULPUS Pro Max
+system.
 
-### WULPUS PRO WiFi host PCB
+### WULPUS Pro Max WiFi host PCB
 
 Directory: [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb)
 
 An open-source companion board that integrates wireless communication, power
-delivery, and firmware programming for the WULPUS PRO Acquisition board. Based
+delivery, and firmware programming for the WULPUS PRO Acquisition PCB. Based
 on the [Seeed Studio XIAO ESP32-C6](https://www.seeedstudio.com/Seeed-Studio-XIAO-ESP32C6-p-5884.html),
 it supports runtime acquisition configuration and real-time ultrasound data
 streaming over Wi-Fi/TCP or native USB CDC at pulse repetition frequencies
-(PRFs) of up to 500 Hz. It is the primary host board for WULPUS PRO and runs
+(PRFs) of up to 500 Hz. It is the primary host board for WULPUS Pro Max and runs
 the [ESP32 firmware](../fw/esp32).
 
 A single USB-C connection powers the complete system and enables wired
@@ -53,7 +55,7 @@ Directory: [`wulpus_polycmut_adapter`](wulpus_polycmut_adapter)
 
 An optional research adapter for connecting polyCMUT transducers to WULPUS. The
 design sources are provided in Altium Designer format. This board is not required
-for standard WULPUS PRO operation.
+for standard WULPUS Pro Max operation.
 
 ## Internal KiCad library
 
@@ -88,9 +90,9 @@ differ:
 
 | PCB design | Directory | License file | Copyright |
 | --- | --- | --- | --- |
-| WULPUS PRO acquisition board | [`wulpus_pro_acq_pcb_dev_board`](wulpus_pro_acq_pcb_dev_board) | [`LICENSE_ETH`](LICENSE_ETH) | Copyright (C) 2025 ETH Zurich. All rights reserved. |
+| WULPUS PRO Acquisition PCB | [`wulpus_pro_acq_pcb_dev_board`](wulpus_pro_acq_pcb_dev_board) | [`LICENSE_ETH`](LICENSE_ETH) | Copyright (C) 2025 ETH Zurich. All rights reserved. |
 | WULPUS polyCMUT adapter | [`wulpus_polycmut_adapter`](wulpus_polycmut_adapter) | [`LICENSE_ETH`](LICENSE_ETH) | Copyright (C) 2025 ETH Zurich. All rights reserved. |
-| WULPUS PRO WiFi host PCB | [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb) | [`LICENSE`](LICENSE) | Copyright (C) 2026 Sergei Vostrikov. All rights reserved. |
+| WULPUS Pro Max WiFi host PCB | [`wulpus_wifi_host_pcb`](wulpus_wifi_host_pcb) | [`LICENSE`](LICENSE) | Copyright (C) 2026 Sergei Vostrikov. All rights reserved. |
 
 The license terms are otherwise identical. The internal `kicad_us_lib`
 submodule contains third-party material and is not covered by this table; its

@@ -1,4 +1,4 @@
-# WULPUS PRO Full Specifications
+# WULPUS Pro Max Full Specifications
 
 ## Transducer and transmit path
 

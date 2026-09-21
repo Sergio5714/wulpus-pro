@@ -52,5 +52,5 @@ void app_main(void)
     ESP_ERROR_CHECK(wulpus_pro_state_init());
     ESP_ERROR_CHECK(wulpus_pro_session_init());
     ESP_ERROR_CHECK(threads_start(reset_provisioning));
-    ESP_LOGI(TAG, "WULPUS PRO runtime started");
+    ESP_LOGI(TAG, "WULPUS Pro Max runtime started");
 }

@@ -1,11 +1,11 @@
-# WULPUS PRO software
-This directory contains the WULPUS PRO Python API, graphical user interface components, Wi-Fi and serial transports, and example Jupyter notebooks.
+# WULPUS Pro Max software
+This directory contains the WULPUS Pro Max Python API, graphical user interface components, Wi-Fi and serial transports, and example Jupyter notebooks.
 
 `wulpus_pro_example.ipynb` is the supported main notebook for USB CDC, Wi-Fi,
 and BLE operation. Older specialized notebooks are retained for reference in
 `legacy/` and are not part of the current workflow.
 
-The supported configuration implementation is the WULPUS PRO stack:
+The supported configuration implementation is the WULPUS Pro Max stack:
 
 - `wulpus/rx_tx_conf_pro.py`: 16-channel TX/RX mask generation
 - `wulpus/uss_conf_pro.py`: acquisition configuration and packet encoding
@@ -157,7 +157,7 @@ For more details, see `sw/how_to_install_dependencies.md`.
 
 The `wulpus_pro_example.ipynb` notebook discovers the ESP32 through the
 `_wulpus_pro._tcp.local.` mDNS service and communicates with it over TCP port 2121.
-The computer and WULPUS PRO must be connected to the same local network.
+The computer and WULPUS Pro Max must be connected to the same local network.
 
 Windows may block mDNS or the TCP connection when the network profile is
 **Public**. On a trusted network, either change its profile to **Private**, or
@@ -169,7 +169,7 @@ interpreter used by this project's virtual environment:
 $pythonPath = (Resolve-Path ".\.venv\Scripts\python.exe").Path
 
 New-NetFirewallRule `
-    -DisplayName "WULPUS PRO mDNS discovery" `
+    -DisplayName "WULPUS Pro Max mDNS discovery" `
     -Direction Inbound `
     -Action Allow `
     -Program $pythonPath `
@@ -179,7 +179,7 @@ New-NetFirewallRule `
     -Profile Public
 
 New-NetFirewallRule `
-    -DisplayName "WULPUS PRO TCP communication" `
+    -DisplayName "WULPUS Pro Max TCP communication" `
     -Direction Outbound `
     -Action Allow `
     -Program $pythonPath `
@@ -205,8 +205,8 @@ The ESP32 IP address can additionally be supplied manually using
 To remove the firewall rules later:
 
 ```powershell
-Remove-NetFirewallRule -DisplayName "WULPUS PRO mDNS discovery"
-Remove-NetFirewallRule -DisplayName "WULPUS PRO TCP communication"
+Remove-NetFirewallRule -DisplayName "WULPUS Pro Max mDNS discovery"
+Remove-NetFirewallRule -DisplayName "WULPUS Pro Max TCP communication"
 ```
 
 # License

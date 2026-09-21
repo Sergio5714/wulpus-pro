@@ -1,6 +1,6 @@
-# WULPUS PRO source files for MSP430 Ultrasound MCU firmware project
+# WULPUS Pro Max source files for MSP430 Ultrasound MCU firmware project
 This directory contains the source firmware files for 
-- MSP430FR5043 Ultrasound MCU (`fw/msp430/wulpus_msp430_firmware`) mounted on the WULPUS PRO PCB
+- MSP430FR5043 Ultrasound MCU (`fw/msp430/wulpus_msp430_firmware`) mounted on the WULPUS Pro Max PCB
 
 # Build and export firmware
 
@@ -15,13 +15,13 @@ version matching, so pin the installed toolchain for reproducible builds.
 
 # Flashing
 
-For the WULPUS PRO WiFi host PCB, use [`sw/msp430_update.ipynb`](../../sw/msp430_update.ipynb)
+For the WiFi host PCB, use [`sw/msp430_update.ipynb`](../../sw/msp430_update.ipynb)
 to upload a TI-TXT image over USB.
 
 An MSP-FET can alternatively program the MSP430 using the procedure in the
 legacy [WULPUS User Manual](https://github.com/pulp-bio/wulpus/blob/main/docs/wulpus_user_manual.pdf).
 Before connecting the programmer, verify the MSP-FET pin mapping against the
-WULPUS PRO Acquisition PCB schematic and connector pinout.
+Acquisition PCB schematic and connector pinout.
 Disconnect the MSP-FET when using the ESP32 as the JTAG programmer.
 
 # License

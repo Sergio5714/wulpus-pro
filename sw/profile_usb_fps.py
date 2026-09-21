@@ -15,7 +15,7 @@ limitations under the License.
 
 SPDX-License-Identifier: Apache-2.0
 
-Profile WULPUS PRO frame rate over ESP32-C6 native USB CDC.
+Profile WULPUS Pro Max frame rate over ESP32-C6 native USB CDC.
 """
 
 import argparse
@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--config",
-        help="GUI-saved WULPUS PRO acquisition configuration JSON file",
+        help="GUI-saved WULPUS Pro Max acquisition configuration JSON file",
     )
     parser.add_argument("--frames", type=int, default=500, help="Measured frames per period")
     parser.add_argument("--warmup", type=int, default=10, help="Frames discarded before timing")

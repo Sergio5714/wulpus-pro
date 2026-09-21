@@ -30,7 +30,7 @@ from scipy.signal import hilbert
 
 
 class WulpusProNpzViewer(widgets.VBox):
-    """Interactive viewer for GUI- and profiler-generated WULPUS PRO NPZ files."""
+    """Interactive viewer for GUI- and profiler-generated WULPUS Pro Max NPZ files."""
 
     REQUIRED_ARRAYS = ("data_arr", "acq_num_arr", "tx_rx_id_arr")
 
@@ -116,7 +116,7 @@ class WulpusProNpzViewer(widgets.VBox):
         (self.envelope_line,) = self.axis.plot(
             [], [], color="tab:red", linewidth=1.2, label="Envelope"
         )
-        self.axis.set_title("WULPUS PRO acquisition")
+        self.axis.set_title("WULPUS Pro Max acquisition")
         self.axis.set_xlabel("Sample")
         self.axis.set_ylabel("ADC code")
         self.axis.grid(True, alpha=0.3)

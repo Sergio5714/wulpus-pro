@@ -1,26 +1,26 @@
-# WULPUS PRO
+# WULPUS Pro Max
 ## Multi-mode Ultra-Low-Power Wearable Ultrasound Platform
-> Originally forked from the [WULPUS PRO project](https://github.com/pulp-bio/wulpus-pro), now developed and maintained independently by @Sergio5714 (Sergei Vostrikov).
+> WULPUS Pro Max adopts the core analog front end of the original [WULPUS PRO design](https://github.com/pulp-bio/wulpus-pro), while extending its analog performance, firmware architecture, host connectivity, and software tooling. The project is independently developed and maintained by [Sergei Vostrikov](https://github.com/Sergio5714) and contributors.
 
 <p align="center">
-  <img src="docs/images/v1_0/wulpus_pro_main.png" alt="WULPUS PRO main" width="80%"/>
+  <img src="docs/images/v1_0/wulpus_pro_main.png" alt="WULPUS Pro Max main" width="80%"/>
   <br/>
-  WULPUS PRO module with PolyCMUT transducer.
+  WULPUS Pro Max module with PolyCMUT transducer.
 </p>
 
 ## Table of contents
 
 - [Introduction](#introduction)
-  - [System diagram](#system-diagram)
   - [Hardware photos](#hardware-photos)
+  - [System diagram](#system-diagram)
   - [Specifications](#specifications)
 - [Clone the repository](#clone-the-repository)
 - [Structure of the repository](#structure-of-the-repository)
 - [Documentation](#documentation)
 - [Build Instructions](#build-instructions)
 - [Host setup and operation](#host-setup-and-operation)
-  - [WULPUS PRO WiFi host PCB (WiFi/USB CDC)](#wulpus-pro-wifi-host-pcb-wifiusb-cdc)
-  - [WULPUS PRO + nRF52 DK + nRF Dongle (BLE)](#wulpus-pro--nrf52-dk--nrf-dongle-ble)
+  - [WULPUS Pro Max WiFi host PCB (WiFi/USB CDC)](#wulpus-pro-max-wifi-host-pcb-wifiusb-cdc)
+  - [WULPUS Pro Max + nRF52 DK + nRF Dongle (BLE)](#wulpus-pro-max--nrf52-dk--nrf-dongle-ble)
 - [Citation](#citation)
 - [Changelog](#changelog)
 - [Authors](#authors)
@@ -29,15 +29,28 @@
 
 # Introduction
 
-This repository contains work in progress on the WULPUS PRO ultrasound platform, a successor to the [WULPUS Project](https://github.com/Sergio5714/wulpus). It features a programmable 30 V unipolar pulser, a time-multiplexed multichannel acquisition front end with TGC, an optional envelope extractor, and support for PZT and CMUT transducers. The module is compact (40 x 20 mm footprint) and lightweight (5 g), allowing integration with an external host PCB.
+WULPUS Pro Max is a modular wearable ultrasound platform for research and
+development. It combines a tightly integrated, flexible ultrasound acquisition
+front end with a dedicated host board and a mature software stack. Together,
+these components provide a complete path from transducer excitation and signal
+acquisition to device control, data streaming, visualization, and analysis.
 
-## System diagram
+The modular architecture supports both wearable experiments and benchtop
+operation:
 
-<p align="center">
-  <img src="docs/images/wulpus_pro_system_diagram.png" alt="WULPUS PRO system diagram" width="100%"/>
-  <br/>
-  WULPUS PRO system diagram
-</p>
+- **Benchtop operation:** connect a single USB-C cable for power delivery,
+  device configuration, and data transfer over USB CDC.
+- **Wireless operation:** connect a LiPo battery with a 2-pin JST connector to the
+  host board and use Wi-Fi/TCP for seamless, cable-free operation. The host
+  board also provides integrated battery charging and protection.
+
+> **Note:** The same USB-C cable can flash and update the entire device without
+> external programming tools.
+
+WULPUS Pro Max reliably delivers raw ultrasound data to the host system either
+over the air or through a USB cable, with state-of-the-art pulse repetition
+frequencies (PRFs) of up to **500 Hz**. The common Python software stack supports
+both links, providing the same tools and workflows in either operating mode.
 
 ## Hardware photos
 
@@ -46,28 +59,37 @@ This repository contains work in progress on the WULPUS PRO ultrasound platform,
     <td colspan="2" align="center">
       <img src="docs/images/v1_2/full_system.jpg" alt="WULPUS PRO Acquisition PCB connected to the WiFi host PCB" width="80%"/>
       <br/>
-      WULPUS PRO Acquisition PCB connected to the WiFi host PCB
+      Assembled WULPUS Pro Max system
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
       <img src="docs/images/v1_0/eval_board_main.jpg" alt="Top view of the WULPUS PRO Acquisition PCB" width="100%"/>
       <br/>
-      Top view of the WULPUS PRO Acquisition PCB
+      WULPUS PRO Acquisition PCB<br/>
+      (development version with test and debug headers)
     </td>
     <td width="50%" align="center">
-      <img src="docs/images/v1_2/wifi_board_top.jpg" alt="Top view of the WULPUS PRO WiFi host PCB" width="100%"/>
+      <img src="docs/images/v1_2/wifi_board_top.jpg" alt="Top view of the WULPUS Pro Max WiFi host PCB" width="100%"/>
       <br/>
-      Top view of the WULPUS PRO WiFi host PCB
+      WULPUS Pro Max WiFi host PCB
     </td>
   </tr>
 </table>
 
+## System diagram
+
+<p align="center">
+  <img src="docs/images/wulpus_pro_system_diagram.png" alt="WULPUS Pro Max system diagram" width="100%"/>
+  <br/>
+  WULPUS Pro Max system diagram
+</p>
+
 ## Specifications
 
-WULPUS PRO builds on the original [WULPUS](https://github.com/Sergio5714/wulpus) platform and keeps the same low-power wearable ultrasound philosophy while extending the hardware and communication options. The table below compares the main features of WULPUS PRO with those of the original WULPUS platform.
+WULPUS Pro Max builds on the original [WULPUS](https://github.com/Sergio5714/wulpus) platform and keeps the same low-power wearable ultrasound philosophy while extending the hardware and communication options. The table below compares the main features of WULPUS Pro Max with those of the original WULPUS platform.
 
-| Feature | WULPUS | WULPUS PRO |
+| Feature | WULPUS | WULPUS Pro Max |
 | --- | --- | --- |
 | Number of channels | 8, time-multiplexed | **16**, time-multiplexed |
 | Supported transducers | PZT transducers | PZT transducers, **CMUTs** |
@@ -81,14 +103,14 @@ WULPUS PRO builds on the original [WULPUS](https://github.com/Sergio5714/wulpus)
 | Wireless link | BLE | BLE or **WiFi** (via host) |
 | Form factor | 46 x 25 mm footprint | **40 x 20 mm** footprint |
 
-Full WULPUS PRO specifications are available in [docs/full_specifications.md](docs/full_specifications.md).
+Full WULPUS Pro Max specifications are available in [docs/full_specifications.md](docs/full_specifications.md).
 
 # Clone the repository
 
 Clone the public repository without its private development submodule:
 
 ```bash
-git clone https://github.com/Sergio5714/wulpus-pro.git
+git clone https://github.com/Sergio5714/wulpus-pro-max.git
 ```
 
 The `hw/kicad_us_lib` submodule is an internal development library hosted in a
@@ -130,7 +152,7 @@ For background information about the original WULPUS platform, see the
 
 # Build Instructions
 
-The WULPUS PRO WiFi host PCB provides a one-cable setup and programming
+The WULPUS Pro Max WiFi host PCB provides a one-cable setup and programming
 workflow:
 
 1. **Get hardware**
@@ -158,13 +180,13 @@ workflow:
 
 # Host setup and operation
 
-WULPUS PRO supports multiple host-board configurations. See
+WULPUS Pro Max supports multiple host-board configurations. See
 [Host board options](docs/host_board_options.md) for a comparison. Instructions
 for getting started with each configuration are provided below.
 
-## WULPUS PRO WiFi host PCB (WiFi/USB CDC)
+## WULPUS Pro Max WiFi host PCB (WiFi/USB CDC)
 
-1. Connect the [WULPUS PRO WiFi host PCB](docs/images/v1_2/wifi_board_top.jpg) to the [Acquisition PCB](docs/images/v1_0/eval_board_main.jpg).
+1. Connect the [WULPUS Pro Max WiFi host PCB](docs/images/v1_2/wifi_board_top.jpg) to the [Acquisition PCB](docs/images/v1_0/eval_board_main.jpg).
 2. Connect the host PCB to the PC with a data-capable USB-C cable. This connection powers both PCBs.
 3. Start Jupyter from the `sw` folder:
 
@@ -178,7 +200,7 @@ for getting started with each configuration are provided below.
 
 For development with a standalone XIAO ESP32-C6, follow its [wiring and power requirements](fw/esp32/docs/development_guide.md#supported-boards) and the [pin mapping](fw/esp32/docs/development_guide.md#pin-mapping). This setup requires an Acquisition PCB with the MSP430 firmware already programmed.
 
-## WULPUS PRO + nRF52 DK + nRF Dongle (BLE)
+## WULPUS Pro Max + nRF52 DK + nRF Dongle (BLE)
 
 > The nRF52 BLE option may suit applications that need even lower power
 > consumption than the WiFi host solution. It is a legacy, unsupported option
@@ -216,11 +238,11 @@ If you would like to cite this repository, please use:
 
 ```bibtex
 @misc{wulpus_pro_repo_sergio5714_2026,
-  title={WULPUS PRO: Multi-mode Ultra-Low-Power Wearable Ultrasound Platform (Independently Maintained)},
+  title={WULPUS Pro Max: Multi-mode Ultra-Low-Power Wearable Ultrasound Platform (Independently Maintained)},
   author={Vostrikov, Sergei and Villani, Federico and Hirschi, Cedric and Cossettini, Andrea and Benini, Luca},
   year={2026},
   howpublished={GitHub repository},
-  url={https://github.com/Sergio5714/wulpus-pro}
+  url={https://github.com/Sergio5714/wulpus-pro-max}
 }
 ```
 
@@ -233,7 +255,7 @@ See [CHANGELOG.md](CHANGELOG.md) for release notes and main project changes.
 Since 2025,
 [Sergei Vostrikov](https://scholar.google.com/citations?user=a0KNUooAAAAJ&hl=en)
 (@Sergio5714) has independently maintained this repository and continued
-developing WULPUS PRO, with contributions from others.
+developing WULPUS Pro Max, with contributions from others.
 
 The initial WULPUS PRO system was developed from 2024 to 2025 as a research
 project at the [Integrated Systems Laboratory (IIS)](https://iis.ee.ethz.ch/)

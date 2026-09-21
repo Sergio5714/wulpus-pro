@@ -1,14 +1,14 @@
 # Host board options
 
-WULPUS PRO has three host configurations. The
-[WULPUS PRO WiFi host PCB](../hw/wulpus_wifi_host_pcb) is recommended for normal
+WULPUS Pro Max has three host configurations. The
+[WiFi host PCB](../hw/wulpus_wifi_host_pcb) is recommended for normal
 use because it integrates communication, power delivery, and programming in one
 board. The other options are intended for development or compatibility with
 legacy setups. The nRF52 BLE option may also suit applications that need even
 lower power consumption than the WiFi host solution, but it is unsupported,
 is not recommended for new setups, and requires additional integration work.
 
-| Capability | WULPUS PRO WiFi host PCB | Standalone Seeed Studio XIAO ESP32-C6 | nRF52 BLE solution |
+| Capability | WiFi host PCB | Standalone Seeed Studio XIAO ESP32-C6 | nRF52 BLE solution |
 |---|---|---|---|
 | Status | Primary and recommended | Development alternative | Legacy, unsupported; not recommended for new setups |
 | PC connection | USB CDC or WiFi/TCP | USB CDC or WiFi/TCP | BLE through an nRF52840 USB dongle |
@@ -18,7 +18,7 @@ is not recommended for new setups, and requires additional integration work.
 | Battery charging | Supported via USB, with integrated battery protection | Not provided for the Acquisition PCB | Not provided |
 | Additional hardware | One data-capable USB-C cable | Data-capable USB-C cable, Dupont wires, and lab power supplies | nRF52832 DK, nRF52840 USB dongle, wiring, and external power |
 
-## WULPUS PRO WiFi host PCB
+## WiFi host PCB
 
 This option provides the simplest setup. A single USB-C connection can power
 the system, provide USB communication, flash the ESP32, and then program the

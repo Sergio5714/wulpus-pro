@@ -75,6 +75,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Renamed the user-facing project branding and repository from WULPUS PRO to
+  WULPUS Pro Max.
+- Released the WULPUS Pro Max WiFi host PCB v1.0.1 with updated title blocks,
+  silkscreen, and regenerated design and fabrication outputs.
 - Clarified in the README and host-board guide that the legacy nRF52 BLE option
   may suit lower-power applications, but is unsupported, is not recommended for
   new setups, and requires additional integration work.

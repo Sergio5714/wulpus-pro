@@ -996,7 +996,7 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# WULPUS PRO Configuration
+# WULPUS Pro Max Configuration
 #
 
 #
@@ -1073,7 +1073,7 @@ CONFIG_WP_HANDLER_STACK_SIZE=2048
 CONFIG_WP_HANDLER_PRIORITY=3
 CONFIG_WP_DATA_RX_LENGTH=804
 # end of Data Handling
-# end of WULPUS PRO Configuration
+# end of WULPUS Pro Max Configuration
 
 #
 # BSP settings

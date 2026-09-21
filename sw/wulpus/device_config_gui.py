@@ -15,7 +15,7 @@ limitations under the License.
 
 SPDX-License-Identifier: Apache-2.0
 
-USB CDC GUI for persistent WULPUS PRO device configuration.
+USB CDC GUI for persistent WULPUS Pro Max device configuration.
 """
 
 from typing import Dict, Optional
